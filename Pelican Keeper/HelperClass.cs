@@ -145,11 +145,11 @@ public static class HelperClass
             return playerCount;
         }
         
-        var arkRconPlayerList = Regex.Match(serverResponse, @"(\d+)\.\s*([^,]+),\s*(.+)$", RegexOptions.Multiline);
-        if (arkRconPlayerList.Success)
+        var arkRconPlayerList = Regex.Matches(serverResponse, @"(\d+)\.\s*([^,]+),\s*(.+)$", RegexOptions.Multiline);
+        if (arkRconPlayerList.Count > 0)
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using Ark format: {arkRconPlayerList.Length}");
-            return arkRconPlayerList.Length;
+            ConsoleExt.WriteLineWithPretext($"Player count extracted using Ark format: {arkRconPlayerList.Count}");
+            return arkRconPlayerList.Count;
         }
 
         var palworldPlayerList = Regex.Match(serverResponse, @"^(?!name,).+$", RegexOptions.Multiline);

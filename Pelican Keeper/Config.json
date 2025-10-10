@@ -11,7 +11,7 @@
   "PlayerCountDisplay": true,
   "ServersToMonitor": ["UUIDS HERE"],
   
-  "AutomaticShutdown": true,
+  "AutomaticShutdown": false,
   "ServersToAutoShutdown": ["UUIDS HERE"],
   "EmptyServerTimeout": "00:01:00",
   "AllowUserServerStartup": true,
@@ -21,8 +21,8 @@
   "AllowServerStopping": ["UUIDS HERE"],
   "UsersAllowedToStopServers": ["USERID HERE"],
   
-  "ContinuesMarkdownRead": true,
-  "ContinuesGamesToMonitorRead": true,
+  "ContinuesMarkdownRead": false,
+  "ContinuesGamesToMonitorRead": false,
   "MarkdownUpdateInterval": 30,
   "ServerUpdateInterval": 10,
   
