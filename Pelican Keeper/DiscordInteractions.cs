@@ -102,7 +102,7 @@ public class DiscordInteractions
             {
                 new DiscordButtonComponent(ButtonStyle.Primary, "prev_page", "◀️ Previous")
             };
-            if (showStop)
+            if (showStart)
             {
                 components.Add(new DiscordButtonComponent(ButtonStyle.Primary, $"Start: {GlobalServerInfo[index].Uuid}", $"Start"));
             }
@@ -240,7 +240,7 @@ public class DiscordInteractions
                 {
                     await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                         
-                    PelicanInterface.SendPowerCommand(serverInfo.Uuid, "stop");
+                    PelicanInterface.SendPowerCommand(serverInfo.Uuid, "start");
                         
                     await e.Interaction.CreateFollowupMessageAsync(
                         new DiscordFollowupMessageBuilder()
@@ -258,7 +258,7 @@ public class DiscordInteractions
                 {
                     await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                         
-                    PelicanInterface.SendPowerCommand(serverInfo.Uuid, "start");
+                    PelicanInterface.SendPowerCommand(serverInfo.Uuid, "stop");
                         
                     await e.Interaction.CreateFollowupMessageAsync(
                         new DiscordFollowupMessageBuilder()
