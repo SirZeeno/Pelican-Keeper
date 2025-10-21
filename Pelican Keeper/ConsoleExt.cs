@@ -23,11 +23,14 @@ public static class ConsoleExt
     public enum CurrentStep
     {
         FileChecks,
+        MessageHistory,
         PelicanApiRequest,
         A2SRequest,
         RconRequest,
         MinecraftJavaRequest,
         MinecraftBedrockRequest,
+        DiscordMessage,
+        DiscordReaction,
         None
     }
 
@@ -169,11 +172,14 @@ public static class ConsoleExt
         return currentStep switch
         {
             CurrentStep.FileChecks => CreateCurrentStep("Files Integrity Check"),
+            CurrentStep.MessageHistory => CreateCurrentStep("Message History"),
             CurrentStep.PelicanApiRequest => CreateCurrentStep("Pelican API Request"),
             CurrentStep.A2SRequest => CreateCurrentStep("A2S Query"),
             CurrentStep.RconRequest => CreateCurrentStep("RCON Request"),
             CurrentStep.MinecraftJavaRequest => CreateCurrentStep("Minecraft Java Request"),
             CurrentStep.MinecraftBedrockRequest => CreateCurrentStep("Minecraft Bedrock Request"),
+            CurrentStep.DiscordMessage => CreateCurrentStep("Discord Message"),
+            CurrentStep.DiscordReaction=> CreateCurrentStep("Discord Reaction"),
             _ => (0, String.Empty)
         };
     }

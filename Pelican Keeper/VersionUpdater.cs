@@ -4,6 +4,13 @@ namespace Pelican_Keeper;
 
 public static class VersionUpdater
 {
+    public static void UpdateProgram()
+    {
+        PreliminaryChecks();
+        
+        
+    }
+    
     private static void PreliminaryChecks()
     {
         if (!IsGitInstalled(out var gitVersion))
@@ -13,7 +20,6 @@ public static class VersionUpdater
 
         ConsoleExt.WriteLineWithPretext($"Git is installed: {gitVersion}");
     }
-    
     
     private static bool IsGitInstalled(out string? version)
     {

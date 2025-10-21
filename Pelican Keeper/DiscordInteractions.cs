@@ -8,7 +8,7 @@ namespace Pelican_Keeper;
 using static ConsoleExt;
 using static Program;
 
-public class DiscordInteractions
+public static class DiscordInteractions
 {
     /// <summary>
     /// Function that is called when a message is deleted in the target channel.
@@ -24,7 +24,7 @@ public class DiscordInteractions
         if (liveMessageTracked != null)
         {
             if (Config.Debug)
-                WriteLineWithPretext($"Live message {e.Message.Id} deleted in channel {e.Message.Channel.Name}. Removing from storage.");
+                WriteLineWithStepPretext($"Live message {e.Message.Id} deleted in channel {e.Message.Channel.Name}. Removing from storage.", CurrentStep.MessageHistory);
             LiveMessageStorage.Remove(liveMessageTracked);
         }
         else if (liveMessageTracked == null)
@@ -33,7 +33,7 @@ public class DiscordInteractions
             if (paginatedMessageTracked != null)
             {
                 if (Config.Debug)
-                    WriteLineWithPretext($"Paginated message {e.Message.Id} deleted in channel {e.Message.Channel.Name}. Removing from storage.");
+                    WriteLineWithStepPretext($"Paginated message {e.Message.Id} deleted in channel {e.Message.Channel.Name}. Removing from storage.", CurrentStep.MessageHistory);
                 LiveMessageStorage.Remove(e.Message.Id);
             }
         }
@@ -52,7 +52,7 @@ public class DiscordInteractions
         if (LiveMessageStorage.GetPaginated(e.Message.Id) is not { } pagedTracked || e.User.IsBot)
         {
             if (Config.Debug)
-                WriteLineWithPretext("User is Bot or is not tracked, message ID is null.", ConsoleExt.OutputType.Warning);
+                WriteLineWithStepPretext("User is Bot or is not tracked, message ID is null.", CurrentStep.DiscordMessage, OutputType.Warning);
             return Task.CompletedTask;
         }
 
@@ -68,7 +68,7 @@ public class DiscordInteractions
                 break;
             default:
                 if (Config.Debug)
-                    WriteLineWithPretext("Unknown interaction ID: " + e.Id, ConsoleExt.OutputType.Warning);
+                    WriteLineWithStepPretext("Unknown interaction ID: " + e.Id, CurrentStep.DiscordMessage, OutputType.Warning);
                 return Task.CompletedTask;
         }
 
@@ -76,7 +76,7 @@ public class DiscordInteractions
                 
         if (EmbedPages.Count == 0 || pagedTracked >= EmbedPages.Count)
         {
-            WriteLineWithPretext("No pages to show or page index out of range", ConsoleExt.OutputType.Warning);
+            WriteLineWithPretext("No pages to show or page index out of range", OutputType.Warning);
             return Task.CompletedTask;
         }
 
@@ -84,19 +84,19 @@ public class DiscordInteractions
         {
             // treat "UUIDS HERE" placeholder or empty/null list as "allow all"
             bool allowAllStart = Config.AllowServerStartup == null || Config.AllowServerStartup.Length == 0 || string.Equals(Config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal);
-            WriteLineWithPretext("show all Start: " + allowAllStart);
+            WriteLineWithStepPretext("show all Start: " + allowAllStart, CurrentStep.DiscordReaction);
 
             // allow only if user-startup enabled, not ignoring offline, and either allow-all or in allow-list
             bool showStart = Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false, AllowServerStartup: not null } && (allowAllStart || Config.AllowServerStartup.Contains(GlobalServerInfo[index].Uuid, StringComparer.OrdinalIgnoreCase));
-            WriteLineWithPretext("show Start: " + showStart);
+            WriteLineWithStepPretext("show Start: " + showStart, CurrentStep.DiscordReaction);
             
             // treat "UUIDS HERE" placeholder or empty/null list as "allow all"
             bool allowAllStop = Config.AllowServerStopping == null || Config.AllowServerStopping.Length == 0 || string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal);
-            WriteLineWithPretext("show all Stop: " + allowAllStop);
+            WriteLineWithStepPretext("show all Stop: " + allowAllStop, CurrentStep.DiscordReaction);
 
             // allow only if user-startup enabled, not ignoring offline, and either allow-all or in stop-list
             bool showStop = Config is { AllowUserServerStopping: true, AllowServerStopping: not null } && (allowAllStop || Config.AllowServerStopping.Contains(GlobalServerInfo[index].Uuid, StringComparer.OrdinalIgnoreCase));
-            WriteLineWithPretext("show Stop: " + showStop);
+            WriteLineWithStepPretext("show Stop: " + showStop, CurrentStep.DiscordReaction);
 
             var components = new List<DiscordComponent>
             {
@@ -120,17 +120,17 @@ public class DiscordInteractions
         catch (NotFoundException nf)
         {
             if (Config.Debug)
-                WriteLineWithPretext("Interaction expired or already responded to. Skipping. " + nf.Message, ConsoleExt.OutputType.Error);
+                WriteLineWithPretext("Interaction expired or already responded to. Skipping. " + nf.Message, OutputType.Error);
         }
         catch (BadRequestException br)
         {
             if (Config.Debug)
-                WriteLineWithPretext("Bad request during interaction: " + br.JsonMessage, ConsoleExt.OutputType.Error);
+                WriteLineWithPretext("Bad request during interaction: " + br.JsonMessage, OutputType.Error);
         }
         catch (Exception ex)
         {
             if (Config.Debug)
-                WriteLineWithPretext("Unexpected error during component interaction: " + ex.Message, ConsoleExt.OutputType.Error);
+                WriteLineWithPretext("Unexpected error during component interaction: " + ex.Message, OutputType.Error);
         }
 
         return Task.CompletedTask;
