@@ -36,6 +36,15 @@ public abstract class TemplateClasses
         Rcon,
         A2S
     }
+
+    public enum ServerStatus
+    {
+        Online,
+        Offline,
+        Paused,
+        Starting,
+        Stopping
+    }
     
     public class Secrets
     {

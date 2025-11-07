@@ -240,13 +240,30 @@ public static class DiscordInteractions
                 {
                     await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                         
-                    PelicanInterface.SendPowerCommand(serverInfo.Uuid, "start");
-                        
-                    await e.Interaction.CreateFollowupMessageAsync(
-                        new DiscordFollowupMessageBuilder()
-                            .WithContent($"▶️ Starting server `{serverInfo.Name}`…")
-                            .AsEphemeral()
-                    );
+                    if (serverInfo.Resources?.CurrentState.ToLower() == "offline") {
+                        PelicanInterface.SendPowerCommand(serverInfo.Uuid, "start");
+
+                        await e.Interaction.CreateFollowupMessageAsync(
+                            new DiscordFollowupMessageBuilder()
+                                .WithContent($"▶️ Starting server `{serverInfo.Name}`…")
+                                .AsEphemeral()
+                        );
+                    }
+                    else if (serverInfo.Resources?.CurrentState.ToLower() == "stopping")
+                    {
+                        await e.Interaction.CreateFollowupMessageAsync(
+                            new DiscordFollowupMessageBuilder()
+                                .WithContent($"▶️ Server `{serverInfo.Name}` is stopping, wait for it to stop before starting it up…")
+                                .AsEphemeral()
+                        );
+                    }
+                    else {
+                        await e.Interaction.CreateFollowupMessageAsync(
+                            new DiscordFollowupMessageBuilder()
+                                .WithContent($"▶️ Server already Running `{serverInfo.Name}`…")
+                                .AsEphemeral()
+                        );
+                    }
                 }
                 break;
             }
@@ -258,13 +275,30 @@ public static class DiscordInteractions
                 {
                     await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
                         
-                    PelicanInterface.SendPowerCommand(serverInfo.Uuid, "stop");
-                        
-                    await e.Interaction.CreateFollowupMessageAsync(
-                        new DiscordFollowupMessageBuilder()
-                            .WithContent($"⏹ Stopping server `{serverInfo.Name}`…")
-                            .AsEphemeral()
-                    );
+                    if (serverInfo.Resources?.CurrentState.ToLower() == "online") {
+                        PelicanInterface.SendPowerCommand(serverInfo.Uuid, "stop");
+
+                        await e.Interaction.CreateFollowupMessageAsync(
+                            new DiscordFollowupMessageBuilder()
+                                .WithContent($"⏹ Stopping server `{serverInfo.Name}`…")
+                                .AsEphemeral()
+                        );
+                    }
+                    else if (serverInfo.Resources?.CurrentState.ToLower() == "starting")
+                    {
+                        await e.Interaction.CreateFollowupMessageAsync(
+                            new DiscordFollowupMessageBuilder()
+                                .WithContent($"⏹ Server `{serverInfo.Name}` is starting, wait for it to start before shutting it down…")
+                                .AsEphemeral()
+                        );
+                    }
+                    else {
+                        await e.Interaction.CreateFollowupMessageAsync(
+                            new DiscordFollowupMessageBuilder()
+                                .WithContent($"⏹ Server already Stopped `{serverInfo.Name}`…")
+                                .AsEphemeral()
+                        );
+                    }
                 }
                 break;
             }

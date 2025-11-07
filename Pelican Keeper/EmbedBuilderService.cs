@@ -25,7 +25,7 @@ public class EmbedBuilderService
         
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter
         {
-            Text = $"Last Updated: {DateTime.Now:HH:mm:ss}"
+            Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" //TODO: allow for an expanded format per users choice like this DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")
         };
         
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
@@ -46,7 +46,7 @@ public class EmbedBuilderService
         for (int i = 0; i < servers.Count && embed.Fields.Count < 25; i++)
         {
             var serverInfo = ServerMarkdown.ParseTemplate(servers[i]);
-            embed.AddField(serverInfo.serverName, serverInfo.message, inline: true);
+            embed.AddField(serverInfo.serverName, serverInfo.message, inline: true); //TODO:Allow customization of this but test first if this is worth customizing
             
             if (Program.Config.DryRun)
             {
