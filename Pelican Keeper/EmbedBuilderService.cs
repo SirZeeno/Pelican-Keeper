@@ -19,8 +19,8 @@ public class EmbedBuilderService
         
         if (Program.Config.DryRun)
         {
-            ConsoleExt.WriteLineWithPretext(serverInfo.serverName);
-            ConsoleExt.WriteLineWithPretext(serverInfo.message);
+            ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
+            ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
         
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter
@@ -30,8 +30,8 @@ public class EmbedBuilderService
         
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
         
-        ConsoleExt.WriteLineWithPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"));
-        ConsoleExt.WriteLineWithPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}");
+        ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
+        ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
         return Task.FromResult(embed.Build());
     }
 
@@ -50,8 +50,8 @@ public class EmbedBuilderService
             
             if (Program.Config.DryRun)
             {
-                ConsoleExt.WriteLineWithPretext(serverInfo.serverName);
-                ConsoleExt.WriteLineWithPretext(serverInfo.message);
+                ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
+                ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
         }
         
@@ -62,8 +62,8 @@ public class EmbedBuilderService
         
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
         
-        ConsoleExt.WriteLineWithPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"));
-        ConsoleExt.WriteLineWithPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}");
+        ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
+        ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
         return Task.FromResult(embed.Build());
     }
 
@@ -87,8 +87,8 @@ public class EmbedBuilderService
             
             if (Program.Config.DryRun)
             {
-                ConsoleExt.WriteLineWithPretext(serverInfo.serverName);
-                ConsoleExt.WriteLineWithPretext(serverInfo.message);
+                ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
+                ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
             
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter
@@ -97,8 +97,8 @@ public class EmbedBuilderService
             };
             if (Program.Config.Debug)
             {
-                ConsoleExt.WriteLineWithPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"));
-                ConsoleExt.WriteLineWithPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}");
+                ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
+                ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
             }
             embeds.Add(embed.Build());
         }

@@ -39,7 +39,7 @@ public static class LiveMessageStorage
     {
         if (!File.Exists(HistoryFilePath))
         {
-            WriteLineWithPretext("MessageHistory.json not found. Creating default one.", OutputType.Warning);
+            WriteLineWithStepPretext("MessageHistory.json not found. Creating default one.", CurrentStep.MessageHistory, OutputType.Warning);
             using var file = File.Create("MessageHistory.json");
             using var writer = new StreamWriter(file);
             writer.Write(JsonSerializer.Serialize(new LiveMessageJsonStorage()));
@@ -51,12 +51,12 @@ public static class LiveMessageStorage
             Cache = JsonSerializer.Deserialize<LiveMessageJsonStorage>(json) ?? new LiveMessageJsonStorage();
             foreach (var liveStore in Cache.LiveStore)
             {
-                WriteLineWithPretext($"Cache contents: {liveStore}");
+                WriteLineWithStepPretext($"Cache contents: {liveStore}", CurrentStep.MessageHistory);
             }
         }
         catch (Exception ex)
         {
-            WriteLineWithPretext("Error loading live message cache! It may be corrupt or not in the right format. Simple solution is to delete the MessageHistory.json file and letting the bot recreate it.", OutputType.Error, ex);
+            WriteLineWithStepPretext("Error loading live message cache! It may be corrupt or not in the right format. Simple solution is to delete the MessageHistory.json file and letting the bot recreate it.", CurrentStep.MessageHistory, OutputType.Error, ex);
             Cache = new LiveMessageJsonStorage();
         }
     }
@@ -174,24 +174,24 @@ public static class LiveMessageStorage
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 if (Program.Config.Debug)
-                    WriteLineWithPretext($"Message {messageId} not found in #{channel.Name}", OutputType.Warning);
+                    WriteLineWithStepPretext($"Message {messageId} not found in #{channel.Name}", CurrentStep.MessageHistory, OutputType.Warning);
             }
             catch (DSharpPlus.Exceptions.UnauthorizedException)
             {
                 if (Program.Config.Debug)
-                    WriteLineWithPretext($"No permission to read #{channel.Name}", OutputType.Warning);
+                    WriteLineWithStepPretext($"No permission to read #{channel.Name}", CurrentStep.MessageHistory, OutputType.Warning);
             }
             catch (DSharpPlus.Exceptions.BadRequestException ex)
             {
                 if (Program.Config.Debug)
-                    WriteLineWithPretext($"Bad request on #{channel.Name}: {ex.Message}", OutputType.Warning);
+                    WriteLineWithStepPretext($"Bad request on #{channel.Name}: {ex.Message}", CurrentStep.MessageHistory, OutputType.Warning);
             }
         }
 
         if (channels.Count == 1) return false; // I am searching only one channel, so I don't need to log.
         
         if (Program.Config.Debug)
-            WriteLineWithPretext($"Message {messageId} not found in any channel", OutputType.Error);
+            WriteLineWithStepPretext($"Message {messageId} not found in any channel", CurrentStep.MessageHistory, OutputType.Error);
         return false;
     }
     

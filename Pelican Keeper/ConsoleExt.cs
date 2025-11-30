@@ -31,6 +31,12 @@ public static class ConsoleExt
         MinecraftBedrockRequest,
         DiscordMessage,
         DiscordReaction,
+        Updater,
+        Markdown,
+        Helper,
+        GameMonitoring,
+        EmbedBuilding,
+        FileReading,
         None
     }
 
@@ -40,9 +46,10 @@ public static class ConsoleExt
     /// <param name="output">Output</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
+    /// <param name="exit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null)
+    public static void WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool exit = false)
     {
         var length1 = CurrentTime();
         var length2 = DetermineOutputType(outputType);
@@ -60,18 +67,22 @@ public static class ConsoleExt
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
+        if (!exit) return;
+        Thread.Sleep(TimeSpan.FromSeconds(5));
+        Environment.Exit(1);
     }
-    
+
     /// <summary>
     /// Writes a line to the console with a pretext based on the output type.
     /// </summary>
     /// <param name="output">Output</param>
+    /// <param name="currentStep">Current step, default is none</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
-    /// <param name="currentStep">Current step, default is none</param>
+    /// <param name="exit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithStepPretext<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null)
+    public static void WriteLineWithStepPretext<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool exit = false)
     {
         var length1 = CurrentTime();
         var length2 = DetermineCurrentStep(currentStep);
@@ -90,6 +101,9 @@ public static class ConsoleExt
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
+        if (!exit) return;
+        Thread.Sleep(TimeSpan.FromSeconds(5));
+        Environment.Exit(1);
     }
 
     /// <summary>
@@ -180,6 +194,12 @@ public static class ConsoleExt
             CurrentStep.MinecraftBedrockRequest => CreateCurrentStep("Minecraft Bedrock Request"),
             CurrentStep.DiscordMessage => CreateCurrentStep("Discord Message"),
             CurrentStep.DiscordReaction=> CreateCurrentStep("Discord Reaction"),
+            CurrentStep.Updater => CreateCurrentStep("Updater"),
+            CurrentStep.Markdown => CreateCurrentStep("Markdown"),
+            CurrentStep.Helper => CreateCurrentStep("Helper"),
+            CurrentStep.GameMonitoring => CreateCurrentStep("Game Monitoring"),
+            CurrentStep.EmbedBuilding => CreateCurrentStep("Embed Building"),
+            CurrentStep.FileReading => CreateCurrentStep("File Reading"),
             _ => (0, String.Empty)
         };
     }

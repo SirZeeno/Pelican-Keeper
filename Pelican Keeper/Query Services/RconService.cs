@@ -20,9 +20,9 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         
         bool authenticated = await AuthenticateAsync();
         if (authenticated && Program.Config.Debug)
-            ConsoleExt.WriteLineWithPretext("RCON connection established successfully.");
+            ConsoleExt.WriteLineWithStepPretext("RCON connection established successfully.", ConsoleExt.CurrentStep.RconRequest);
         else
-            ConsoleExt.WriteLineWithPretext("RCON authentication failed.", ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
+            ConsoleExt.WriteLineWithStepPretext("RCON authentication failed.", ConsoleExt.CurrentStep.RconRequest, ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
     }
 
     private async Task<bool> AuthenticateAsync()
@@ -45,7 +45,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
 
         var response = await ReadResponseAsync();
         if (Program.Config.Debug)
-            ConsoleExt.WriteLineWithPretext($"RCON command response: {response.body.Trim()}");
+            ConsoleExt.WriteLineWithStepPretext($"RCON command response: {response.body.Trim()}", ConsoleExt.CurrentStep.RconRequest);
         return HelperClass.ExtractPlayerCount(response.body.Trim(), regexPattern).ToString();
     }
 
@@ -91,7 +91,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         while (offset < length)
         {
             int read = await _stream!.ReadAsync(buffer, offset, length - offset);
-            if (read == 0) ConsoleExt.WriteLineWithPretext("Connection closed unexpectedly.", ConsoleExt.OutputType.Error, new IOException("Connection closed by remote host"));
+            if (read == 0) ConsoleExt.WriteLineWithStepPretext("Connection closed unexpectedly.", ConsoleExt.CurrentStep.RconRequest, ConsoleExt.OutputType.Error, new IOException("Connection closed by remote host"));
             offset += read;
         }
         return buffer;

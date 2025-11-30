@@ -1,6 +1,6 @@
 ﻿namespace Pelican_Keeper;
 
-public class Validator
+public static class Validator
 {
     public static void ValidateSecrets(TemplateClasses.Secrets? secrets)
     {
@@ -32,5 +32,14 @@ public class Validator
         {
             throw new ArgumentException("ChannelIds is null or empty. Make sure at least one channel ID is provided in the list.");
         }
+    }
+    
+    public static void ValidateConfig(TemplateClasses.Config? config)
+    {
+        if (config == null)
+        {
+            throw new ArgumentNullException(nameof(config), "Config is null.");
+        }
+        //TODO: Add the variables of the config to validate its format.
     }
 }

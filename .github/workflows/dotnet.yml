@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: [win-x86, win-x64, linux-x64, linux-arm64, osx-x64, osx-arm64]
+        rid: [win-x86, win-x64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
     env:
       PROJECT_PATH: "Pelican Keeper/Pelican Keeper.csproj"
       APP_NAME: "Pelican-Keeper"

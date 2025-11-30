@@ -27,7 +27,6 @@ This Discord bot is a basic compile-and-run bot built in .NET 8.0.
 | Consolidation           | Consolidates All Servers into one message (limited to 25 in a single embed) | ✅           |
 | Pagination              | Flip through multiple servers in one paginated message                      | ✅           |
 | Custom Templates        | Markdown style message embed system for customizable structure              | ✅           |
-| Button navigation       | Navigate Paginated messages using buttons                                   | ✅           |
 | Auto Updates            | Messages update automatically every X seconds                               | ✅           |
 | Player Count            | Show live player count from server (if supported)                           | ✅ |
 | Server Joinable IP:Port | Show server joinable IP:Port                                                | ✅ |

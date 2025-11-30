@@ -46,15 +46,27 @@ public abstract class TemplateClasses
         Stopping
     }
     
-    public class Secrets
+    public enum ReleasePlatform
     {
-        public string? ClientToken { get; init; }
-        public string? ServerToken { get; init; }
-        public string? ServerUrl { get; init; }
-        public string? BotToken { get; init; }
-        public ulong[]? ChannelIds { get; init; }
-        public string? ExternalServerIp { get; init; }
+        WinX86,
+        WinX64,
+        LinuxX64,
+        LinuxArm,
+        LinuxArm64,
+        OsxX64,
+        OsxArm64,
+        None
     }
+    
+    public record Secrets
+    (
+        string? ClientToken,
+        string? ServerToken,
+        string? ServerUrl,
+        string? BotToken,
+        ulong[]? ChannelIds,
+        string? ExternalServerIp
+    );
     
     public class Config
     {
@@ -96,6 +108,7 @@ public abstract class TemplateClasses
         
         public bool Debug { get; init; }
         public bool DryRun { get; init; }
+        public bool AutoUpdate { get; init; }
     }
     
     public class ServerInfo

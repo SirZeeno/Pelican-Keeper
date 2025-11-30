@@ -68,7 +68,7 @@ public static class DiscordInteractions
                 break;
             default:
                 if (Config.Debug)
-                    WriteLineWithStepPretext("Unknown interaction ID: " + e.Id, CurrentStep.DiscordMessage, OutputType.Warning);
+                    WriteLineWithStepPretext("Unknown interaction ID: " + e.Id, CurrentStep.DiscordReaction, OutputType.Warning);
                 return Task.CompletedTask;
         }
 
@@ -76,7 +76,7 @@ public static class DiscordInteractions
                 
         if (EmbedPages.Count == 0 || pagedTracked >= EmbedPages.Count)
         {
-            WriteLineWithPretext("No pages to show or page index out of range", OutputType.Warning);
+            WriteLineWithStepPretext("No pages to show or page index out of range", CurrentStep.DiscordReaction, OutputType.Warning);
             return Task.CompletedTask;
         }
 
@@ -120,17 +120,17 @@ public static class DiscordInteractions
         catch (NotFoundException nf)
         {
             if (Config.Debug)
-                WriteLineWithPretext("Interaction expired or already responded to. Skipping. " + nf.Message, OutputType.Error);
+                WriteLineWithStepPretext("Interaction expired or already responded to. Skipping. " + nf.Message, CurrentStep.DiscordReaction, OutputType.Error);
         }
         catch (BadRequestException br)
         {
             if (Config.Debug)
-                WriteLineWithPretext("Bad request during interaction: " + br.JsonMessage, OutputType.Error);
+                WriteLineWithStepPretext("Bad request during interaction: " + br.JsonMessage, CurrentStep.DiscordReaction, OutputType.Error);
         }
         catch (Exception ex)
         {
             if (Config.Debug)
-                WriteLineWithPretext("Unexpected error during component interaction: " + ex.Message, OutputType.Error);
+                WriteLineWithStepPretext("Unexpected error during component interaction: " + ex.Message, CurrentStep.DiscordReaction, OutputType.Error);
         }
 
         return Task.CompletedTask;
@@ -147,7 +147,7 @@ public static class DiscordInteractions
         if (e.User.IsBot)
         {
             if (Config.Debug)
-                WriteLineWithPretext("User is a Bot!", OutputType.Warning);
+                WriteLineWithStepPretext("User is a Bot!", CurrentStep.DiscordReaction, OutputType.Warning);
             return Task.CompletedTask;
         }
 
@@ -157,14 +157,14 @@ public static class DiscordInteractions
         }
 
         if (Config.Debug)
-            WriteLineWithPretext("User " + e.User.Username + " clicked button with ID: " + e.Id);
+            WriteLineWithStepPretext("User " + e.User.Username + " clicked button with ID: " + e.Id, CurrentStep.DiscordReaction);
         
         var id = e.Id;
         var server = GlobalServerInfo.FirstOrDefault(s => s.Uuid == id);
         if (server == null)
         {
             if (Config.Debug)
-                WriteLineWithPretext($"No server found with UUID {id}", OutputType.Warning);
+                WriteLineWithStepPretext($"No server found with UUID {id}", CurrentStep.DiscordReaction, OutputType.Warning);
             return Task.CompletedTask;
         }
 
@@ -172,7 +172,7 @@ public static class DiscordInteractions
         {
             PelicanInterface.SendPowerCommand(server.Uuid, "start");
             if (Config.Debug)
-                WriteLineWithPretext("Start command sent to server " + server.Name);
+                WriteLineWithStepPretext("Start command sent to server " + server.Name, CurrentStep.DiscordReaction);
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
         }
         return Task.CompletedTask;
@@ -189,7 +189,7 @@ public static class DiscordInteractions
         if (e.User.IsBot)
         {
             if (Config.Debug)
-                WriteLineWithPretext("User is a Bot!", OutputType.Warning);
+                WriteLineWithStepPretext("User is a Bot!", CurrentStep.DiscordReaction, OutputType.Warning);
             return Task.CompletedTask;
         }
         
@@ -199,14 +199,14 @@ public static class DiscordInteractions
         }
 
         if (Config.Debug)
-            WriteLineWithPretext("User " + e.User.Username + " clicked button with ID: " + e.Id);
+            WriteLineWithStepPretext("User " + e.User.Username + " clicked button with ID: " + e.Id, CurrentStep.DiscordReaction);
         
         var id = e.Id;
         var server = GlobalServerInfo.FirstOrDefault(s => s.Uuid == id);
         if (server == null)
         {
             if (Config.Debug)
-                WriteLineWithPretext($"No server found with UUID {id}", OutputType.Warning);
+                WriteLineWithStepPretext($"No server found with UUID {id}", CurrentStep.DiscordReaction, OutputType.Warning);
             return Task.CompletedTask;
         }
 
@@ -214,7 +214,7 @@ public static class DiscordInteractions
         {
             PelicanInterface.SendPowerCommand(server.Uuid, "stop");
             if (Config.Debug)
-                WriteLineWithPretext("Stop command sent to server " + server.Name);
+                WriteLineWithStepPretext("Stop command sent to server " + server.Name, CurrentStep.DiscordReaction);
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
         }
         return Task.CompletedTask;

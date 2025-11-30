@@ -51,7 +51,7 @@ public static class HelperClass
     private static ServerAllocation? GetConnectableAllocation(ServerInfo serverInfo) //TODO: I need more logic here to determine the best allocation to use and to determine the right port if the main port is not he joining port, for example in ark se its the query port
     {
         if (serverInfo.Allocations == null || serverInfo.Allocations.Count == 0)
-            ConsoleExt.WriteLineWithPretext("Empty allocations for server: " + serverInfo.Name, ConsoleExt.OutputType.Warning);
+            ConsoleExt.WriteLineWithStepPretext("Empty allocations for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Warning);
         return serverInfo.Allocations?.FirstOrDefault(allocation => allocation.IsDefault) ?? serverInfo.Allocations?.FirstOrDefault();
     }
  
@@ -65,7 +65,7 @@ public static class HelperClass
         var allocation = GetConnectableAllocation(serverInfo);
         if (allocation == null)
         {
-            ConsoleExt.WriteLineWithPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return "No Connectable Address";
         }
         
@@ -91,7 +91,7 @@ public static class HelperClass
         var allocation = GetConnectableAllocation(serverInfo);
         if (allocation == null)
         {
-            ConsoleExt.WriteLineWithPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return "No Connectable Address";
         }
         
@@ -129,7 +129,7 @@ public static class HelperClass
     {
         if (string.IsNullOrEmpty(serverResponse))
         {
-            ConsoleExt.WriteLineWithPretext("The Response of the Server was Empty or Null!", ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("The Response of the Server was Empty or Null!", ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return 0;
         }
 
@@ -141,28 +141,28 @@ public static class HelperClass
         var playerMaxPlayer = Regex.Match(serverResponse, @"^(\d+)\/\d+$");
         if (playerMaxPlayer.Success && int.TryParse(playerMaxPlayer.Groups[1].Value, out var playerCount))
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using standard format: {playerCount}");
+            ConsoleExt.WriteLineWithStepPretext($"Player count extracted using standard format: {playerCount}", ConsoleExt.CurrentStep.Helper);
             return playerCount;
         }
         
         var arkRconPlayerList = Regex.Matches(serverResponse, @"(\d+)\.\s*([^,]+),\s*(.+)$", RegexOptions.Multiline);
         if (arkRconPlayerList.Count > 0)
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using Ark format: {arkRconPlayerList.Count}");
+            ConsoleExt.WriteLineWithStepPretext($"Player count extracted using Ark format: {arkRconPlayerList.Count}", ConsoleExt.CurrentStep.Helper);
             return arkRconPlayerList.Count;
         }
 
         var palworldPlayerList = Regex.Match(serverResponse, @"^(?!name,).+$", RegexOptions.Multiline);
         if (palworldPlayerList.Success && serverResponse.Contains("name,playeruid,steamid"))
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using Palworld format: {palworldPlayerList.Length}");
+            ConsoleExt.WriteLineWithStepPretext($"Player count extracted using Palworld format: {palworldPlayerList.Length}", ConsoleExt.CurrentStep.Helper);
             return palworldPlayerList.Length;
         }
         
         var factorioPlayerList = Regex.Match(serverResponse, @"Online players \((\d+)\):");
         if (factorioPlayerList.Success && int.TryParse(factorioPlayerList.Groups[1].Value, out var factorioPlayerCount))
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using Factorio format: {factorioPlayerCount}");
+            ConsoleExt.WriteLineWithStepPretext($"Player count extracted using Factorio format: {factorioPlayerCount}", ConsoleExt.CurrentStep.Helper);
             return factorioPlayerCount;
         }
         
@@ -174,12 +174,12 @@ public static class HelperClass
             {
                 if (!Int32.TryParse(customMatch.Value, out var count)) return count;
                 if (Program.Config.Debug)
-                    ConsoleExt.WriteLineWithPretext($"Player count returned by Custom Regex: {count}");
+                    ConsoleExt.WriteLineWithStepPretext($"Player count returned by Custom Regex: {count}", ConsoleExt.CurrentStep.Helper);
                 return count;
             }
         }
         
-        ConsoleExt.WriteLineWithPretext("The Bot was unable to determine the Player Count of the Server!", ConsoleExt.OutputType.Error, new Exception(serverResponse));
+        ConsoleExt.WriteLineWithStepPretext("The Bot was unable to determine the Player Count of the Server!", ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error, new Exception(serverResponse));
         return 0;
     }
 

@@ -31,5 +31,6 @@
   "ServersToDisplay": ["UUIDS HERE"],
   
   "Debug": true,
-  "DryRun": false
+  "DryRun": false,
+  "AutoUpdate": true
 }

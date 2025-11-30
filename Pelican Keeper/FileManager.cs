@@ -12,20 +12,26 @@ public static class FileManager
     /// Gets the file path if it exists in the current execution directory or in the Pelican Keeper directory.
     /// </summary>
     /// <param name="fileNameWithExtension">The File name with Extension to check</param>
+    /// <param name="originDirectory">Origin Directory to look in</param>
     /// <returns>The File path or empty string</returns>
-    public static string GetFilePath(string fileNameWithExtension)
+    public static string GetFilePath(string fileNameWithExtension, string? originDirectory = null)
     {
         if (File.Exists(fileNameWithExtension))
         {
             return fileNameWithExtension;
         }
+
+        if (string.IsNullOrEmpty(originDirectory))
+        {
+            originDirectory = Environment.CurrentDirectory;
+        }
         
-        foreach (var file in Directory.GetFiles(Environment.CurrentDirectory, fileNameWithExtension, SearchOption.AllDirectories))
+        foreach (var file in Directory.GetFiles(originDirectory, fileNameWithExtension, SearchOption.AllDirectories))
         {
             return file;
         }
         
-        WriteLineWithPretext($"Couldn't find {fileNameWithExtension} file in program directory!", OutputType.Error, new FileNotFoundException());
+        WriteLineWithStepPretext($"Couldn't find {fileNameWithExtension} file in program directory!", CurrentStep.FileReading, OutputType.Error, new FileNotFoundException());
         return string.Empty;
     }
 
@@ -34,12 +40,12 @@ public static class FileManager
     /// </summary>
     private static async Task CreateSecretsFile()
     {
-        WriteLineWithPretext("Secrets.json not found. Creating default one.", OutputType.Warning);
+        WriteLineWithStepPretext("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
         await using var secretsFile = File.Create("Secrets.json");
         string defaultSecrets = new string("{\n  \"ClientToken\": \"YOUR_CLIENT_TOKEN\",\n  \"ServerToken\": \"YOUR_SERVER_TOKEN\",\n  \"ServerUrl\": \"YOUR_BASIC_SERVER_URL\",\n  \"BotToken\": \"YOUR_DISCORD_BOT_TOKEN\",\n  \"ChannelIds\": [THE_CHANNEL_ID_YOU_WANT_THE_BOT_TO_POST_IN],\n  \"ExternalServerIp\": \"YOUR_EXTERNAL_SERVER_IP\"\n}");
         await using var writer = new StreamWriter(secretsFile);
         await writer.WriteAsync(defaultSecrets);
-        WriteLineWithPretext("Created default Secrets.json. Please fill out the values.", OutputType.Warning);
+        WriteLineWithStepPretext("Created default Secrets.json. Please fill out the values.", CurrentStep.FileReading, OutputType.Warning);
     }
 
     /// <summary>
@@ -76,13 +82,13 @@ public static class FileManager
     /// Reads the Secrets.json file and interprets it to the Secrets class structure.
     /// </summary>
     /// <returns>The interpreted Secrets in the Secrets class structure</returns>
-    public static async Task<Secrets?> ReadSecretsFile()
+    public static async Task<Secrets?> ReadSecretsFile(string? customDirectory = null)
     {
-        string secretsPath = GetFilePath("Secrets.json");
+        string secretsPath = GetFilePath("Secrets.json", customDirectory);
         
         if (secretsPath == String.Empty)
         {
-            Console.WriteLine("Secrets.json not found. Creating default one.");
+            WriteLineWithStepPretext("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
             await CreateSecretsFile();
             return null;
         }
@@ -108,13 +114,11 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            WriteLineWithPretext("Failed to load secrets. Check that the Secrets file is filled out and is in the correct format. Check Secrets.json", OutputType.Error, ex);
-            Thread.Sleep(TimeSpan.FromSeconds(5));
-            Environment.Exit(1);
+            WriteLineWithStepPretext("Failed to load secrets. Check that the Secrets file is filled out and is in the correct format. Check Secrets.json", CurrentStep.FileReading, OutputType.Error, ex, true);
             return null;
         }
 
-        Program.Secrets = secrets;
+        Program.Secrets = secrets!;
         return secrets;
     }
     
@@ -122,13 +126,13 @@ public static class FileManager
     /// Reads the Config.json file and interprets it to the Config class structure.
     /// </summary>
     /// <returns>The interpreted Config in the Config class structure</returns>
-    public static async Task<Config?> ReadConfigFile()
+    public static async Task<Config?> ReadConfigFile(string? customDirectory = null)
     {
-        string configPath = GetFilePath("Config.json");
+        string configPath = GetFilePath("Config.json", customDirectory);
         
         if (configPath == String.Empty)
         {
-            Console.WriteLine("Config.json not found. Pulling Default from Github!");
+            WriteLineWithStepPretext("Config.json not found. Pulling Default from Github!", CurrentStep.FileReading, OutputType.Warning);
             await CreateConfigFile();
         }
         
@@ -140,17 +144,13 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            WriteLineWithPretext("Failed to load config. Check if nothing is misspelled and you used the correct options", OutputType.Error, ex);
-            Thread.Sleep(TimeSpan.FromSeconds(5));
-            Environment.Exit(1);
+            WriteLineWithStepPretext("Failed to load config. Check if nothing is misspelled and you used the correct options", CurrentStep.FileReading, OutputType.Error, ex, true);
             return null;
         }
         
         if (config == null)
         {
-            WriteLineWithPretext("Config file is empty or not in the correct format. Please check Config.json", OutputType.Error);
-            Thread.Sleep(TimeSpan.FromSeconds(5));
-            Environment.Exit(1);
+            WriteLineWithStepPretext("Config file is empty or not in the correct format. Please check Config.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
             return null;
         }
         
@@ -168,7 +168,7 @@ public static class FileManager
         
         if (gameCommPath == String.Empty)
         {
-            WriteLineWithPretext("GamesToMonitor.json not found. Pulling from Github Repo!", OutputType.Error);
+            WriteLineWithStepPretext("GamesToMonitor.json not found. Pulling from Github Repo!", CurrentStep.FileReading, OutputType.Error);
             await CreateGamesToMonitorFile();
             return null;
         }
@@ -181,7 +181,7 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            WriteLineWithPretext("Failed to load GamesToMonitor.json. Check if nothing is misspelled and you used the correct options", OutputType.Error, ex);
+            WriteLineWithStepPretext("Failed to load GamesToMonitor.json. Check if nothing is misspelled and you used the correct options", CurrentStep.FileReading, OutputType.Error, ex);
             return null;
         }
     }
