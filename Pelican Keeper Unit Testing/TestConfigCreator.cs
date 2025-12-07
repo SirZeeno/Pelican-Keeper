@@ -1,8 +1,9 @@
-﻿using Pelican_Keeper;
+﻿using System.Text.Json;
+using Pelican_Keeper;
 
 namespace Pelican_Keeper_Unit_Testing;
 
-public class TestConfigCreator
+public static class TestConfigCreator
 {
     public static TemplateClasses.Config CreateDefaultConfigInstance()
     {
@@ -37,14 +38,9 @@ public class TestConfigCreator
             DryRun = true
         };
     }
-
-    public static TemplateClasses.GamesToMonitor CreateDefaultServersToMonitor()
+    
+    public static List<TemplateClasses.GamesToMonitor>? PullGamesToMonitor()
     {
-        return new TemplateClasses.GamesToMonitor
-        {
-            Game = "GAME_NAME_HERE",
-            Protocol = TemplateClasses.CommandExecutionMethod.Rcon,
-            
-        };
+        return JsonSerializer.Deserialize<List<TemplateClasses.GamesToMonitor>>(HelperClass.GetJsonTextAsync("https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/GamesToMonitor.json").GetAwaiter().GetResult());
     }
 }

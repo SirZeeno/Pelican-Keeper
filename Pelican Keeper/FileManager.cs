@@ -54,7 +54,7 @@ public static class FileManager
     private static async Task CreateConfigFile()
     {
         await using var configFile = File.Create("Config.json");
-        var defaultConfig = HelperClass.GetJsonTextAsync("https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/Config.json").GetAwaiter().GetResult();
+        var defaultConfig = await HelperClass.GetJsonTextAsync("https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/Config.json");
         await using var writer = new StreamWriter(configFile);
         await writer.WriteAsync(defaultConfig);
     }
@@ -62,7 +62,7 @@ public static class FileManager
     private static async Task CreateGamesToMonitorFile()
     {
         await using var gamesToMonitorFile = File.Create("GamesToMonitor.json");
-        var gamesToMonitor = HelperClass.GetJsonTextAsync("https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/GamesToMonitor.json").GetAwaiter().GetResult();
+        var gamesToMonitor = await HelperClass.GetJsonTextAsync("https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/GamesToMonitor.json");
         await using var writer = new StreamWriter(gamesToMonitorFile);
         await writer.WriteAsync(gamesToMonitor);
     }
@@ -73,7 +73,7 @@ public static class FileManager
     public static async Task CreateMessageMarkdownFile()
     {
         await using var messageMarkdownFile = File.Create("MessageMarkdown.txt");
-        var defaultMarkdown = HelperClass.GetJsonTextAsync("https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/MessageMarkdown.txt").GetAwaiter().GetResult();
+        var defaultMarkdown = await HelperClass.GetJsonTextAsync("https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/MessageMarkdown.txt");
         await using var writer = new StreamWriter(messageMarkdownFile);
         await writer.WriteAsync(defaultMarkdown);
     }
@@ -90,10 +90,17 @@ public static class FileManager
         {
             WriteLineWithStepPretext("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
             await CreateSecretsFile();
-            return null;
+            secretsPath = GetFilePath("Secrets.json", customDirectory);
+            
+            if (secretsPath == String.Empty)
+            {
+                WriteLineWithStepPretext("Unable to Find Secrets.json!", CurrentStep.FileReading, OutputType.Error);
+                Thread.Sleep(100);
+                Environment.Exit(1);
+                return null;
+            }
         }
 
-        Secrets? secrets;
         try
         {
             var settings = new JsonSerializerSettings
@@ -109,17 +116,23 @@ public static class FileManager
             
             var secretsJson = await File.ReadAllTextAsync(secretsPath);
             
-            secrets = JsonConvert.DeserializeObject<Secrets>(secretsJson, settings); // for ignoring errors when deserializing the secrets file, since I may edit the structure in the future and i want this to tell the user what changed.
+            var secrets = JsonConvert.DeserializeObject<Secrets>(secretsJson, settings);
             Validator.ValidateSecrets(secrets);
+            
+            if (secrets == null)
+            {
+                WriteLineWithStepPretext("Secrets file is empty or not in the correct format. Please check Secrets.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                return null;
+            }
+            
+            Program.Secrets = secrets;
+            return secrets;
         }
         catch (Exception ex)
         {
             WriteLineWithStepPretext("Failed to load secrets. Check that the Secrets file is filled out and is in the correct format. Check Secrets.json", CurrentStep.FileReading, OutputType.Error, ex, true);
             return null;
         }
-
-        Program.Secrets = secrets!;
-        return secrets;
     }
     
     /// <summary>
@@ -134,28 +147,35 @@ public static class FileManager
         {
             WriteLineWithStepPretext("Config.json not found. Pulling Default from Github!", CurrentStep.FileReading, OutputType.Warning);
             await CreateConfigFile();
+            configPath = GetFilePath("Config.json", customDirectory);
+            if (configPath == String.Empty)
+            {
+                WriteLineWithStepPretext("Unable to Find Config.json!", CurrentStep.FileReading, OutputType.Error);
+                Thread.Sleep(100);
+                Environment.Exit(1);
+                return null;
+            }
         }
-        
-        Config? config;
+
         try
         {
             var configJson = await File.ReadAllTextAsync(configPath);
-            config = JsonSerializer.Deserialize<Config>(configJson);
+            var config = JsonSerializer.Deserialize<Config>(configJson);
+            
+            if (config == null)
+            {
+                WriteLineWithStepPretext("Config file is empty or not in the correct format. Please check Config.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                return null;
+            }
+            
+            Program.Config = config;
+            return config;
         }
         catch (Exception ex)
         {
             WriteLineWithStepPretext("Failed to load config. Check if nothing is misspelled and you used the correct options", CurrentStep.FileReading, OutputType.Error, ex, true);
             return null;
         }
-        
-        if (config == null)
-        {
-            WriteLineWithStepPretext("Config file is empty or not in the correct format. Please check Config.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-            return null;
-        }
-        
-        Program.Config = config;
-        return config;
     }
     
     /// <summary>
@@ -170,7 +190,14 @@ public static class FileManager
         {
             WriteLineWithStepPretext("GamesToMonitor.json not found. Pulling from Github Repo!", CurrentStep.FileReading, OutputType.Error);
             await CreateGamesToMonitorFile();
-            return null;
+            gameCommPath = GetFilePath("GamesToMonitor.json");
+            if (gameCommPath == String.Empty)
+            {
+                WriteLineWithStepPretext("Unable to Find GamesToMonitor.json!", CurrentStep.FileReading, OutputType.Error);
+                Thread.Sleep(100);
+                Environment.Exit(1);
+                return null;
+            }
         }
 
         try
