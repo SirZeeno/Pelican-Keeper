@@ -10,6 +10,7 @@ public class QueryTesting
     [SetUp]
     public async Task Setup()
     {
+        ConsoleExt.SuppressProcessExitForTests = true;
         _secrets = await FileManager.ReadSecretsFile();
         _config = TestConfigCreator.CreateDefaultConfigInstance();
     }
@@ -26,7 +27,7 @@ public class QueryTesting
         if (_secrets.ExternalServerIp != null)
             await PelicanInterface.SendA2SRequest(_secrets.ExternalServerIp, 27051);
         
-        if (ConsoleExt.ExceptionOccurred) //TODO: expand the testing to include output testing, to see if the output is as desired.
+        if (ConsoleExt.ExceptionOccurred) //TODO: expand the testing to include output testing, to see if the output is as desired. For example i could get "Timed out waiting for server response." but the test returns a pass
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}");
         else
             Assert.Pass("A2S request sent successfully.");

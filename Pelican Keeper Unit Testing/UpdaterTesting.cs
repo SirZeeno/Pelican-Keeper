@@ -7,6 +7,7 @@ public class UpdaterTesting
     [SetUp]
     public void Setup()
     {
+        ConsoleExt.SuppressProcessExitForTests = true;
         VersionUpdater.CurrentVersion = "v2.0.2";
         ConsoleExt.WriteLineWithPretext($"Current version: {VersionUpdater.CurrentVersion}");
     }
@@ -20,7 +21,7 @@ public class UpdaterTesting
         
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}");
-        else
+        else if (VersionUpdater.CurrentVersion != "v2.0.2")
             Assert.Pass("Rcon command sent successfully.");
     }
 }

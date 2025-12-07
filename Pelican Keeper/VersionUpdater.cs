@@ -6,7 +6,7 @@ namespace Pelican_Keeper;
 
 public static class VersionUpdater
 {
-    private static readonly string CurrentVersion = "v2.0.2";
+    public static string CurrentVersion = "v2.0.3";
     private static HttpClient _http = null!;
     
     public static async Task UpdateProgram()

@@ -10,6 +10,9 @@ public static class ConsoleExt
     // ReSharper disable once InconsistentNaming
     private static readonly LinkedList<Exception> _exceptions = new();
     
+    // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
+    public static bool SuppressProcessExitForTests { get; set; }
+    
     public enum OutputType
     {
         Error,
@@ -57,17 +60,16 @@ public static class ConsoleExt
         {
             Console.WriteLine(string.Join(", ", enumerable.Cast<object>()));
         }
-        else
-        {
-            Console.WriteLine(output);
-        }
         var constructedReturn = (length1.length + length2.length, length1.pretext + length2.pretext + output);
         
         if (exception == null) return;
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
+        Console.WriteLine(constructedReturn.Item2);
+        
         if (!exit) return;
+        if (SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
         Environment.Exit(1);
     }
@@ -87,21 +89,22 @@ public static class ConsoleExt
         var length1 = CurrentTime();
         var length2 = DetermineCurrentStep(currentStep);
         var length3 = DetermineOutputType(outputType);
+        
         if (output is IEnumerable enumerable && !(output is string))
         {
             Console.WriteLine(string.Join(", ", enumerable.Cast<object>()));
         }
-        else
-        {
-            Console.WriteLine(output);
-        }
+        
         var constructedReturn = (length1.length + length2.length + length3.length, length1.pretext + length2.pretext + length3.pretext + output);
         
         if (exception == null) return;
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
+        Console.WriteLine(constructedReturn.Item2);
+                  
         if (!exit) return;
+        if (SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
         Environment.Exit(1);
     }
@@ -112,19 +115,16 @@ public static class ConsoleExt
     /// <param name="output">Output</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
+    /// <param name="exit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null)
+    public static void WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool exit = false)
     {
         var length1 = CurrentTime();
         var length2 = DetermineOutputType(outputType);
         if (output is IEnumerable enumerable && !(output is string))
         {
-            Console.WriteLine(string.Join(", ", enumerable.Cast<object>()));
-        }
-        else
-        {
-            Console.Write(output);
+            Console.Write(string.Join(", ", enumerable.Cast<object>()));
         }
         var constructedReturn = (length1.length + length2.length, length1.pretext + length2.pretext + output);
         
@@ -132,6 +132,12 @@ public static class ConsoleExt
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
+        Console.Write(constructedReturn.Item2);
+        
+        if (!exit) return;
+        if (SuppressProcessExitForTests) return;
+        Thread.Sleep(TimeSpan.FromSeconds(5));
+        Environment.Exit(1);
     }
 
     /// <summary>
