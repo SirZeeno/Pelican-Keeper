@@ -14,16 +14,22 @@ public static class TestConfigCreator
             MessageSorting = TemplateClasses.MessageSorting.Name,
             MessageSortingDirection = TemplateClasses.MessageSortingDirection.Ascending,
             IgnoreOfflineServers = false,
+            IgnoreInternalServers =  false,
             ServersToIgnore = ["UUIDS HERE"],
             
             JoinableIpDisplay = true,
             PlayerCountDisplay = true,
+            ServersToMonitor = ["UUIDS HERE"],
             
-            AutomaticShutdown = true,
+            AutomaticShutdown = false,
             ServersToAutoShutdown = ["UUIDS HERE"],
             EmptyServerTimeout = "00:01:00",
             AllowUserServerStartup = true,
             AllowServerStartup = ["UUIDS HERE"],
+            UsersAllowedToStartServers =  ["USERID HERE"],
+            AllowUserServerStopping = false,
+            AllowServerStopping =  ["USERID HERE"],
+            UsersAllowedToStopServers =  ["USERID HERE"],
             
             ContinuesMarkdownRead = true,
             ContinuesGamesToMonitorRead = true,
@@ -35,7 +41,8 @@ public static class TestConfigCreator
             ServersToDisplay = ["UUIDS HERE"],
             
             Debug = true,
-            DryRun = true
+            DryRun = true,
+            AutoUpdate =  true
         };
     }
     

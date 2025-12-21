@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Pelican_Keeper;
 
@@ -92,7 +93,7 @@ public static class VersionUpdater
         _http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
     }
 
-    private record GitHubAsset(string Name, string BrowserDownloadUrl);
+    private record GitHubAsset(string Name, [property: JsonPropertyName("browser_download_url")] string BrowserDownloadUrl);
     private record GitHubRelease(string TagName, string Name, GitHubAsset[] Assets);
 
     private static async Task<string?> DownloadLatestAssetIfNewerAsync(string currentVersionString)
@@ -139,7 +140,7 @@ public static class VersionUpdater
     private static async Task<(bool hasUpdate, string latestTag, Version? latestVersion, GitHubRelease? release)> CheckForUpdateAsync(string currentVersionString)
     {
         // 1. Get latest release JSON
-        var url = "https://api.github.com/reposSirZeeno/Pelican-Keeper/releases/latest";
+        var url = "https://api.github.com/repos/SirZeeno/Pelican-Keeper/releases/latest";
         using var resp = await _http.GetAsync(url);
         resp.EnsureSuccessStatusCode();
 

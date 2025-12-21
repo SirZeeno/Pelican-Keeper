@@ -9,7 +9,8 @@ public abstract class TemplateClasses
     {
         PerServer,
         Consolidated,
-        Paginated
+        Paginated,
+        None
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -25,7 +26,8 @@ public abstract class TemplateClasses
     public enum MessageSortingDirection
     {
         Ascending,
-        Descending
+        Descending,
+        None
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -71,9 +73,9 @@ public abstract class TemplateClasses
     public class Config
     {
         public string? InternalIpStructure { get; init; }
-        public MessageFormat MessageFormat { get; init; }
-        public MessageSorting MessageSorting { get; init; }
-        public MessageSortingDirection MessageSortingDirection { get; init; }
+        public MessageFormat MessageFormat { get; init; } = MessageFormat.None;
+        public MessageSorting MessageSorting { get; init; } = MessageSorting.None;
+        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
         public bool IgnoreOfflineServers { get; init; }
         public bool IgnoreInternalServers { get; init; }
         public string[]? ServersToIgnore { get; init; }

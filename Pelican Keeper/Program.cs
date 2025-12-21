@@ -12,11 +12,11 @@ using static ConsoleExt;
 using static DiscordInteractions;
 
 
-internal static class Program
+public static class Program
 {
     internal static List<DiscordChannel?> TargetChannel = null!;
     internal static Secrets Secrets = null!;
-    internal static Config Config = null!;
+    public static Config Config = null!;
     private static readonly EmbedBuilderService EmbedService = new();
     internal static List<DiscordEmbed> EmbedPages = null!;
     internal static List<ServerInfo> GlobalServerInfo = null!;

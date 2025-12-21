@@ -36,6 +36,22 @@ public static class FileManager
     }
 
     /// <summary>
+    /// Gets the file either in the current environment folder if no custom directory of file was specified, otherwise gets it in the specified folder or gets the specified file.
+    /// </summary>
+    /// <param name="fileNameWithExtension">File with Extension</param>
+    /// <param name="customDirectoryOrFile">Custom Directory to search in or direct File Path</param>
+    /// <returns>String of the found File</returns>c
+    public static string GetCustomFilePath(string fileNameWithExtension, string? customDirectoryOrFile = null)
+    {
+        if (string.IsNullOrEmpty(customDirectoryOrFile))
+        {
+            return File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath(fileNameWithExtension, customDirectoryOrFile);
+        }
+
+        return GetFilePath(fileNameWithExtension);
+    }
+
+    /// <summary>
     /// Creates a default Secrets.json file in the current execution directory.
     /// </summary>
     private static async Task CreateSecretsFile()
@@ -82,21 +98,37 @@ public static class FileManager
     /// Reads the Secrets.json file and interprets it to the Secrets class structure.
     /// </summary>
     /// <returns>The interpreted Secrets in the Secrets class structure</returns>
-    public static async Task<Secrets?> ReadSecretsFile(string? customDirectory = null)
+    public static async Task<Secrets?> ReadSecretsFile(string? customDirectoryOrFile = null)
     {
-        string secretsPath = GetFilePath("Secrets.json", customDirectory);
+        string secretsPath;
+
+        if (string.IsNullOrEmpty(customDirectoryOrFile))
+        {
+            secretsPath = File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath("Secrets.json", customDirectoryOrFile);
+        }
+        else
+        {
+            secretsPath = GetFilePath("Secrets.json");
+        }
         
-        if (secretsPath == String.Empty)
+        if (secretsPath == string.Empty)
         {
             WriteLineWithStepPretext("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
-            await CreateSecretsFile();
-            secretsPath = GetFilePath("Secrets.json", customDirectory);
-            
-            if (secretsPath == String.Empty)
+
+            if (string.IsNullOrEmpty(customDirectoryOrFile))
             {
-                WriteLineWithStepPretext("Unable to Find Secrets.json!", CurrentStep.FileReading, OutputType.Error);
-                Thread.Sleep(100);
-                Environment.Exit(1);
+                await CreateSecretsFile();
+                secretsPath = GetFilePath("Secrets.json");
+            }
+            else
+            {
+                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find Secrets File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
+                return null;
+            }
+            
+            if (secretsPath == string.Empty)
+            {
+                WriteLineWithStepPretext("Unable to Find Secrets.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
         }
@@ -139,20 +171,37 @@ public static class FileManager
     /// Reads the Config.json file and interprets it to the Config class structure.
     /// </summary>
     /// <returns>The interpreted Config in the Config class structure</returns>
-    public static async Task<Config?> ReadConfigFile(string? customDirectory = null)
+    public static async Task<Config?> ReadConfigFile(string? customDirectoryOrFile = null)
     {
-        string configPath = GetFilePath("Config.json", customDirectory);
+        string configPath;
         
-        if (configPath == String.Empty)
+        if (string.IsNullOrEmpty(customDirectoryOrFile))
+        {
+            configPath = File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath("Config.json", customDirectoryOrFile);
+        }
+        else
+        {
+            configPath = GetFilePath("Config.json");
+        }
+        
+        if (configPath == string.Empty)
         {
             WriteLineWithStepPretext("Config.json not found. Pulling Default from Github!", CurrentStep.FileReading, OutputType.Warning);
-            await CreateConfigFile();
-            configPath = GetFilePath("Config.json", customDirectory);
-            if (configPath == String.Empty)
+
+            if (string.IsNullOrEmpty(customDirectoryOrFile))
             {
-                WriteLineWithStepPretext("Unable to Find Config.json!", CurrentStep.FileReading, OutputType.Error);
-                Thread.Sleep(100);
-                Environment.Exit(1);
+                await CreateConfigFile();
+                configPath = GetFilePath("Config.json");
+            }
+            else
+            {
+                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find Config File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
+                return null;
+            }
+            
+            if (configPath == string.Empty)
+            {
+                WriteLineWithStepPretext("Unable to Find Config.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
         }
@@ -161,6 +210,7 @@ public static class FileManager
         {
             var configJson = await File.ReadAllTextAsync(configPath);
             var config = JsonSerializer.Deserialize<Config>(configJson);
+            Validator.ValidateConfig(config);
             
             if (config == null)
             {
@@ -182,20 +232,36 @@ public static class FileManager
     /// Reads the GamesToMonitor.json file and interprets it to the GamesToMonitor class structure.
     /// </summary>
     /// <returns>The interpreted GamesToMonitor in the GamesToMonitor class structure</returns>
-    public static async Task<List<GamesToMonitor>?> ReadGamesToMonitorFile()
+    public static async Task<List<GamesToMonitor>?> ReadGamesToMonitorFile(string? customDirectoryOrFile = null)
     {
-        string gameCommPath = GetFilePath("GamesToMonitor.json");
+        string gameCommPath;
         
-        if (gameCommPath == String.Empty)
+        if (string.IsNullOrEmpty(customDirectoryOrFile))
         {
-            WriteLineWithStepPretext("GamesToMonitor.json not found. Pulling from Github Repo!", CurrentStep.FileReading, OutputType.Error);
-            await CreateGamesToMonitorFile();
+            gameCommPath = File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath("GamesToMonitor.json", customDirectoryOrFile);
+        }
+        else
+        {
             gameCommPath = GetFilePath("GamesToMonitor.json");
-            if (gameCommPath == String.Empty)
+        }
+        
+        if (gameCommPath == string.Empty)
+        {
+            WriteLineWithStepPretext("GamesToMonitor.json not found. Pulling from Github Repo!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+            if (string.IsNullOrEmpty(customDirectoryOrFile))
             {
-                WriteLineWithStepPretext("Unable to Find GamesToMonitor.json!", CurrentStep.FileReading, OutputType.Error);
-                Thread.Sleep(100);
-                Environment.Exit(1);
+                await CreateGamesToMonitorFile();
+                gameCommPath = GetFilePath("GamesToMonitor.json");
+            }
+            else
+            {
+                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find GamesToMonitor File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
+                return null;
+            }
+            
+            if (gameCommPath == string.Empty)
+            {
+                WriteLineWithStepPretext("Unable to Find GamesToMonitor.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
         }

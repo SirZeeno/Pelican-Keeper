@@ -2,7 +2,7 @@
 
 namespace Pelican_Keeper;
 
-//TODO: be more selective with the output to only show what is relevant and reduce the output unless debug and verbose is enabled
+//TODO: Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per message
 public static class ConsoleExt
 {
     public static bool ExceptionOccurred;
@@ -22,7 +22,7 @@ public static class ConsoleExt
     }
 
     //TODO: Update all the current console outputs to use these enums for better logging and tracking of issues and steps
-    // This is changeable to be whatever you want
+    // This is changeable to be whatever necessary
     public enum CurrentStep
     {
         FileChecks,
@@ -58,15 +58,21 @@ public static class ConsoleExt
         var length2 = DetermineOutputType(outputType);
         if (output is IEnumerable enumerable && !(output is string))
         {
-            Console.WriteLine(string.Join(", ", enumerable.Cast<object>()));
+            Console.Write(string.Join(", ", enumerable.Cast<object>()));
         }
-        var constructedReturn = (length1.length + length2.length, length1.pretext + length2.pretext + output);
+        else
+        {
+            Console.Write(output);
+        }
         
-        if (exception == null) return;
+        if (exception == null)
+        {
+            Console.WriteLine();
+            return;
+        }
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
-        constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
-        Console.WriteLine(constructedReturn.Item2);
+        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
         
         if (!exit) return;
         if (SuppressProcessExitForTests) return;
@@ -92,16 +98,21 @@ public static class ConsoleExt
         
         if (output is IEnumerable enumerable && !(output is string))
         {
-            Console.WriteLine(string.Join(", ", enumerable.Cast<object>()));
+            Console.Write(string.Join(", ", enumerable.Cast<object>()));
+        }
+        else
+        {
+            Console.Write(output);
         }
         
-        var constructedReturn = (length1.length + length2.length + length3.length, length1.pretext + length2.pretext + length3.pretext + output);
-        
-        if (exception == null) return;
+        if (exception == null)
+        {
+            Console.WriteLine();
+            return;
+        }
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
-        constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
-        Console.WriteLine(constructedReturn.Item2);
+        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
                   
         if (!exit) return;
         if (SuppressProcessExitForTests) return;
@@ -126,13 +137,19 @@ public static class ConsoleExt
         {
             Console.Write(string.Join(", ", enumerable.Cast<object>()));
         }
-        var constructedReturn = (length1.length + length2.length, length1.pretext + length2.pretext + output);
+        else
+        {
+            Console.Write(output);
+        }
         
-        if (exception == null) return;
+        if (exception == null)
+        {
+            Console.WriteLine();
+            return;
+        }
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
-        constructedReturn.Item2 += $"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}";
-        Console.Write(constructedReturn.Item2);
+        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
         
         if (!exit) return;
         if (SuppressProcessExitForTests) return;

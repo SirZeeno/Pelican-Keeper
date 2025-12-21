@@ -297,7 +297,7 @@ public static class PelicanInterface
         if (Program.Config.Debug)
             ConsoleExt.WriteLineWithStepPretext(response.Content, ConsoleExt.CurrentStep.PelicanApiRequest);
     }
-    
+
     /// <summary>
     /// Sends a RCON Server command to the Specified IP and Port
     /// </summary>
@@ -305,6 +305,7 @@ public static class PelicanInterface
     /// <param name="port">Port of the Server</param>
     /// <param name="password">RCON Password of the Server</param>
     /// <param name="command">Game command to send</param>
+    /// <param name="regexPattern">Regex Pattern to use when </param>
     /// <returns>The response to the command that was sent</returns>
     // TODO: Generalize the connection protocol calls so I don't have to have separate methods for RCON and A2S and i can just generalize it with the ISendCommand interface.
     public static async Task<string> SendRconGameServerCommand(string ip, int port, string password, string command, string? regexPattern = null)

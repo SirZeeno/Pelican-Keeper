@@ -81,19 +81,19 @@ public class PlayerCountResponseTesting
                 ConsoleExt.WriteLineWithPretext("Success! The Response Conforms to the output Standard!");
                 ConsoleExt.WriteLineWithPretext($"Response: {response}");
                 ConsoleExt.WriteLineWithPretext($"Clean Response: {cleanResponse}");
-                Assert.Pass($"{response}, {cleanResponse}");
+                Assert.Pass($"{response}, {cleanResponse}\n");
             }
             else
             {
                 ConsoleExt.WriteLineWithPretext("Failed! The Response does not Conform to the output Standard!");
                 ConsoleExt.WriteLineWithPretext($"Response: {response}");
                 ConsoleExt.WriteLineWithPretext($"Clean Response: {cleanResponse}");
-                Assert.Fail($"{response}, {cleanResponse}");
+                Assert.Fail($"{response}, {cleanResponse}\n");
             }
         }
         else
         {
-            Assert.Fail("Response not returned or Empty!");
+            Assert.Fail("Response not returned or Empty!\n");
         }
     }
 }
