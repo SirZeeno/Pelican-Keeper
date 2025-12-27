@@ -1,0 +1,400 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+    "meta": {
+        "version": "PLCN_v3",
+        "update_url": null
+    },
+    "exported_at": "2025-12-27T20:47:29+00:00",
+    "name": "Pelican Keeper",
+    "author": "Leon@logocomp.com",
+    "uuid": "b9f6a260-8be9-4de0-90bb-4251ef5f9524",
+    "description": "Egg version of the Pelican Keeper Discord Bot.",
+    "image": null,
+    "tags": [],
+    "features": [],
+    "docker_images": {
+        "Dotnet_8": "ghcr.io/parkervcp/yolks:dotnet_8"
+    },
+    "file_denylist": [],
+    "startup_commands": {
+        "Default": "./\"Pelican Keeper\";"
+    },
+    "config": {
+        "files": "{}",
+        "startup": "{\n    \"done\": [\n        \"Bot is connected and ready!\"\n    ]\n}",
+        "logs": "{}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y curl unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nset -euo pipefail\r\n\r\nREPO=\"SirZeeno/Pelican-Keeper\"\r\n\r\n# The asset name we want (exact match, per your example)\r\nASSET_PATTERN=\"linux-x64.zip\"\r\n\r\n# Where to put extracted files\r\nINSTALL_DIR=\"${INSTALL_DIR:-./}\"\r\n\r\n# Requirements\r\nfor cmd in curl unzip; do\r\n  command -v \"$cmd\" >/dev/null 2>&1 || {\r\n    echo \"Error: '$cmd' is required but not installed.\" >&2\r\n    exit 1\r\n  }\r\ndone\r\n\r\ntmpdir=\"$(mktemp -d)\"\r\ncleanup() { rm -rf \"$tmpdir\"; }\r\ntrap cleanup EXIT\r\n\r\n# Extract the browser_download_url for the asset that ends with linux-x64.zip (no jq/python)\r\ndownload_url=$(\r\n  curl -fsSL \"https://api.github.com/repos/$REPO/releases/latest\" |\r\n  grep -oE '\"browser_download_url\":\\s*\"[^\"]+' |\r\n  cut -d'\"' -f4 |\r\n  grep \"$ASSET_PATTERN\" |\r\n  head -n 1\r\n)\r\n\r\nif [[ -z \"${download_url:-}\" ]]; then\r\n  echo \"Error: Could not find an asset ending with '${ASSET_NAME_SUFFIX}' in the latest release.\" >&2\r\n  echo \"Tip: Check the release assets and confirm the filename matches, e.g. Pelican-Keeper-vX.Y.Z-${ASSET_NAME_SUFFIX}\" >&2\r\n  exit 1\r\nfi\r\n\r\nzip_name=\"$(basename \"$download_url\")\"\r\nzip_path=\"${tmpdir}/${zip_name}\"\r\n\r\necho \"Downloading: $download_url\"\r\ncurl -fL --retry 3 --retry-delay 1 -o \"$zip_path\" \"$download_url\"\r\n\r\necho \"Extracting to: $INSTALL_DIR\"\r\nmkdir -p \"$INSTALL_DIR\"\r\nunzip -o \"$zip_path\" -d \"$INSTALL_DIR\" >/dev/null\r\n\r\necho \"Deleting zip: $zip_name\"\r\nrm -f \"$zip_path\"\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Allow Server Startup",
+            "description": "UUIDs of servers that are allowed to be started up by users in the Discord server. (All if empty) (separated by a comma)",
+            "env_variable": "AllowServerStartup",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 15
+        },
+        {
+            "name": "Allow Server Stopping",
+            "description": "UUIDs of servers that are allowed to be stopped by users in the Discord server. (All if empty) (separated by a comma)",
+            "env_variable": "AllowServerStopping",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string"
+            ],
+            "sort": 18
+        },
+        {
+            "name": "Allow User Server Startup",
+            "description": "If Users in the Discord server are allowed to start servers in the list.",
+            "env_variable": "AllowUserServerStartup",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 14
+        },
+        {
+            "name": "Allow User Server Stopping",
+            "description": "If Users in the Discord server are allowed to stop servers in the list.",
+            "env_variable": "AllowUserServerStopping",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 17
+        },
+        {
+            "name": "Auto Update",
+            "description": "If you want the auto update to run on startup.",
+            "env_variable": "AutoUpdate",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 29
+        },
+        {
+            "name": "Automatic Shutdown",
+            "description": "If you want to automatically shut down inactive servers.",
+            "env_variable": "AutomaticShutdown",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 11
+        },
+        {
+            "name": "Continues Games To Monitor Read",
+            "description": "If the bot should read the Games To Monitor file continuously after startup. (Only once on startup if false)",
+            "env_variable": "ContinuesGamesToMonitorRead",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 21
+        },
+        {
+            "name": "Continues Markdown Read",
+            "description": "If the bot should read the Markdown file continuously after startup. (Only once on startup if false)",
+            "env_variable": "ContinuesMarkdownRead",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 20
+        },
+        {
+            "name": "Debug",
+            "description": "If you want to see the full console output.",
+            "env_variable": "Debug",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 27
+        },
+        {
+            "name": "Dry Run",
+            "description": "If you want to do a dry run.",
+            "env_variable": "DryRun",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 28
+        },
+        {
+            "name": "Empty Server Timeout",
+            "description": "The time a server can be empty until it gets shut down. (Format Example: Days:Hours:Minutes)",
+            "env_variable": "EmptyServerTimeout",
+            "default_value": "00:01:00",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 13
+        },
+        {
+            "name": "Ignore Internal Servers",
+            "description": "Don't display any servers whose IP matches the internal IP structure.",
+            "env_variable": "IgnoreInternalServers",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 6
+        },
+        {
+            "name": "Ignore Offline Servers",
+            "description": "Don't display Offline Servers.",
+            "env_variable": "IgnoreOfflineServers",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 5
+        },
+        {
+            "name": "Internal IP Structure",
+            "description": "IP Structure in the local Network Pelican is sitting in.",
+            "env_variable": "InternalIpStructure",
+            "default_value": "192.168.*.*",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string"
+            ],
+            "sort": 1
+        },
+        {
+            "name": "Joinable IP Display",
+            "description": "If the Joinable IP of the servers should be displayed.",
+            "env_variable": "JoinableIpDisplay",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 8
+        },
+        {
+            "name": "Limit Server Count",
+            "description": "If you want to limit the server count in the list to a specific number.",
+            "env_variable": "LimitServerCount",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 24
+        },
+        {
+            "name": "Markdown Update Interval",
+            "description": "Time in seconds after which the bot reads the Markdown file again. (Can't go below 10 seconds)",
+            "env_variable": "MarkdownUpdateInterval",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "min:10",
+                "integer"
+            ],
+            "sort": 22
+        },
+        {
+            "name": "Max Server Count",
+            "description": "The maximum number of servers you want to be in the server list.",
+            "env_variable": "MaxServerCount",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "integer"
+            ],
+            "sort": 25
+        },
+        {
+            "name": "Message Format",
+            "description": "The Message format you want the bot's output Message to be.",
+            "env_variable": "MessageFormat",
+            "default_value": "Consolidated",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "in:Consolidated,PerServer,Paginated",
+                "required"
+            ],
+            "sort": 2
+        },
+        {
+            "name": "Message Sorting",
+            "description": "How the bot should sort the Servers in the list.",
+            "env_variable": "MessageSorting",
+            "default_value": "Name",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "in:Name,Status,Uptime",
+                "required"
+            ],
+            "sort": 3
+        },
+        {
+            "name": "Message Sorting Direction",
+            "description": "The direction the Bot should sort the Servers in the list.",
+            "env_variable": "MessageSortingDirection",
+            "default_value": "Ascending",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "in:Ascending,Descending",
+                "required"
+            ],
+            "sort": 4
+        },
+        {
+            "name": "Player Count Display",
+            "description": "If the Player Count of the servers should be displayed. (Only works with supported Games)",
+            "env_variable": "PlayerCountDisplay",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 9
+        },
+        {
+            "name": "Server Update Interval",
+            "description": "Time in seconds after which the bot fetches the new information from Pelican. (Can't go below 10 seconds)",
+            "env_variable": "ServerUpdateInterval",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "min:10",
+                "integer"
+            ],
+            "sort": 23
+        },
+        {
+            "name": "Servers To Auto Shutdown",
+            "description": "UUIDs of the servers you want the automatic shutdown to apply to. (All if empty) (separated by a comma)",
+            "env_variable": "ServersToAutoShutdown",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 12
+        },
+        {
+            "name": "Servers To Display",
+            "description": "UUIDs of the servers you want to be displayed in the list. (All if empty) (separated by a comma)",
+            "env_variable": "ServersToDisplay",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 26
+        },
+        {
+            "name": "Servers To Ignore",
+            "description": "UUIDs of servers you want to exclude from the server list. (None if empty) (separated by a comma)",
+            "env_variable": "ServersToIgnore",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 7
+        },
+        {
+            "name": "Servers To Monitor",
+            "description": "UUIDs of the servers for which you want the player count to be displayed. (All if empty) (separated by a comma)",
+            "env_variable": "ServersToMonitor",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 10
+        },
+        {
+            "name": "Users Allowed To Start Servers",
+            "description": "USERID of the users who are allowed to start servers in the Discord server. (All if empty) (separated by a comma)",
+            "env_variable": "UsersAllowedToStartServers",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 16
+        },
+        {
+            "name": "Users Allowed To Stop Servers",
+            "description": "USERID of the users who are allowed to stop servers in the Discord server. (All if empty) (separated by a comma)",
+            "env_variable": "UsersAllowedToStopServers",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 19
+        }
+    ]
+}
