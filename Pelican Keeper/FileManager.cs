@@ -104,106 +104,105 @@ public static class FileManager
             var configJson = await File.ReadAllTextAsync(configPath);
             var config = JsonSerializer.Deserialize<Config>(configJson);
             Validator.ValidateConfig(config);
-            if (config == null)
-            {
-                WriteLineWithStepPretext("Config file invalid.", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-                return null;
-            }
+            if (config == null) { WriteLineWithStepPretext("Config file invalid.", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true); return null; }
 
-            // --- ENV VAR OVERRIDES (Syncs with Pelican Panel) ---
+            // --- ENV VAR OVERRIDES ---
+            // Helper to get raw env var (returns null if missing, string if present)
+            string? GetEnv(string key) => Environment.GetEnvironmentVariable(key);
+
             string? val;
 
-            val = Environment.GetEnvironmentVariable("MessageFormat");
+            val = GetEnv("MessageFormat");
             if (!string.IsNullOrEmpty(val) && Enum.TryParse(val, true, out MessageFormat mf)) config.MessageFormat = mf;
 
-            val = Environment.GetEnvironmentVariable("MessageSorting");
+            val = GetEnv("MessageSorting");
             if (!string.IsNullOrEmpty(val) && Enum.TryParse(val, true, out MessageSorting ms)) config.MessageSorting = ms;
 
-            // FIX: Parsing Enum correctly here instead of direct string assignment
-            val = Environment.GetEnvironmentVariable("MessageSortingDirection");
+            val = GetEnv("MessageSortingDirection");
             if (!string.IsNullOrEmpty(val) && Enum.TryParse(val, true, out MessageSortingDirection msd)) config.MessageSortingDirection = msd;
 
             // Bools
-            val = Environment.GetEnvironmentVariable("IgnoreOfflineServers");
+            val = GetEnv("IgnoreOfflineServers");
             if (!string.IsNullOrEmpty(val)) config.IgnoreOfflineServers = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("IgnoreInternalServers");
+            val = GetEnv("IgnoreInternalServers");
             if (!string.IsNullOrEmpty(val)) config.IgnoreInternalServers = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("JoinableIpDisplay");
+            val = GetEnv("JoinableIpDisplay");
             if (!string.IsNullOrEmpty(val)) config.JoinableIpDisplay = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("PlayerCountDisplay");
+            val = GetEnv("PlayerCountDisplay");
             if (!string.IsNullOrEmpty(val)) config.PlayerCountDisplay = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("AutomaticShutdown");
+            val = GetEnv("AutomaticShutdown");
             if (!string.IsNullOrEmpty(val)) config.AutomaticShutdown = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("AllowUserServerStartup");
+            val = GetEnv("AllowUserServerStartup");
             if (!string.IsNullOrEmpty(val)) config.AllowUserServerStartup = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("AllowUserServerStopping");
+            val = GetEnv("AllowUserServerStopping");
             if (!string.IsNullOrEmpty(val)) config.AllowUserServerStopping = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("AutoUpdate");
+            val = GetEnv("AutoUpdate");
             if (!string.IsNullOrEmpty(val)) config.AutoUpdate = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("Debug");
+            val = GetEnv("Debug");
             if (!string.IsNullOrEmpty(val)) config.Debug = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("DryRun");
+            val = GetEnv("DryRun");
             if (!string.IsNullOrEmpty(val)) config.DryRun = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("LimitServerCount");
+            val = GetEnv("LimitServerCount");
             if (!string.IsNullOrEmpty(val)) config.LimitServerCount = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("ContinuesMarkdownRead");
+            val = GetEnv("ContinuesMarkdownRead");
             if (!string.IsNullOrEmpty(val)) config.ContinuesMarkdownRead = (val == "1" || val.ToLower() == "true");
 
-            val = Environment.GetEnvironmentVariable("ContinuesGamesToMonitorRead");
+            val = GetEnv("ContinuesGamesToMonitorRead");
             if (!string.IsNullOrEmpty(val)) config.ContinuesGamesToMonitorRead = (val == "1" || val.ToLower() == "true");
 
             // Strings & Arrays
-            val = Environment.GetEnvironmentVariable("InternalIpStructure");
-            if (!string.IsNullOrEmpty(val)) config.InternalIpStructure = val;
+            // FIX: If Env Var exists but is empty, clear the list/string (overriding config.json defaults)
 
-            val = Environment.GetEnvironmentVariable("EmptyServerTimeout");
-            if (!string.IsNullOrEmpty(val)) config.EmptyServerTimeout = val;
+            val = GetEnv("InternalIpStructure");
+            if (val != null) config.InternalIpStructure = val; // Allows setting to empty string
 
-            val = Environment.GetEnvironmentVariable("ServersToIgnore");
-            if (!string.IsNullOrEmpty(val)) config.ServersToIgnore = val.Split(',');
+            val = GetEnv("EmptyServerTimeout");
+            if (val != null) config.EmptyServerTimeout = val;
 
-            val = Environment.GetEnvironmentVariable("ServersToMonitor");
-            if (!string.IsNullOrEmpty(val)) config.ServersToMonitor = val.Split(',');
+            val = GetEnv("ServersToIgnore");
+            if (val != null) config.ServersToIgnore = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
 
-            val = Environment.GetEnvironmentVariable("ServersToAutoShutdown");
-            if (!string.IsNullOrEmpty(val)) config.ServersToAutoShutdown = val.Split(',');
+            val = GetEnv("ServersToMonitor");
+            if (val != null) config.ServersToMonitor = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
 
-            val = Environment.GetEnvironmentVariable("AllowServerStartup");
-            if (!string.IsNullOrEmpty(val)) config.AllowServerStartup = val.Split(',');
+            val = GetEnv("ServersToAutoShutdown");
+            if (val != null) config.ServersToAutoShutdown = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
 
-            val = Environment.GetEnvironmentVariable("AllowServerStopping");
-            if (!string.IsNullOrEmpty(val)) config.AllowServerStopping = val.Split(',');
+            val = GetEnv("AllowServerStartup");
+            if (val != null) config.AllowServerStartup = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
 
-            val = Environment.GetEnvironmentVariable("UsersAllowedToStartServers");
-            if (!string.IsNullOrEmpty(val)) config.UsersAllowedToStartServers = val.Split(',');
+            val = GetEnv("AllowServerStopping");
+            if (val != null) config.AllowServerStopping = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
 
-            val = Environment.GetEnvironmentVariable("UsersAllowedToStopServers");
-            if (!string.IsNullOrEmpty(val)) config.UsersAllowedToStopServers = val.Split(',');
+            val = GetEnv("UsersAllowedToStartServers");
+            if (val != null) config.UsersAllowedToStartServers = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
 
-            val = Environment.GetEnvironmentVariable("ServersToDisplay");
-            if (!string.IsNullOrEmpty(val)) config.ServersToDisplay = val.Split(',');
+            val = GetEnv("UsersAllowedToStopServers");
+            if (val != null) config.UsersAllowedToStopServers = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
+
+            val = GetEnv("ServersToDisplay");
+            if (val != null) config.ServersToDisplay = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
 
             // Ints
-            val = Environment.GetEnvironmentVariable("MarkdownUpdateInterval");
+            val = GetEnv("MarkdownUpdateInterval");
             if (!string.IsNullOrEmpty(val) && int.TryParse(val, out int mui)) config.MarkdownUpdateInterval = mui;
 
-            val = Environment.GetEnvironmentVariable("ServerUpdateInterval");
+            val = GetEnv("ServerUpdateInterval");
             if (!string.IsNullOrEmpty(val) && int.TryParse(val, out int sui)) config.ServerUpdateInterval = sui;
 
-            val = Environment.GetEnvironmentVariable("MaxServerCount");
+            val = GetEnv("MaxServerCount");
             if (!string.IsNullOrEmpty(val) && int.TryParse(val, out int msc)) config.MaxServerCount = msc;
-            // ----------------------------------------------------
 
             Program.Config = config;
             return config;

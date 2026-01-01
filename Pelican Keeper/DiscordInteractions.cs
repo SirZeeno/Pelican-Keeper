@@ -21,7 +21,6 @@ public static class DiscordInteractions
 
     internal static async Task<Task> OnPageFlipInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
     {
-        // Ignore Start/Stop buttons here
         if (e.Id.StartsWith("start:") || e.Id.StartsWith("stop:")) return Task.CompletedTask;
 
         if (LiveMessageStorage.GetPaginated(e.Message.Id) is not { } pagedTracked || e.User.IsBot) return Task.CompletedTask;
@@ -36,10 +35,8 @@ public static class DiscordInteractions
 
         try
         {
-            // Rebuild buttons for the new page
             var components = new List<DiscordComponent> { new DiscordButtonComponent(ButtonStyle.Primary, "prev_page", "◀️ Previous") };
 
-            // Logic to add Start/Stop buttons for the current server page
             bool showStart = Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false };
             bool showStop = Config is { AllowUserServerStopping: true };
             string uuid = GlobalServerInfo[index].Uuid;
@@ -63,16 +60,20 @@ public static class DiscordInteractions
     internal static async Task<Task> OnServerStartInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
     {
         if (e.User.IsBot) return Task.CompletedTask;
-
-        // FIX: Check for "start:" prefix
         if (!e.Id.StartsWith("start:")) return Task.CompletedTask;
 
-        // Extract UUID
         var id = e.Id.Split(':')[1];
 
-        // Permission checks
-        if (Config.UsersAllowedToStartServers != null && string.Equals(Config.UsersAllowedToStartServers[0], "USERID HERE", StringComparison.Ordinal) && Config.UsersAllowedToStartServers.Length != 0 && !Config.UsersAllowedToStartServers.Contains(e.User.Id.ToString()))
+        bool isRestricted = Config.UsersAllowedToStartServers != null
+                            && Config.UsersAllowedToStartServers.Length > 0
+                            && !string.Equals(Config.UsersAllowedToStartServers[0], "USERID HERE", StringComparison.OrdinalIgnoreCase);
+
+        if (isRestricted && !Config.UsersAllowedToStartServers!.Contains(e.User.Id.ToString()))
+        {
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent("⛔ You are not allowed to start servers.").AsEphemeral());
             return Task.CompletedTask;
+        }
 
         var server = GlobalServerInfo.FirstOrDefault(s => s.Uuid == id);
         if (server == null) return Task.CompletedTask;
@@ -82,22 +83,31 @@ public static class DiscordInteractions
             PelicanInterface.SendPowerCommand(server.Uuid, "start");
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
         }
+        else
+        {
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+               new DiscordInteractionResponseBuilder().WithContent($"⚠️ Server {server.Name} is already running.").AsEphemeral());
+        }
         return Task.CompletedTask;
     }
 
     internal static async Task<Task> OnServerStopInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
     {
         if (e.User.IsBot) return Task.CompletedTask;
-
-        // FIX: Check for "stop:" prefix
         if (!e.Id.StartsWith("stop:")) return Task.CompletedTask;
 
-        // Extract UUID
         var id = e.Id.Split(':')[1];
 
-        // Permission checks
-        if (Config.UsersAllowedToStopServers != null && string.Equals(Config.UsersAllowedToStopServers[0], "USERID HERE", StringComparison.Ordinal) && Config.UsersAllowedToStopServers.Length != 0 && !Config.UsersAllowedToStopServers.Contains(e.User.Id.ToString()))
+        bool isRestricted = Config.UsersAllowedToStopServers != null
+                            && Config.UsersAllowedToStopServers.Length > 0
+                            && !string.Equals(Config.UsersAllowedToStopServers[0], "USERID HERE", StringComparison.OrdinalIgnoreCase);
+
+        if (isRestricted && !Config.UsersAllowedToStopServers!.Contains(e.User.Id.ToString()))
+        {
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent("⛔ You are not allowed to stop servers.").AsEphemeral());
             return Task.CompletedTask;
+        }
 
         var server = GlobalServerInfo.FirstOrDefault(s => s.Uuid == id);
         if (server == null) return Task.CompletedTask;
@@ -107,14 +117,57 @@ public static class DiscordInteractions
             PelicanInterface.SendPowerCommand(server.Uuid, "stop");
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
         }
+        else
+        {
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+               new DiscordInteractionResponseBuilder().WithContent($"⚠️ Server {server.Name} is not online.").AsEphemeral());
+        }
         return Task.CompletedTask;
     }
 
     internal static async Task<Task> OnDropDownInteration(DiscordClient sender, ComponentInteractionCreateEventArgs e)
     {
         if (e.User.IsBot) return Task.CompletedTask;
-        // Consolidated drop down logic works as-is because it reads Values[] directly
-        // ... (Keep existing logic or use previous file's logic here)
+
+        string? uuid = e.Values.FirstOrDefault();
+        if (string.IsNullOrEmpty(uuid)) return Task.CompletedTask;
+
+        var serverInfo = GlobalServerInfo.FirstOrDefault(x => x.Uuid == uuid);
+        if (serverInfo == null) return Task.CompletedTask;
+
+        // FIX: Force Update Server Stats before checking status
+        PelicanInterface.GetServerStats(serverInfo);
+
+        if (e.Id == "start_menu")
+        {
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+            if (serverInfo.Resources?.CurrentState.ToLower() == "offline")
+            {
+                PelicanInterface.SendPowerCommand(serverInfo.Uuid, "start");
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"▶️ Starting `{serverInfo.Name}`...").AsEphemeral());
+            }
+            else
+            {
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"⚠️ `{serverInfo.Name}` is already running (State: {serverInfo.Resources?.CurrentState}).").AsEphemeral());
+            }
+        }
+        else if (e.Id == "stop_menu")
+        {
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+
+            // Allow stopping if state is anything other than offline (e.g. starting, running)
+            if (serverInfo.Resources?.CurrentState.ToLower() != "offline")
+            {
+                PelicanInterface.SendPowerCommand(serverInfo.Uuid, "stop");
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"⏹ Stopping `{serverInfo.Name}`...").AsEphemeral());
+            }
+            else
+            {
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"⚠️ `{serverInfo.Name}` is already offline.").AsEphemeral());
+            }
+        }
+
         return Task.CompletedTask;
     }
 }

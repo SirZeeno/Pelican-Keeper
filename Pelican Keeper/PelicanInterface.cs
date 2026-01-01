@@ -46,7 +46,7 @@ public static class PelicanInterface
     /// </summary>
     /// <param name="serverInfo">Server Info Class</param>
     /// <returns>The server stats response</returns>
-    private static void GetServerStats(ServerInfo serverInfo)
+    public static void GetServerStats(ServerInfo serverInfo)
     {
         if (string.IsNullOrWhiteSpace(serverInfo.Uuid))
         {

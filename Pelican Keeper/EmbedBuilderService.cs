@@ -118,17 +118,17 @@ public static class EmbedBuilderHelper
 
     internal static string FormatBytes(long bytes)
     {
-        const long kb = 1024;
-        const long mb = kb * 1024;
-        const long gb = mb * 1024;
-        const long tb = gb * 1024;
+        const long kb = 1000;
+        const long mb = kb * 1000;
+        const long gb = mb * 1000;
+        const long tb = gb * 1000;
 
         return bytes switch
         {
-            >= tb => $"{bytes / (double)tb:F2} TiB",
-            >= gb => $"{bytes / (double)gb:F2} GiB",
-            >= mb => $"{bytes / (double)mb:F2} MiB",
-            >= kb => $"{bytes / (double)kb:F2} KiB",
+            >= tb => $"{bytes / (double)tb:F2} TB",
+            >= gb => $"{bytes / (double)gb:F2} GB",
+            >= mb => $"{bytes / (double)mb:F2} MB",
+            >= kb => $"{bytes / (double)kb:F2} kB",
             _ => $"{bytes} B"
         };
     }
@@ -175,4 +175,3 @@ public static class EmbedBuilderHelper
         return count;
     }
 }
-
