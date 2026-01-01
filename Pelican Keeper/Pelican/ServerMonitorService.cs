@@ -46,10 +46,14 @@ public static class ServerMonitorService
             if (egg != null) server.Egg.Name = egg.Name;
         }
 
+        // Apply early filters (UUID-based, before fetching stats)
+        servers = ApplyEarlyFilters(servers);
+
         FetchServerStats(servers);
         ProcessAllocationsAndPlayerCounts(servers);
 
-        return ApplyFilters(servers);
+        // Apply late filters (require stats/allocations)
+        return ApplyLateFilters(servers);
     }
 
     private static void FetchServerStats(List<ServerInfo> servers)
@@ -239,12 +243,33 @@ public static class ServerMonitorService
         }
     }
 
-    private static List<ServerInfo> ApplyFilters(List<ServerInfo> servers)
+    /// <summary>
+    /// Applies UUID-based filters before fetching stats (ServersToIgnore, ServersToDisplay limit).
+    /// </summary>
+    private static List<ServerInfo> ApplyEarlyFilters(List<ServerInfo> servers)
     {
         var config = RuntimeContext.Config;
 
-        if (config.ServersToIgnore?.Length > 0 && config.ServersToIgnore[0] != "UUIDS HERE")
+        if (config.ServersToIgnore?.Length > 0)
             servers = servers.Where(s => !config.ServersToIgnore.Contains(s.Uuid)).ToList();
+
+        if (config.LimitServerCount && config.MaxServerCount > 0)
+        {
+            if (config.ServersToDisplay?.Length > 0)
+                servers = servers.Where(s => config.ServersToDisplay.Contains(s.Uuid)).ToList();
+            else
+                servers = servers.Take(config.MaxServerCount).ToList();
+        }
+
+        return servers;
+    }
+
+    /// <summary>
+    /// Applies filters that require stats/allocations (IgnoreOfflineServers, IgnoreInternalServers, sorting).
+    /// </summary>
+    private static List<ServerInfo> ApplyLateFilters(List<ServerInfo> servers)
+    {
+        var config = RuntimeContext.Config;
 
         if (config.IgnoreOfflineServers)
             servers = servers.Where(s => s.Resources?.CurrentState.ToLower() != "offline" && s.Resources?.CurrentState.ToLower() != "missing").ToList();
@@ -253,14 +278,6 @@ public static class ServerMonitorService
         {
             var pattern = "^" + Regex.Escape(config.InternalIpStructure).Replace("\\*", "\\d+") + "$";
             servers = servers.Where(s => s.Allocations?.Any(a => !Regex.IsMatch(a.Ip, pattern)) == true).ToList();
-        }
-
-        if (config.LimitServerCount && config.MaxServerCount > 0)
-        {
-            if (config.ServersToDisplay?.Length > 0 && config.ServersToDisplay[0] != "UUIDS HERE")
-                servers = servers.Where(s => config.ServersToDisplay.Contains(s.Uuid)).ToList();
-            else
-                servers = servers.Take(config.MaxServerCount).ToList();
         }
 
         return CollectionHelper.SortServers(servers, config.MessageSorting, config.MessageSortingDirection);
