@@ -1,5 +1,25 @@
 ﻿[
   {
+    "Game": "Terraria Vanilla",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
+  },
+  {
+    "Game": "TShock",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
+  },
+  {
+    "Game": "tModLoader",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
+  },
+  {
+    "Game": "Terraria",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
+  },
+  {
     "Game": "Ark: Survival Evolved",
     "Protocol": "A2S",
     "QueryPortVariable": "QUERY_PORT"
