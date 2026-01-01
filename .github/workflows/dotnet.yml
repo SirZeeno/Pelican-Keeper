@@ -1,4 +1,4 @@
-name: .NET Multi-RID Publish
+name: .NET Build, Test & Publish
 
 on:
   push:
@@ -10,6 +10,25 @@ permissions:
   contents: write
 
 jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
+
   check-version:
     runs-on: ubuntu-latest
     outputs:
@@ -53,13 +72,22 @@ jobs:
           prerelease: false
 
   publish-and-upload:
-    needs: [check-version, create-release]
+    needs: [build-and-test, check-version, create-release]
     if: needs.check-version.outputs.valid == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        rid: [win-x86, win-x64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
+        rid:
+          [
+            win-x86,
+            win-x64,
+            linux-x64,
+            linux-arm,
+            linux-arm64,
+            osx-x64,
+            osx-arm64,
+          ]
     env:
       PROJECT_PATH: "Pelican Keeper/Pelican Keeper.csproj"
       APP_NAME: "Pelican-Keeper"
@@ -69,7 +97,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: "8.x"
 
       - name: Restore (per RID)
         run: dotnet restore "$PROJECT_PATH" -r ${{ matrix.rid }}
@@ -85,12 +113,13 @@ jobs:
           echo "OUTDIR=$OUTDIR" >> "$GITHUB_ENV"
 
       - name: Zip publish output (${{ matrix.rid }})
+        id: zip_output
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
           NAME="${{ env.APP_NAME }}-v${VERSION}-${{ matrix.rid }}.zip"
           cd "$OUTDIR"
           zip -r "../$NAME" .
-          echo "ZIP=dist/$NAME" >> $GITHUB_ENV
+          echo "zip_path=dist/$NAME" >> $GITHUB_OUTPUT
 
       - name: Upload Release Asset (${{ matrix.rid }})
         uses: actions/upload-release-asset@v1
@@ -98,6 +127,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ${{ env.ZIP }}
+          asset_path: ${{ steps.zip_output.outputs.zip_path }}
           asset_name: ${{ env.APP_NAME }}-v${{ needs.check-version.outputs.version }}-${{ matrix.rid }}.zip
           asset_content_type: application/zip

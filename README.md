@@ -139,3 +139,62 @@ Finally, There is a special Tag called [Title] for the server Name to mark what 
 | NetworkRx  | Inbound network traffic                          |
 | NetworkTx  | Outbound network traffic                         |
 | Uptime     | Uptime of the server                             |
+
+## Development
+
+### Project Structure
+
+```
+Pelican-Keeper/
+├── Pelican Keeper/          # Main application
+│   ├── Core/                # App context and configuration
+│   ├── Models/              # Data models (Config, Secrets, ServerInfo, etc.)
+│   ├── Configuration/       # File management and validation
+│   ├── Discord/             # Discord embeds, interactions, markdown parser
+│   ├── Pelican/             # Pelican API client and server monitoring
+│   ├── Query/               # Game server query services (A2S, RCON, Minecraft, etc.)
+│   ├── Utilities/           # Helpers (formatting, logging, network)
+│   └── Updates/             # Version checking and auto-updates
+├── Tests/                   # Unit tests
+├── deploy/                  # Deployment files
+├── build.sh                 # Local build script
+└── .github/workflows/       # CI/CD pipeline
+```
+
+### Building Locally
+
+Use the included build script for easy local builds:
+
+```bash
+# Build for current platform (release)
+./build.sh
+
+# Build for specific platform
+./build.sh linux          # Linux x64
+./build.sh windows        # Windows x64
+./build.sh osx            # macOS x64
+./build.sh all            # All platforms
+
+# Build with debug configuration
+./build.sh linux debug
+```
+
+Output will be in the `dist/` directory.
+
+### Manual Build
+
+```bash
+# Debug build
+dotnet build "Pelican Keeper.sln"
+
+# Release build (single-file executable)
+dotnet publish "Pelican Keeper/Pelican Keeper.csproj" -c Release -r linux-x64 --self-contained
+```
+
+### Running Tests
+
+```bash
+dotnet test "Pelican Keeper.sln"
+```
+
+Tests require config files (`Config.json`, `GamesToMonitor.json`, `MessageMarkdown.txt`) in the test output directory. These are automatically copied from the main project during build.

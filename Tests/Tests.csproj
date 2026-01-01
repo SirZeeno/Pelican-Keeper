@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPublishable>false</IsPublishable>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Pelican_Keeper.Tests</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
+    <PackageReference Include="NUnit" Version="4.2.2"/>
+    <PackageReference Include="NUnit.Analyzers" Version="4.4.0"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pelican Keeper\Pelican Keeper.csproj" />
+  </ItemGroup>
+
+  <!-- Copy test configuration files from main project -->
+  <ItemGroup>
+    <None Include="..\Pelican Keeper\Config.json" Link="Config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Pelican Keeper\GamesToMonitor.json" Link="GamesToMonitor.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Pelican Keeper\MessageMarkdown.txt" Link="MessageMarkdown.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Pelican Keeper\MessageHistory.json" Link="MessageHistory.json" Condition="Exists('..\Pelican Keeper\MessageHistory.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

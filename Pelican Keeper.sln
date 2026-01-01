@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pelican Keeper", "Pelican Keeper\Pelican Keeper.csproj", "{2A4FC4B6-D69C-4250-8DE6-D6385B32B4B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pelican Keeper Unit Testing", "Pelican Keeper Unit Testing\Pelican Keeper Unit Testing.csproj", "{F9E53A39-DC4B-4DEB-8C0B-408A1904D62A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{F9E53A39-DC4B-4DEB-8C0B-408A1904D62A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
