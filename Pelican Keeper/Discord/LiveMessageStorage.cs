@@ -24,7 +24,7 @@ public static class LiveMessageStorage
             Cache = new LiveMessageJsonStorage();
         }
 
-        foreach (var id in Cache.LiveStore)
+        foreach (var id in Cache.LiveStore!)
             Logger.WriteLineWithStep($"Cached message ID: {id}", Logger.Step.MessageHistory);
 
         _ = ValidateCacheAsync();

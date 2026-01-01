@@ -29,15 +29,15 @@ Pelican-Keeper/
 
 | File | Purpose |
 |------|---------|
-| [Program.cs](Pelican%20Keeper/Program.cs) | Main entry point, Discord client setup, update loop |
-| [Core/RuntimeContext.cs](Pelican%20Keeper/Core/AppContext.cs) | Global state (Config, Secrets, TargetChannels, ServerInfo) |
-| [Core/RepoConfig.cs](Pelican%20Keeper/Core/RepoConfig.cs) | GitHub repository configuration constants |
-| [Pelican/PelicanApiClient.cs](Pelican%20Keeper/Pelican/PelicanApiClient.cs) | REST API calls to Pelican Panel |
-| [Pelican/ServerMonitorService.cs](Pelican%20Keeper/Pelican/ServerMonitorService.cs) | Server filtering, player counts, shutdown logic |
-| [Discord/EmbedBuilderService.cs](Pelican%20Keeper/Discord/EmbedBuilderService.cs) | Discord embed construction |
-| [Discord/InteractionHandler.cs](Pelican%20Keeper/Discord/InteractionHandler.cs) | Button/dropdown event handlers |
-| [Discord/LiveMessageStorage.cs](Pelican%20Keeper/Discord/LiveMessageStorage.cs) | Persists Discord message IDs |
-| [Discord/ServerMarkdownParser.cs](Pelican%20Keeper/Discord/ServerMarkdownParser.cs) | Template parsing with `{{placeholder}}` syntax |
+| `Program.cs` | Main entry point, Discord client setup, update loop |
+| `Core/RuntimeContext.cs` | Global state (Config, Secrets, TargetChannels, ServerInfo) |
+| `Core/RepoConfig.cs` | GitHub repository configuration constants |
+| `Pelican/PelicanApiClient.cs` | REST API calls to Pelican Panel |
+| `Pelican/ServerMonitorService.cs` | Server filtering, player counts, shutdown logic |
+| `Discord/EmbedBuilderService.cs` | Discord embed construction |
+| `Discord/InteractionHandler.cs` | Button/dropdown event handlers |
+| `Discord/LiveMessageStorage.cs` | Persists Discord message IDs |
+| `Discord/ServerMarkdownParser.cs` | Template parsing with `{{placeholder}}` syntax |
 
 ### Configuration Files
 
