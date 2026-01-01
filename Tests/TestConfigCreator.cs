@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Pelican_Keeper.Core;
 using Pelican_Keeper.Models;
 using Pelican_Keeper.Utilities;
 
@@ -71,11 +72,13 @@ public static class TestConfigCreator
 
     /// <summary>
     /// Fetches the GamesToMonitor configuration from the repository.
+    /// Requires REPO_OWNER and REPO_NAME environment variables to be set.
     /// </summary>
     public static async Task<List<GamesToMonitor>?> PullGamesToMonitorAsync()
     {
-        var json = await HttpHelper.GetStringAsync(
-            "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/GamesToMonitor.json");
+        var url = RepoConfig.GetRawContentUrl("templates/GamesToMonitor.json");
+        if (url == null) return null;
+        var json = await HttpHelper.GetStringAsync(url);
         return JsonSerializer.Deserialize<List<GamesToMonitor>>(json);
     }
 }

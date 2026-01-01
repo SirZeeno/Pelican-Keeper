@@ -206,13 +206,48 @@ public static class FileManager
     }
 
     /// <summary>
-    /// Downloads Config.json template from GitHub repository.
+    /// Creates default Config.json with null values.
+    /// All settings are configured via environment variables in Pelican Panel.
     /// </summary>
     public static async Task CreateConfigFileAsync()
     {
-        var url = RepoConfig.GetRawContentUrl("Pelican%20Keeper/Config.json");
-        var content = await HttpHelper.GetStringAsync(url);
-        await File.WriteAllTextAsync("Config.json", content);
+        const string template = """
+            {
+              "InternalIpStructure": null,
+              "MessageFormat": "Consolidated",
+              "MessageSorting": "Name",
+              "MessageSortingDirection": "Ascending",
+              "IgnoreOfflineServers": false,
+              "IgnoreInternalServers": false,
+              "ServersToIgnore": [],
+              "JoinableIpDisplay": true,
+              "PlayerCountDisplay": true,
+              "ServersToMonitor": [],
+              "AutomaticShutdown": false,
+              "ServersToAutoShutdown": [],
+              "EmptyServerTimeout": "00:01:00",
+              "AllowUserServerStartup": true,
+              "AllowServerStartup": [],
+              "UsersAllowedToStartServers": [],
+              "AllowUserServerStopping": true,
+              "AllowServerStopping": [],
+              "UsersAllowedToStopServers": [],
+              "ContinuesMarkdownRead": false,
+              "ContinuesGamesToMonitorRead": false,
+              "MarkdownUpdateInterval": 30,
+              "ServerUpdateInterval": 10,
+              "LimitServerCount": false,
+              "MaxServerCount": 10,
+              "ServersToDisplay": [],
+              "Debug": false,
+              "DryRun": false,
+              "AutoUpdate": false,
+              "NotifyOnUpdate": true
+            }
+            """;
+
+        await File.WriteAllTextAsync("Config.json", template);
+        Logger.WriteLineWithStep("Created default Config.json. Configure via environment variables.", Logger.Step.FileReading, Logger.OutputType.Warning);
     }
 
     /// <summary>
@@ -220,7 +255,12 @@ public static class FileManager
     /// </summary>
     public static async Task CreateGamesToMonitorFileAsync()
     {
-        var url = RepoConfig.GetRawContentUrl("Pelican%20Keeper/GamesToMonitor.json");
+        var url = RepoConfig.GetRawContentUrl("templates/GamesToMonitor.json");
+        if (url == null)
+        {
+            Logger.WriteLineWithStep("REPO_OWNER/REPO_NAME not configured. Cannot download GamesToMonitor.json.", Logger.Step.FileReading, Logger.OutputType.Error);
+            return;
+        }
         var content = await HttpHelper.GetStringAsync(url);
         await File.WriteAllTextAsync("GamesToMonitor.json", content);
     }
@@ -230,7 +270,12 @@ public static class FileManager
     /// </summary>
     public static async Task CreateMessageMarkdownFileAsync()
     {
-        var url = RepoConfig.GetRawContentUrl("Pelican%20Keeper/MessageMarkdown.txt");
+        var url = RepoConfig.GetRawContentUrl("templates/MessageMarkdown.txt");
+        if (url == null)
+        {
+            Logger.WriteLineWithStep("REPO_OWNER/REPO_NAME not configured. Cannot download MessageMarkdown.txt.", Logger.Step.FileReading, Logger.OutputType.Error);
+            return;
+        }
         var content = await HttpHelper.GetStringAsync(url);
         await File.WriteAllTextAsync("MessageMarkdown.txt", content);
     }

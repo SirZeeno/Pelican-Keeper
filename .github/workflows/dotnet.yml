@@ -65,22 +65,10 @@ jobs:
     needs: [build-and-test, check-version, create-release]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        rid:
-          [
-            win-x86,
-            win-x64,
-            linux-x64,
-            linux-arm,
-            linux-arm64,
-            osx-x64,
-            osx-arm64,
-          ]
     env:
       PROJECT_PATH: "Pelican Keeper/Pelican Keeper.csproj"
       APP_NAME: "Pelican-Keeper"
+      RID: "linux-x64"
     steps:
       - uses: actions/checkout@v4
 
@@ -89,31 +77,31 @@ jobs:
         with:
           dotnet-version: "8.x"
 
-      - name: Restore (per RID)
-        run: dotnet restore "$PROJECT_PATH" -r ${{ matrix.rid }}
+      - name: Restore
+        run: dotnet restore "$PROJECT_PATH" -r $RID
 
-      - name: Publish (${{ matrix.rid }})
+      - name: Publish
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
-          OUTDIR="dist/${{ matrix.rid }}"
+          OUTDIR="dist/$RID"
           mkdir -p "$OUTDIR"
           dotnet publish "$PROJECT_PATH" \
-            -c Release -r ${{ matrix.rid }} --no-restore --nologo \
+            -c Release -r $RID --no-restore --nologo \
             -p:PublishSingleFile=true -p:SelfContained=true -p:EnableCompressionInSingleFile=true \
             -p:Version="$VERSION" \
             -o "$OUTDIR"
           echo "OUTDIR=$OUTDIR" >> "$GITHUB_ENV"
 
-      - name: Zip publish output (${{ matrix.rid }})
+      - name: Zip publish output
         id: zip_output
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
-          NAME="${{ env.APP_NAME }}-v${VERSION}-${{ matrix.rid }}.zip"
+          NAME="${{ env.APP_NAME }}-v${VERSION}-$RID.zip"
           cd "$OUTDIR"
           zip -r "../$NAME" .
           echo "zip_path=dist/$NAME" >> $GITHUB_OUTPUT
 
-      - name: Upload Release Asset (${{ matrix.rid }})
+      - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}

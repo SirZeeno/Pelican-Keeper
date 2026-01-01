@@ -121,7 +121,7 @@ in the [Wiki](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Config)
 ### Markdown Formatting
 >
 > [!TIP]
-> The Markdown file can be found in [here](https://github.com/SirZeeno/Pelican-Keeper/blob/main/Pelican%20Keeper/MessageMarkdown.txt).
+> The Markdown file can be found in [here](https://github.com/SirZeeno/Pelican-Keeper/blob/main/templates/MessageMarkdown.txt).
 
 The Markdown formatting uses [Discord's](https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline) formatting with some slight modifications.<br>
 Anything marked with {{}} will be replaced with the variable name.<br>

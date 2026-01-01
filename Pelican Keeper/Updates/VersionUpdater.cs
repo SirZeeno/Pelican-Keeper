@@ -61,6 +61,12 @@ public static class VersionUpdater
     /// </summary>
     public static async Task FetchLatestReleaseInfoAsync()
     {
+        if (RepoConfig.LatestReleaseApiUrl == null)
+        {
+            Logger.WriteLineWithStep("REPO_OWNER/REPO_NAME not configured. Skipping update check.", Logger.Step.Initialization, Logger.OutputType.Warning);
+            return;
+        }
+
         try
         {
             var client = new RestClient(RepoConfig.LatestReleaseApiUrl);
@@ -233,6 +239,9 @@ public static class VersionUpdater
     /// </summary>
     private static async Task<string?> GetPlatformAssetUrlAsync(string pattern)
     {
+        if (RepoConfig.LatestReleaseApiUrl == null)
+            return null;
+
         try
         {
             var client = new RestClient(RepoConfig.LatestReleaseApiUrl);
