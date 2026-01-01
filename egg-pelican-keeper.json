@@ -156,14 +156,13 @@
         },
         {
             "name": "Auto Update",
-            "description": "Automatically download and install updates when available. Requires restart.",
+            "description": "Automatically download and install updates when available. Pelican will restart the container.",
             "env_variable": "AUTO_UPDATE",
-            "default_value": "false",
+            "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "in:true,false,1,0",
-                "required"
+                "boolean"
             ],
             "sort": 9
         },

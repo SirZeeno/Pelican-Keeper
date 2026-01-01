@@ -199,7 +199,7 @@ public static class VersionUpdater
             var tempPath = Path.Combine(Path.GetTempPath(), "pelican-keeper-update");
             Directory.CreateDirectory(tempPath);
 
-            var archivePath = Path.Combine(tempPath, "update.tar.gz");
+            var archivePath = Path.Combine(tempPath, "update.zip");
 
             using (var client = new HttpClient())
             {
@@ -281,19 +281,20 @@ public static class VersionUpdater
             ? "Pelican Keeper.exe"
             : "Pelican Keeper";
 
+        // For Docker/Pelican: extract update and exit. Pelican will restart the container.
         return $@"#!/bin/bash
-sleep 2
+sleep 1
 
 cd ""{targetDir}""
 
-tar -xzf ""{archivePath}"" --strip-components=1
+# Extract zip (CI builds .zip files)
+unzip -o ""{archivePath}"" -d ""{targetDir}""
 
 chmod +x ""{Path.Combine(targetDir, executableName)}""
 
 rm -rf ""{Path.GetDirectoryName(archivePath)}""
 
-nohup ""./{executableName}"" > /dev/null 2>&1 &
-
+# Exit cleanly - Pelican will restart with updated binary
 exit 0
 ";
     }
