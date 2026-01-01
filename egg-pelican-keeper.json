@@ -31,7 +31,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\n\napt update\napt install -y curl unzip\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nset -euo pipefail\n\nREPO=\"SirZeeno/Pelican-Keeper\"\nASSET_PATTERN=\"linux-x64.zip\"\nINSTALL_DIR=\"${INSTALL_DIR:-./}\"\n\nfor cmd in curl unzip; do\n  command -v \"$cmd\" >/dev/null 2>&1 || { echo \"Error: '$cmd' is required.\" >&2; exit 1; }\ndone\n\ntmpdir=\"$(mktemp -d)\"\ncleanup() { rm -rf \"$tmpdir\"; }\ntrap cleanup EXIT\n\necho \"Fetching latest release from ${REPO}...\"\n\ndownload_url=$(\n  curl -fsSL \"https://api.github.com/repos/$REPO/releases/latest\" |\n  grep -oE '\"browser_download_url\":\\s*\"[^\"]+' |\n  cut -d'\"' -f4 |\n  grep \"$ASSET_PATTERN\" |\n  head -n 1\n)\n\nif [[ -z \"${download_url:-}\" ]]; then\n  echo \"Error: Could not find release asset.\" >&2\n  exit 1\nfi\n\nzip_path=\"${tmpdir}/update.zip\"\ncurl -fL --retry 3 -o \"$zip_path\" \"$download_url\"\nmkdir -p \"$INSTALL_DIR\"\nunzip -o \"$zip_path\" -d \"$INSTALL_DIR\" >/dev/null\n\necho \"Installation completed successfully!\"",
+            "script": "#!/bin/bash\n\napt update\napt install -y curl unzip\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nset -euo pipefail\n\nif [[ -z \"${REPO_OWNER:-}\" ]] || [[ -z \"${REPO_NAME:-}\" ]]; then\n  echo \"Error: REPO_OWNER and REPO_NAME must be set.\" >&2\n  exit 1\nfi\n\nREPO=\"${REPO_OWNER}/${REPO_NAME}\"\nASSET_PATTERN=\"linux-x64.zip\"\nINSTALL_DIR=\"${INSTALL_DIR:-./}\"\n\nfor cmd in curl unzip; do\n  command -v \"$cmd\" >/dev/null 2>&1 || { echo \"Error: '$cmd' is required.\" >&2; exit 1; }\ndone\n\ntmpdir=\"$(mktemp -d)\"\ncleanup() { rm -rf \"$tmpdir\"; }\ntrap cleanup EXIT\n\necho \"Fetching latest release from ${REPO}...\"\n\ndownload_url=$(\n  curl -fsSL \"https://api.github.com/repos/$REPO/releases/latest\" |\n  grep -oE '\"browser_download_url\":\\s*\"[^\"]+' |\n  cut -d'\"' -f4 |\n  grep \"$ASSET_PATTERN\" |\n  head -n 1\n)\n\nif [[ -z \"${download_url:-}\" ]]; then\n  echo \"Error: Could not find release asset.\" >&2\n  exit 1\nfi\n\nzip_path=\"${tmpdir}/update.zip\"\ncurl -fL --retry 3 -o \"$zip_path\" \"$download_url\"\nmkdir -p \"$INSTALL_DIR\"\nunzip -o \"$zip_path\" -d \"$INSTALL_DIR\" >/dev/null\n\necho \"Installation completed successfully!\"",
             "container": "ghcr.io/parkervcp/installers:debian",
             "entrypoint": "bash"
         }
@@ -326,6 +326,32 @@
                 "boolean"
             ],
             "sort": 22
+        },
+        {
+            "name": "⚙️ Repository Owner",
+            "description": "GitHub username/org for updates (your fork owner)",
+            "env_variable": "REPO_OWNER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 23
+        },
+        {
+            "name": "⚙️ Repository Name",
+            "description": "GitHub repository name for updates (usually Pelican-Keeper)",
+            "env_variable": "REPO_NAME",
+            "default_value": "Pelican-Keeper",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 24
         }
     ]
 }

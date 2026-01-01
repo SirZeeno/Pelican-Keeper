@@ -168,6 +168,11 @@ public static class FileManager
     public static async Task CreateGamesToMonitorFileAsync()
     {
         var url = RepoConfig.GetRawContentUrl("templates/GamesToMonitor.json");
+        if (url == null)
+        {
+            Logger.WriteLineWithStep("Repository not configured. Set REPO_OWNER and REPO_NAME environment variables.", Logger.Step.FileReading, Logger.OutputType.Warning);
+            return;
+        }
         var content = await HttpHelper.GetStringAsync(url);
         await File.WriteAllTextAsync("GamesToMonitor.json", content);
     }
@@ -178,6 +183,11 @@ public static class FileManager
     public static async Task CreateMessageMarkdownFileAsync()
     {
         var url = RepoConfig.GetRawContentUrl("templates/MessageMarkdown.txt");
+        if (url == null)
+        {
+            Logger.WriteLineWithStep("Repository not configured. Set REPO_OWNER and REPO_NAME environment variables.", Logger.Step.FileReading, Logger.OutputType.Warning);
+            return;
+        }
         var content = await HttpHelper.GetStringAsync(url);
         await File.WriteAllTextAsync("MessageMarkdown.txt", content);
     }
