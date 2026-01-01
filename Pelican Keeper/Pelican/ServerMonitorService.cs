@@ -251,7 +251,7 @@ public static class ServerMonitorService
         var config = RuntimeContext.Config;
 
         if (config.ServersToIgnore?.Length > 0)
-            servers = servers.Where(s => !config.ServersToIgnore.Contains(s.Uuid)).ToList();
+            servers = servers.Where(s => !config.ServersToIgnore.Any(uuid => string.Equals(uuid, s.Uuid, StringComparison.OrdinalIgnoreCase))).ToList();
 
         if (config.LimitServerCount && config.MaxServerCount > 0)
         {
@@ -265,7 +265,7 @@ public static class ServerMonitorService
     }
 
     /// <summary>
-    /// Applies filters that require stats/allocations (IgnoreOfflineServers, IgnoreInternalServers, sorting).
+    /// Applies filters that require stats/allocations (IgnoreOfflineServers, IgnoreInternalServers, IgnoreServersWithoutAllocations, sorting).
     /// </summary>
     private static List<ServerInfo> ApplyLateFilters(List<ServerInfo> servers)
     {
@@ -273,6 +273,9 @@ public static class ServerMonitorService
 
         if (config.IgnoreOfflineServers)
             servers = servers.Where(s => s.Resources?.CurrentState.ToLower() != "offline" && s.Resources?.CurrentState.ToLower() != "missing").ToList();
+
+        if (config.IgnoreServersWithoutAllocations)
+            servers = servers.Where(s => s.Allocations != null && s.Allocations.Count > 0).ToList();
 
         if (config.IgnoreInternalServers && !string.IsNullOrEmpty(config.InternalIpStructure))
         {

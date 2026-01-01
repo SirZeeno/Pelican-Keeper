@@ -180,6 +180,18 @@
             "sort": 10
         },
         {
+            "name": "👁️ Hide Servers Without Ports",
+            "description": "Hide servers that have no port allocations (like bots)",
+            "env_variable": "IgnoreServersWithoutAllocations",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 11
+        },
+        {
             "name": "🎮 Show Player Count",
             "description": "Query and display player counts for supported games",
             "env_variable": "PlayerCountDisplay",
@@ -189,7 +201,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 11
+            "sort": 12
         },
         {
             "name": "🎮 Show Connection IP",
@@ -201,7 +213,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 12
+            "sort": 13
         },
         {
             "name": "🎮 Allow Start Servers",
@@ -213,7 +225,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 13
+            "sort": 14
         },
         {
             "name": "🎮 Allow Stop Servers",
@@ -225,7 +237,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 14
+            "sort": 15
         },
         {
             "name": "⏰ Auto-Shutdown Empty Servers",
@@ -237,7 +249,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 15
+            "sort": 16
         },
         {
             "name": "⏰ Empty Server Timeout",
@@ -250,7 +262,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 16
+            "sort": 17
         },
         {
             "name": "⏰ Auto-Shutdown Servers",
@@ -263,7 +275,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 17
+            "sort": 18
         },
         {
             "name": "🔄 Auto-Update",
@@ -275,7 +287,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 18
+            "sort": 19
         },
         {
             "name": "🔄 Update Notifications",
@@ -287,7 +299,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 19
+            "sort": 20
         },
         {
             "name": "⚙️ Refresh Interval",
@@ -300,7 +312,7 @@
                 "integer",
                 "min:10"
             ],
-            "sort": 20
+            "sort": 21
         },
         {
             "name": "⚙️ External Server IP",
@@ -313,7 +325,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 21
+            "sort": 22
         },
         {
             "name": "⚙️ Debug Mode",
@@ -325,7 +337,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 22
+            "sort": 23
         },
         {
             "name": "⚙️ Repository Owner",
@@ -338,7 +350,7 @@
                 "string",
                 "required"
             ],
-            "sort": 23
+            "sort": 24
         },
         {
             "name": "⚙️ Repository Name",
@@ -351,7 +363,7 @@
                 "string",
                 "required"
             ],
-            "sort": 24
+            "sort": 25
         }
     ]
 }

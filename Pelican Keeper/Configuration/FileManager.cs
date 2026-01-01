@@ -95,6 +95,7 @@ public static class FileManager
         MessageSortingDirection = MessageSortingDirection.Ascending,
         IgnoreOfflineServers = false,
         IgnoreInternalServers = false,
+        IgnoreServersWithoutAllocations = false,
         ServersToIgnore = [],
         JoinableIpDisplay = true,
         PlayerCountDisplay = true,
@@ -224,6 +225,7 @@ public static class FileManager
         // Booleans
         if ((val = GetEnv("IgnoreOfflineServers")) != null) config.IgnoreOfflineServers = ParseBool(val);
         if ((val = GetEnv("IgnoreInternalServers")) != null) config.IgnoreInternalServers = ParseBool(val);
+        if ((val = GetEnv("IgnoreServersWithoutAllocations")) != null) config.IgnoreServersWithoutAllocations = ParseBool(val);
         if ((val = GetEnv("JoinableIpDisplay")) != null) config.JoinableIpDisplay = ParseBool(val);
         if ((val = GetEnv("PlayerCountDisplay")) != null) config.PlayerCountDisplay = ParseBool(val);
         if ((val = GetEnv("AutomaticShutdown")) != null) config.AutomaticShutdown = ParseBool(val);

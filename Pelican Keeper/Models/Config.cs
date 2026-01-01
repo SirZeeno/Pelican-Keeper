@@ -24,6 +24,9 @@ public class Config
     /// <summary>Hide servers with internal IP addresses.</summary>
     public bool IgnoreInternalServers { get; set; }
 
+    /// <summary>Hide servers that have no port allocations (like bots).</summary>
+    public bool IgnoreServersWithoutAllocations { get; set; }
+
     /// <summary>Server UUIDs to exclude from display.</summary>
     public string[]? ServersToIgnore { get; set; }
 

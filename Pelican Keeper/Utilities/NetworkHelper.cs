@@ -16,7 +16,8 @@ public static class NetworkHelper
     {
         if (serverInfo.Allocations == null || serverInfo.Allocations.Count == 0)
         {
-            Logger.WriteLineWithStep($"Empty allocations for server: {serverInfo.Name}", Logger.Step.Helper, Logger.OutputType.Warning);
+            if (RuntimeContext.Config.Debug)
+                Logger.WriteLineWithStep($"No allocations for server: {serverInfo.Name}", Logger.Step.Helper);
             return null;
         }
 
@@ -31,8 +32,7 @@ public static class NetworkHelper
         var allocation = GetDefaultAllocation(serverInfo);
         if (allocation == null)
         {
-            Logger.WriteLineWithStep($"No allocation found for server: {serverInfo.Name}", Logger.Step.Helper, Logger.OutputType.Error);
-            return "No Connectable Address";
+            return "N/A";
         }
 
         if (!string.IsNullOrEmpty(RuntimeContext.Config.InternalIpStructure))
@@ -53,8 +53,7 @@ public static class NetworkHelper
         var allocation = GetDefaultAllocation(serverInfo);
         if (allocation == null)
         {
-            Logger.WriteLineWithStep($"No allocation found for server: {serverInfo.Name}", Logger.Step.Helper, Logger.OutputType.Error);
-            return "No Connectable Address";
+            return "N/A";
         }
 
         return $"{GetDisplayIp(serverInfo)}:{allocation.Port}";
