@@ -198,7 +198,10 @@ public static class VersionUpdater
         try
         {
             var tempPath = Path.Combine(Path.GetTempPath(), "pelican-keeper-update");
+            var extractPath = Path.Combine(tempPath, "extracted");
             Directory.CreateDirectory(tempPath);
+            if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
+            Directory.CreateDirectory(extractPath);
 
             var archivePath = Path.Combine(tempPath, "update.zip");
             var currentDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -217,20 +220,53 @@ public static class VersionUpdater
 
             Logger.WriteLineWithStep("Extracting update...", Logger.Step.Initialization);
 
-            // Extract zip directly using .NET
-            ZipFile.ExtractToDirectory(archivePath, currentDir, overwriteFiles: true);
+            // Extract to temp directory first (not current dir - that causes "Text file busy")
+            ZipFile.ExtractToDirectory(archivePath, extractPath, overwriteFiles: true);
 
-            // Set executable permission on Linux
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            // Copy all files except the executable
+            foreach (var file in Directory.GetFiles(extractPath))
             {
-                var chmod = Process.Start(new ProcessStartInfo
+                var fileName = Path.GetFileName(file);
+                var destPath = Path.Combine(currentDir, fileName);
+
+                if (fileName == executableName)
+                    continue; // Handle executable separately
+
+                File.Copy(file, destPath, overwrite: true);
+            }
+
+            // On Linux, we can't overwrite a running executable directly.
+            // Rename the old one, copy the new one, then delete the old one.
+            var newExecutablePath = Path.Combine(extractPath, executableName);
+            if (File.Exists(newExecutablePath))
+            {
+                var oldExecutablePath = executablePath + ".old";
+
+                // Remove any previous .old file
+                if (File.Exists(oldExecutablePath))
+                    File.Delete(oldExecutablePath);
+
+                // Rename current executable to .old (this works even while running)
+                File.Move(executablePath, oldExecutablePath);
+
+                // Copy new executable in place
+                File.Copy(newExecutablePath, executablePath);
+
+                // Set executable permission on Linux
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    FileName = "/bin/chmod",
-                    Arguments = $"+x \"{executablePath}\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                });
-                chmod?.WaitForExit();
+                    var chmod = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "/bin/chmod",
+                        Arguments = $"+x \"{executablePath}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    });
+                    chmod?.WaitForExit();
+                }
+
+                // Try to delete old executable (may fail if still in use, that's ok)
+                try { File.Delete(oldExecutablePath); } catch { /* will be cleaned up on next update */ }
             }
 
             // Cleanup temp files
