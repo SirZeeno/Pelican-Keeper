@@ -130,8 +130,9 @@ public static class FileManager
             var json = await File.ReadAllTextAsync(path);
             var config = JsonSerializer.Deserialize<Config>(json);
 
-            Validator.ValidateConfig(config);
+            // Apply environment overrides BEFORE validation
             ApplyEnvironmentOverrides(config!);
+            Validator.ValidateConfig(config);
 
             RuntimeContext.Config = config!;
             return config;
@@ -206,14 +207,14 @@ public static class FileManager
     }
 
     /// <summary>
-    /// Creates default Config.json with null values.
-    /// All settings are configured via environment variables in Pelican Panel.
+    /// Creates default Config.json with sensible defaults.
+    /// Settings can be overridden via environment variables in Pelican Panel.
     /// </summary>
     public static async Task CreateConfigFileAsync()
     {
         const string template = """
             {
-              "InternalIpStructure": null,
+              "InternalIpStructure": "192.168.*.*",
               "MessageFormat": "Consolidated",
               "MessageSorting": "Name",
               "MessageSortingDirection": "Ascending",
