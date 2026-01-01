@@ -26,18 +26,18 @@
     <ProjectReference Include="..\Pelican Keeper\Pelican Keeper.csproj" />
   </ItemGroup>
 
-  <!-- Copy test configuration files from main project -->
+  <!-- Test fixture files - copy to output root -->
   <ItemGroup>
-    <None Include="..\Pelican Keeper\Config.json" Link="Config.json">
+    <None Include="Fixtures\Config.json" Link="Config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Pelican Keeper\GamesToMonitor.json" Link="GamesToMonitor.json">
+    <None Include="Fixtures\GamesToMonitor.json" Link="GamesToMonitor.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Pelican Keeper\MessageMarkdown.txt" Link="MessageMarkdown.txt">
+    <None Include="Fixtures\MessageMarkdown.txt" Link="MessageMarkdown.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\Pelican Keeper\MessageHistory.json" Link="MessageHistory.json" Condition="Exists('..\Pelican Keeper\MessageHistory.json')">
+    <None Include="Fixtures\MessageHistory.json" Link="MessageHistory.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

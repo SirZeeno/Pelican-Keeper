@@ -82,6 +82,9 @@ public static class FileManager
             var json = await File.ReadAllTextAsync(path);
             var secrets = JsonConvert.DeserializeObject<Secrets>(json, settings);
 
+            // Apply environment variable overrides
+            secrets = ApplySecretsEnvironmentOverrides(secrets);
+
             Validator.ValidateSecrets(secrets);
             RuntimeContext.Secrets = secrets!;
             return secrets;
@@ -268,7 +271,8 @@ public static class FileManager
         if ((val = GetEnv("AutomaticShutdown")) != null) config.AutomaticShutdown = ParseBool(val);
         if ((val = GetEnv("AllowUserServerStartup")) != null) config.AllowUserServerStartup = ParseBool(val);
         if ((val = GetEnv("AllowUserServerStopping")) != null) config.AllowUserServerStopping = ParseBool(val);
-        if ((val = GetEnv("AutoUpdate")) != null) config.AutoUpdate = ParseBool(val);
+        // Support both AutoUpdate and AUTO_UPDATE (Pelican egg convention)
+        if ((val = GetEnv("AutoUpdate") ?? GetEnv("AUTO_UPDATE")) != null) config.AutoUpdate = ParseBool(val);
         if ((val = GetEnv("NotifyOnUpdate")) != null) config.NotifyOnUpdate = ParseBool(val);
         if ((val = GetEnv("Debug")) != null) config.Debug = ParseBool(val);
         if ((val = GetEnv("DryRun")) != null) config.DryRun = ParseBool(val);
@@ -298,5 +302,33 @@ public static class FileManager
             config.ServerUpdateInterval = sui;
         if ((val = GetEnv("MaxServerCount")) != null && int.TryParse(val, out int msc))
             config.MaxServerCount = msc;
+    }
+
+    /// <summary>
+    /// Applies environment variable overrides to secrets.
+    /// Returns a new Secrets record with overridden values.
+    /// </summary>
+    private static Secrets? ApplySecretsEnvironmentOverrides(Secrets? secrets)
+    {
+        if (secrets == null) return null;
+
+        static string? GetEnv(string key) => Environment.GetEnvironmentVariable(key);
+        static ulong[]? ParseUlongArray(string? v) =>
+            string.IsNullOrWhiteSpace(v)
+                ? null
+                : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => ulong.TryParse(s.Trim(), out var id) ? id : 0)
+                    .Where(id => id != 0)
+                    .ToArray();
+
+        return secrets with
+        {
+            ClientToken = GetEnv("ClientToken") ?? GetEnv("CLIENT_TOKEN") ?? secrets.ClientToken,
+            ServerToken = GetEnv("ServerToken") ?? GetEnv("SERVER_TOKEN") ?? secrets.ServerToken,
+            ServerUrl = GetEnv("ServerUrl") ?? GetEnv("SERVER_URL") ?? secrets.ServerUrl,
+            BotToken = GetEnv("BotToken") ?? GetEnv("BOT_TOKEN") ?? secrets.BotToken,
+            ChannelIds = ParseUlongArray(GetEnv("ChannelIds") ?? GetEnv("CHANNEL_IDS")) ?? secrets.ChannelIds,
+            ExternalServerIp = GetEnv("ExternalServerIp") ?? GetEnv("EXTERNAL_SERVER_IP") ?? secrets.ExternalServerIp
+        };
     }
 }

@@ -3,5 +3,24 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Secrets (never commit)
+Secrets.json
 Pelican Keeper/Secrets.json
+
+# Generated/runtime config files in project folder
+Pelican Keeper/Config.json
+Pelican Keeper/GamesToMonitor.json
+Pelican Keeper/MessageHistory.json
+Pelican Keeper/MessageMarkdown.txt
+Pelican Keeper/update.sh
+
+# Build output
+/dist/
+
+# Deploy folder (contains runtime configs)
 /deploy/
+
+# IDE settings
+.idea/
+*.DotSettings.user

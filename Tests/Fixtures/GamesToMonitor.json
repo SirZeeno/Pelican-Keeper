@@ -1,0 +1,22 @@
+[
+    {
+        "Game": "Terraria Vanilla",
+        "Protocol": "Terraria",
+        "QueryPortVariable": "SERVER_PORT"
+    },
+    {
+        "Game": "Minecraft Java",
+        "Protocol": "MinecraftJava",
+        "QueryPortVariable": "SERVER_PORT"
+    },
+    {
+        "Game": "Minecraft Bedrock",
+        "Protocol": "MinecraftBedrock",
+        "QueryPortVariable": "SERVER_PORT"
+    },
+    {
+        "Game": "Counter-Strike 2",
+        "Protocol": "A2S",
+        "QueryPortVariable": "QUERY_PORT"
+    }
+]
