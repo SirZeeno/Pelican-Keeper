@@ -123,7 +123,11 @@ public static class VersionUpdater
     /// </summary>
     public static async Task SendDiscordNotificationAsync()
     {
-        if (RuntimeContext.TargetChannels.Count == 0)
+        // Use dedicated notification channel if set, otherwise fall back to first status channel
+        var notificationChannel = RuntimeContext.NotificationChannel
+            ?? RuntimeContext.TargetChannels.FirstOrDefault();
+
+        if (notificationChannel == null)
         {
             Logger.WriteLineWithStep("No channels available for update notification.", Logger.Step.Discord, Logger.OutputType.Warning);
             return;
@@ -166,11 +170,7 @@ public static class VersionUpdater
 
         try
         {
-            foreach (var channel in RuntimeContext.TargetChannels)
-            {
-                await channel.SendMessageAsync(embed);
-            }
-
+            await notificationChannel.SendMessageAsync(embed);
             Logger.WriteLineWithStep("Update notification sent to Discord.", Logger.Step.Discord);
         }
         catch (Exception ex)

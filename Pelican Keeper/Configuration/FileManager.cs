@@ -272,7 +272,7 @@ public static class FileManager
     private static Secrets ApplySecretsEnvironmentOverrides(Secrets? secrets)
     {
         // Create default if null - allows full configuration via environment variables
-        secrets ??= new Secrets(null, null, null, null, null, null);
+        secrets ??= new Secrets(null, null, null, null, null, null, null);
 
         static string? GetEnv(string key) => Environment.GetEnvironmentVariable(key);
         static ulong[]? ParseUlongArray(string? v) =>
@@ -282,6 +282,8 @@ public static class FileManager
                     .Select(s => ulong.TryParse(s.Trim(), out var id) ? id : 0)
                     .Where(id => id != 0)
                     .ToArray();
+        static ulong? ParseUlong(string? v) =>
+            ulong.TryParse(v?.Trim(), out var id) ? id : null;
 
         return secrets with
         {
@@ -290,6 +292,7 @@ public static class FileManager
             ServerUrl = GetEnv("ServerUrl") ?? GetEnv("SERVER_URL") ?? secrets.ServerUrl,
             BotToken = GetEnv("BotToken") ?? GetEnv("BOT_TOKEN") ?? secrets.BotToken,
             ChannelIds = ParseUlongArray(GetEnv("ChannelIds") ?? GetEnv("CHANNEL_IDS")) ?? secrets.ChannelIds,
+            NotificationChannelId = ParseUlong(GetEnv("NotificationChannelId") ?? GetEnv("NOTIFICATION_CHANNEL_ID")) ?? secrets.NotificationChannelId,
             ExternalServerIp = GetEnv("ExternalServerIp") ?? GetEnv("EXTERNAL_SERVER_IP") ?? secrets.ExternalServerIp
         };
     }

@@ -64,6 +64,19 @@
             "sort": 1
         },
         {
+            "name": "Notification Channel ID",
+            "description": "Discord channel ID for update notifications. If empty, uses first status channel.",
+            "env_variable": "NOTIFICATION_CHANNEL_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 2
+        },
+        {
             "name": "Pelican Server URL",
             "description": "Base URL of your Pelican Panel instance (e.g., https://panel.example.com).",
             "env_variable": "SERVER_URL",
@@ -74,7 +87,7 @@
                 "string",
                 "required"
             ],
-            "sort": 2
+            "sort": 3
         },
         {
             "name": "Pelican Client API Token",
@@ -87,7 +100,7 @@
                 "string",
                 "required"
             ],
-            "sort": 3
+            "sort": 4
         },
         {
             "name": "Pelican Server API Token",
@@ -100,7 +113,7 @@
                 "string",
                 "required"
             ],
-            "sort": 4
+            "sort": 5
         },
         {
             "name": "External Server IP",
@@ -113,7 +126,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 5
+            "sort": 6
         },
         {
             "name": "Repository Owner",
@@ -126,7 +139,7 @@
                 "string",
                 "required"
             ],
-            "sort": 6
+            "sort": 7
         },
         {
             "name": "Repository Name",
@@ -139,7 +152,7 @@
                 "string",
                 "required"
             ],
-            "sort": 7
+            "sort": 8
         },
         {
             "name": "Repository Branch",
@@ -152,7 +165,7 @@
                 "string",
                 "required"
             ],
-            "sort": 8
+            "sort": 9
         },
         {
             "name": "Auto Update",
@@ -164,7 +177,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 9
+            "sort": 10
         },
         {
             "name": "Notify On Update",
@@ -176,7 +189,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 10
+            "sort": 11
         },
         {
             "name": "Internal IP Structure",
@@ -188,7 +201,7 @@
             "rules": [
                 "string"
             ],
-            "sort": 11
+            "sort": 12
         },
         {
             "name": "Message Format",

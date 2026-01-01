@@ -66,6 +66,7 @@ public static class TestConfigCreator
             ServerUrl: "https://panel.example.com",
             BotToken: "test-bot-token",
             ChannelIds: [123456789],
+            NotificationChannelId: null,
             ExternalServerIp: "127.0.0.1"
         );
     }

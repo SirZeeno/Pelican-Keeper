@@ -110,6 +110,17 @@ public static class Program
             Logger.WriteLineWithStep($"Target channel: {channel.Name}", Logger.Step.Discord);
         }
 
+        // Resolve notification channel if configured, otherwise use first status channel
+        if (RuntimeContext.Secrets.NotificationChannelId.HasValue)
+        {
+            var notifyChannel = await sender.GetChannelAsync(RuntimeContext.Secrets.NotificationChannelId.Value);
+            if (notifyChannel != null)
+            {
+                RuntimeContext.NotificationChannel = notifyChannel;
+                Logger.WriteLineWithStep($"Notification channel: {notifyChannel.Name}", Logger.Step.Discord);
+            }
+        }
+
         // Send update notification now that channels are available
         if (VersionUpdater.UpdateAvailable && RuntimeContext.Config.NotifyOnUpdate)
         {

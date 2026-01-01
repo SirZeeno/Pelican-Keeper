@@ -15,6 +15,11 @@ public static class RuntimeContext
     public static List<DiscordChannel> TargetChannels { get; set; } = [];
 
     /// <summary>
+    /// Discord channel for update notifications. Falls back to first TargetChannel if not set.
+    /// </summary>
+    public static DiscordChannel? NotificationChannel { get; set; }
+
+    /// <summary>
     /// API credentials and connection settings.
     /// </summary>
     public static Secrets Secrets { get; set; } = null!;
