@@ -42,107 +42,84 @@ public static class FileManager
     }
 
     /// <summary>
-    /// Reads and parses Secrets.json, creating default if missing.
+    /// Loads Secrets from environment variables. No file needed.
     /// </summary>
-    public static async Task<Secrets?> ReadSecretsFileAsync(string? customPath = null)
+    public static Task<Secrets?> ReadSecretsFileAsync(string? customPath = null)
     {
-        var path = string.IsNullOrEmpty(customPath) || !File.Exists(customPath)
-            ? GetFilePath("Secrets.json", customPath)
-            : customPath;
-
-        if (path == string.Empty)
-        {
-            Logger.WriteLineWithStep("Secrets.json not found. Creating default.", Logger.Step.FileReading, Logger.OutputType.Warning);
-
-            if (!string.IsNullOrEmpty(customPath))
-            {
-                Logger.WriteLineWithStep("Custom path specified but file not found.", Logger.Step.FileReading, Logger.OutputType.Error, shouldExit: true);
-                return null;
-            }
-
-            await CreateSecretsFileAsync();
-            path = GetFilePath("Secrets.json");
-
-            if (path == string.Empty)
-            {
-                Logger.WriteLineWithStep("Unable to find Secrets.json after creation.", Logger.Step.FileReading, Logger.OutputType.Error, shouldExit: true);
-                return null;
-            }
-        }
+        // Build Secrets entirely from environment variables
+        var secrets = ApplySecretsEnvironmentOverrides(null);
 
         try
         {
-            var settings = new JsonSerializerSettings
-            {
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                NullValueHandling = NullValueHandling.Include,
-                Error = (_, args) => args.ErrorContext.Handled = true
-            };
-
-            var json = await File.ReadAllTextAsync(path);
-            var secrets = JsonConvert.DeserializeObject<Secrets>(json, settings);
-
-            // Apply environment variable overrides
-            secrets = ApplySecretsEnvironmentOverrides(secrets);
-
             Validator.ValidateSecrets(secrets);
             RuntimeContext.Secrets = secrets!;
-            return secrets;
+            return Task.FromResult<Secrets?>(secrets);
         }
         catch (Exception ex)
         {
-            Logger.WriteLineWithStep("Failed to load Secrets.json.", Logger.Step.FileReading, Logger.OutputType.Error, ex, shouldExit: true);
-            return null;
+            Logger.WriteLineWithStep("Secrets validation failed. Check environment variables.", Logger.Step.FileReading, Logger.OutputType.Error, ex, shouldExit: true);
+            return Task.FromResult<Secrets?>(null);
         }
     }
 
     /// <summary>
-    /// Reads and parses Config.json with environment variable overrides.
+    /// Loads Config from environment variables with sensible defaults. No file needed.
     /// </summary>
-    public static async Task<Config?> ReadConfigFileAsync(string? customPath = null)
+    public static Task<Config?> ReadConfigFileAsync(string? customPath = null)
     {
-        var path = string.IsNullOrEmpty(customPath) || !File.Exists(customPath)
-            ? GetFilePath("Config.json", customPath)
-            : customPath;
-
-        if (path == string.Empty)
-        {
-            Logger.WriteLineWithStep("Config.json not found. Pulling from GitHub.", Logger.Step.FileReading, Logger.OutputType.Warning);
-
-            if (!string.IsNullOrEmpty(customPath))
-            {
-                Logger.WriteLineWithStep("Custom path specified but file not found.", Logger.Step.FileReading, Logger.OutputType.Error, shouldExit: true);
-                return null;
-            }
-
-            await CreateConfigFileAsync();
-            path = GetFilePath("Config.json");
-
-            if (path == string.Empty)
-            {
-                Logger.WriteLineWithStep("Unable to find Config.json after creation.", Logger.Step.FileReading, Logger.OutputType.Error, shouldExit: true);
-                return null;
-            }
-        }
+        // Create config with defaults, then apply environment overrides
+        var config = CreateDefaultConfig();
+        ApplyEnvironmentOverrides(config);
 
         try
         {
-            var json = await File.ReadAllTextAsync(path);
-            var config = JsonSerializer.Deserialize<Config>(json);
-
-            // Apply environment overrides BEFORE validation
-            ApplyEnvironmentOverrides(config!);
             Validator.ValidateConfig(config);
-
-            RuntimeContext.Config = config!;
-            return config;
+            RuntimeContext.Config = config;
+            return Task.FromResult<Config?>(config);
         }
         catch (Exception ex)
         {
-            Logger.WriteLineWithStep("Failed to load Config.json.", Logger.Step.FileReading, Logger.OutputType.Error, ex, shouldExit: true);
-            return null;
+            Logger.WriteLineWithStep("Config validation failed. Check environment variables.", Logger.Step.FileReading, Logger.OutputType.Error, ex, shouldExit: true);
+            return Task.FromResult<Config?>(null);
         }
     }
+
+    /// <summary>
+    /// Creates a Config instance with sensible defaults.
+    /// </summary>
+    private static Config CreateDefaultConfig() => new()
+    {
+        InternalIpStructure = "192.168.*.*",
+        MessageFormat = MessageFormat.Consolidated,
+        MessageSorting = MessageSorting.Name,
+        MessageSortingDirection = MessageSortingDirection.Ascending,
+        IgnoreOfflineServers = false,
+        IgnoreInternalServers = false,
+        ServersToIgnore = [],
+        JoinableIpDisplay = true,
+        PlayerCountDisplay = true,
+        ServersToMonitor = [],
+        AutomaticShutdown = false,
+        ServersToAutoShutdown = [],
+        EmptyServerTimeout = "00:01:00",
+        AllowUserServerStartup = true,
+        AllowServerStartup = [],
+        UsersAllowedToStartServers = [],
+        AllowUserServerStopping = true,
+        AllowServerStopping = [],
+        UsersAllowedToStopServers = [],
+        ContinuesMarkdownRead = false,
+        ContinuesGamesToMonitorRead = false,
+        MarkdownUpdateInterval = 30,
+        ServerUpdateInterval = 10,
+        LimitServerCount = false,
+        MaxServerCount = 10,
+        ServersToDisplay = [],
+        Debug = false,
+        DryRun = false,
+        AutoUpdate = false,
+        NotifyOnUpdate = true
+    };
 
     /// <summary>
     /// Reads GamesToMonitor.json for player count query configuration.
@@ -183,72 +160,6 @@ public static class FileManager
             Logger.WriteLineWithStep("Failed to load GamesToMonitor.json.", Logger.Step.FileReading, Logger.OutputType.Error, ex);
             return null;
         }
-    }
-
-    /// <summary>
-    /// Creates default Secrets.json template with null values.
-    /// When using Pelican Panel, configure credentials via environment variables instead.
-    /// </summary>
-    public static async Task CreateSecretsFileAsync()
-    {
-        const string template = """
-            {
-              "ClientToken": null,
-              "ServerToken": null,
-              "ServerUrl": null,
-              "BotToken": null,
-              "ChannelIds": null,
-              "ExternalServerIp": null
-            }
-            """;
-
-        await File.WriteAllTextAsync("Secrets.json", template);
-        Logger.WriteLineWithStep("Created default Secrets.json. Configure via environment variables or edit the file.", Logger.Step.FileReading, Logger.OutputType.Warning);
-    }
-
-    /// <summary>
-    /// Creates default Config.json with sensible defaults.
-    /// Settings can be overridden via environment variables in Pelican Panel.
-    /// </summary>
-    public static async Task CreateConfigFileAsync()
-    {
-        const string template = """
-            {
-              "InternalIpStructure": "192.168.*.*",
-              "MessageFormat": "Consolidated",
-              "MessageSorting": "Name",
-              "MessageSortingDirection": "Ascending",
-              "IgnoreOfflineServers": false,
-              "IgnoreInternalServers": false,
-              "ServersToIgnore": [],
-              "JoinableIpDisplay": true,
-              "PlayerCountDisplay": true,
-              "ServersToMonitor": [],
-              "AutomaticShutdown": false,
-              "ServersToAutoShutdown": [],
-              "EmptyServerTimeout": "00:01:00",
-              "AllowUserServerStartup": true,
-              "AllowServerStartup": [],
-              "UsersAllowedToStartServers": [],
-              "AllowUserServerStopping": true,
-              "AllowServerStopping": [],
-              "UsersAllowedToStopServers": [],
-              "ContinuesMarkdownRead": false,
-              "ContinuesGamesToMonitorRead": false,
-              "MarkdownUpdateInterval": 30,
-              "ServerUpdateInterval": 10,
-              "LimitServerCount": false,
-              "MaxServerCount": 10,
-              "ServersToDisplay": [],
-              "Debug": false,
-              "DryRun": false,
-              "AutoUpdate": false,
-              "NotifyOnUpdate": true
-            }
-            """;
-
-        await File.WriteAllTextAsync("Config.json", template);
-        Logger.WriteLineWithStep("Created default Config.json. Configure via environment variables.", Logger.Step.FileReading, Logger.OutputType.Warning);
     }
 
     /// <summary>
@@ -331,8 +242,10 @@ public static class FileManager
         if ((val = GetEnv("InternalIpStructure")) != null) config.InternalIpStructure = val;
         if ((val = GetEnv("EmptyServerTimeout")) != null) config.EmptyServerTimeout = val;
 
-        // String arrays (comma-separated)
-        static string[] ParseArray(string? v) => string.IsNullOrWhiteSpace(v) ? [] : v.Split(',');
+        // String arrays (comma-separated, with whitespace trimming)
+        static string[] ParseArray(string? v) => string.IsNullOrWhiteSpace(v) 
+            ? [] 
+            : v.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if ((val = GetEnv("ServersToIgnore")) != null) config.ServersToIgnore = ParseArray(val);
         if ((val = GetEnv("ServersToMonitor")) != null) config.ServersToMonitor = ParseArray(val);
         if ((val = GetEnv("ServersToAutoShutdown")) != null) config.ServersToAutoShutdown = ParseArray(val);
