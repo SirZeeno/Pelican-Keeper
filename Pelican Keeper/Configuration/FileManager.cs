@@ -307,10 +307,12 @@ public static class FileManager
     /// <summary>
     /// Applies environment variable overrides to secrets.
     /// Returns a new Secrets record with overridden values.
+    /// Creates a default Secrets object if null to support environment-only configuration.
     /// </summary>
-    private static Secrets? ApplySecretsEnvironmentOverrides(Secrets? secrets)
+    private static Secrets ApplySecretsEnvironmentOverrides(Secrets? secrets)
     {
-        if (secrets == null) return null;
+        // Create default if null - allows full configuration via environment variables
+        secrets ??= new Secrets(null, null, null, null, null, null);
 
         static string? GetEnv(string key) => Environment.GetEnvironmentVariable(key);
         static ulong[]? ParseUlongArray(string? v) =>
