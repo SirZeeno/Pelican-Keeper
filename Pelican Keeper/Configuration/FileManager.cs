@@ -17,8 +17,9 @@ public static class FileManager
     /// </summary>
     /// <param name="fileName">File name with extension.</param>
     /// <param name="searchDirectory">Starting directory for search.</param>
+    /// <param name="silent">If true, don't log error when file not found.</param>
     /// <returns>Full path if found, empty string otherwise.</returns>
-    public static string GetFilePath(string fileName, string? searchDirectory = null)
+    public static string GetFilePath(string fileName, string? searchDirectory = null, bool silent = false)
     {
         if (File.Exists(fileName)) return fileName;
         searchDirectory ??= Environment.CurrentDirectory;
@@ -26,19 +27,20 @@ public static class FileManager
         foreach (var file in Directory.GetFiles(searchDirectory, fileName, SearchOption.AllDirectories))
             return file;
 
-        Logger.WriteLineWithStep($"Could not find {fileName} in program directory.", Logger.Step.FileReading, Logger.OutputType.Error);
+        if (!silent)
+            Logger.WriteLineWithStep($"Could not find {fileName} in program directory.", Logger.Step.FileReading, Logger.OutputType.Error);
         return string.Empty;
     }
 
     /// <summary>
     /// Gets file path with optional custom directory override.
     /// </summary>
-    public static string GetCustomFilePath(string fileName, string? customPath = null)
+    public static string GetCustomFilePath(string fileName, string? customPath = null, bool silent = false)
     {
         if (!string.IsNullOrEmpty(customPath) && File.Exists(customPath))
             return customPath;
 
-        return GetFilePath(fileName, customPath);
+        return GetFilePath(fileName, customPath, silent);
     }
 
     /// <summary>
@@ -95,7 +97,7 @@ public static class FileManager
         MessageSortingDirection = MessageSortingDirection.Ascending,
         IgnoreOfflineServers = false,
         IgnoreInternalServers = false,
-        IgnoreServersWithoutAllocations = false,
+        IgnoreServersWithoutAllocations = true,
         ServersToIgnore = [],
         JoinableIpDisplay = true,
         PlayerCountDisplay = true,
@@ -128,12 +130,12 @@ public static class FileManager
     public static async Task<List<GamesToMonitor>?> ReadGamesToMonitorFileAsync(string? customPath = null)
     {
         var path = string.IsNullOrEmpty(customPath) || !File.Exists(customPath)
-            ? GetFilePath("GamesToMonitor.json", customPath)
+            ? GetFilePath("GamesToMonitor.json", customPath, silent: true)
             : customPath;
 
         if (path == string.Empty)
         {
-            Logger.WriteLineWithStep("GamesToMonitor.json not found. Pulling from GitHub.", Logger.Step.FileReading, Logger.OutputType.Warning);
+            Logger.WriteLineWithStep("GamesToMonitor.json not found. Pulling from GitHub.", Logger.Step.FileReading);
 
             if (!string.IsNullOrEmpty(customPath))
             {

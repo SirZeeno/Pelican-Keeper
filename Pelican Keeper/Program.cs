@@ -41,10 +41,10 @@ public static class Program
 
     private static async Task EnsureMarkdownFileAsync()
     {
-        var mdPath = FileManager.GetFilePath("MessageMarkdown.txt");
+        var mdPath = FileManager.GetFilePath("MessageMarkdown.txt", silent: true);
         if (mdPath == string.Empty || new FileInfo(mdPath).Length == 0)
         {
-            Logger.WriteLineWithStep("MessageMarkdown.txt missing. Creating default.", Logger.Step.FileReading);
+            Logger.WriteLineWithStep("MessageMarkdown.txt not found. Creating default.", Logger.Step.FileReading);
             await FileManager.CreateMessageMarkdownFileAsync();
         }
     }

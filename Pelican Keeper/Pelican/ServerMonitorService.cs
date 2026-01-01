@@ -90,7 +90,12 @@ public static class ServerMonitorService
 
         if (!RuntimeContext.Config.PlayerCountDisplay) return;
 
-        foreach (var server in servers)
+        // Only process servers that have allocations (skip bots/services without ports)
+        var serversToProcess = RuntimeContext.Config.IgnoreServersWithoutAllocations
+            ? servers.Where(s => s.Allocations != null && s.Allocations.Count > 0)
+            : servers;
+
+        foreach (var server in serversToProcess)
         {
             var state = server.Resources?.CurrentState.ToLower();
             var isRunning = state != "offline" && state != "stopping" && state != "starting" && state != "missing";

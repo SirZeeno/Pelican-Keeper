@@ -35,11 +35,11 @@ public static class LiveMessageStorage
     /// </summary>
     public static LiveMessageJsonStorage? LoadAll(string? customPath = null)
     {
-        var path = Configuration.FileManager.GetCustomFilePath("MessageHistory.json", customPath);
+        var path = Configuration.FileManager.GetCustomFilePath("MessageHistory.json", customPath, silent: true);
 
         if (path == string.Empty)
         {
-            Logger.WriteLineWithStep("MessageHistory.json not found. Creating default.", Logger.Step.MessageHistory, Logger.OutputType.Warning);
+            Logger.WriteLineWithStep("MessageHistory.json not found. Creating default.", Logger.Step.MessageHistory);
 
             if (!string.IsNullOrEmpty(customPath))
             {
@@ -50,7 +50,7 @@ public static class LiveMessageStorage
             using var file = File.Create("MessageHistory.json");
             using var writer = new StreamWriter(file);
             writer.Write(JsonSerializer.Serialize(new LiveMessageJsonStorage()));
-            path = Configuration.FileManager.GetFilePath("MessageHistory.json");
+            path = Configuration.FileManager.GetFilePath("MessageHistory.json", silent: true);
 
             if (path == string.Empty)
             {
