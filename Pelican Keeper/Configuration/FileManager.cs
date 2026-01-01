@@ -185,23 +185,24 @@ public static class FileManager
     }
 
     /// <summary>
-    /// Creates default Secrets.json template.
+    /// Creates default Secrets.json template with null values.
+    /// When using Pelican Panel, configure credentials via environment variables instead.
     /// </summary>
     public static async Task CreateSecretsFileAsync()
     {
         const string template = """
             {
-              "ClientToken": "YOUR_CLIENT_TOKEN",
-              "ServerToken": "YOUR_SERVER_TOKEN",
-              "ServerUrl": "YOUR_BASIC_SERVER_URL",
-              "BotToken": "YOUR_DISCORD_BOT_TOKEN",
-              "ChannelIds": [THE_CHANNEL_ID_YOU_WANT_THE_BOT_TO_POST_IN],
-              "ExternalServerIp": "YOUR_EXTERNAL_SERVER_IP"
+              "ClientToken": null,
+              "ServerToken": null,
+              "ServerUrl": null,
+              "BotToken": null,
+              "ChannelIds": null,
+              "ExternalServerIp": null
             }
             """;
 
         await File.WriteAllTextAsync("Secrets.json", template);
-        Logger.WriteLineWithStep("Created default Secrets.json. Please fill in the values.", Logger.Step.FileReading, Logger.OutputType.Warning);
+        Logger.WriteLineWithStep("Created default Secrets.json. Configure via environment variables or edit the file.", Logger.Step.FileReading, Logger.OutputType.Warning);
     }
 
     /// <summary>
