@@ -23,11 +23,11 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
     {
         if (_udpClient == null || _endPoint == null)
             throw new InvalidOperationException("Call Connect() before sending commands.");
-        
+
         var request = BuildA2SInfoPacket();
         await _udpClient.SendAsync(request, request.Length, _endPoint);
         ConsoleExt.WriteLineWithStepPretext("Sent A2S_INFO request", ConsoleExt.CurrentStep.A2SRequest);
-        
+
         var first = await ReceiveWithTimeoutAsync(_udpClient, timeoutMs: 15000);
         if (first == null)
         {
@@ -53,11 +53,11 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
                 int challenge = BitConverter.ToInt32(first, 5);
                 if (Program.Config.Debug)
                     ConsoleExt.WriteLineWithStepPretext($"Received challenge: 0x{challenge:X8}", ConsoleExt.CurrentStep.A2SRequest);
-                
+
                 var challenged = BuildA2SInfoPacket(challenge);
                 await _udpClient.SendAsync(challenged, challenged.Length, _endPoint);
                 ConsoleExt.WriteLineWithStepPretext("Sent A2S_INFO request with challenge", ConsoleExt.CurrentStep.A2SRequest);
-                
+
                 var second = await ReceiveWithTimeoutAsync(_udpClient, timeoutMs: 15000);
                 if (second == null)
                 {

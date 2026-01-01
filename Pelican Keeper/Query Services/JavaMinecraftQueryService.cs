@@ -9,7 +9,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
 {
     private TcpClient? _tcpClient;
     private NetworkStream? _stream;
-    
+
     public async Task Connect()
     {
         try
@@ -127,7 +127,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         } while ((read & 0b1000_0000) != 0);
         return result;
     }
-    
+
     private static int ReadVarInt(Stream s)
     {
         int numRead = 0, result = 0, read;
@@ -154,10 +154,10 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         }
         return buf;
     }
-    
+
     private static async Task<byte[]> ReadPacketAsync(NetworkStream stream, CancellationToken ct)
     {
-        var length  = await ReadVarIntAsync(stream, ct);
+        var length = await ReadVarIntAsync(stream, ct);
         return await ReadExactAsync(stream, length, ct);
     }
 

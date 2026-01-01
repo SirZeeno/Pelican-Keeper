@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 
 namespace Pelican_Keeper;
+
 using static TemplateClasses;
 
 public class EmbedBuilderService
@@ -8,28 +9,28 @@ public class EmbedBuilderService
     public Task<DiscordEmbed> BuildSingleServerEmbed(ServerInfo server)
     {
         var serverInfo = ServerMarkdown.ParseTemplate(server);
-        
+
         var embed = new DiscordEmbedBuilder
         {
             Title = serverInfo.serverName,
             Color = DiscordColor.Azure
         };
-        
+
         embed.AddField("\u200B", serverInfo.message, inline: true);
-        
+
         if (Program.Config.DryRun)
         {
             ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
             ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
-        
+
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter
         {
             Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" //TODO: allow for an expanded format per users choice like this DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")
         };
-        
+
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
-        
+
         ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
         ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
         return Task.FromResult(embed.Build());
@@ -47,21 +48,21 @@ public class EmbedBuilderService
         {
             var serverInfo = ServerMarkdown.ParseTemplate(servers[i]);
             embed.AddField(serverInfo.serverName, serverInfo.message, inline: true); //TODO:Allow customization of this but test first if this is worth customizing
-            
+
             if (Program.Config.DryRun)
             {
                 ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
                 ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
         }
-        
+
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter
         {
             Text = $"Last Updated: {DateTime.Now:HH:mm:ss}"
         };
-        
+
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
-        
+
         ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
         ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
         return Task.FromResult(embed.Build());
@@ -83,14 +84,14 @@ public class EmbedBuilderService
                 Color = DiscordColor.Azure
             };
 
-            embed.AddField("\u200B", serverInfo.message,true);
-            
+            embed.AddField("\u200B", serverInfo.message, true);
+
             if (Program.Config.DryRun)
             {
                 ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
                 ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
-            
+
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter
             {
                 Text = $"Last Updated: {DateTime.Now:HH:mm:ss}"
@@ -102,7 +103,7 @@ public class EmbedBuilderService
             }
             embeds.Add(embed.Build());
         }
-        
+
         return Task.FromResult(embeds);
     }
 }
@@ -148,7 +149,7 @@ public static class EmbedBuilderHelper
             _ => "⚪"
         };
     }
-    
+
     internal static int GetEmbedCharacterCount(DiscordEmbedBuilder embed)
     {
         var count = 0;

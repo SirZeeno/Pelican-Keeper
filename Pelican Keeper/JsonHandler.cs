@@ -15,12 +15,12 @@ public static class JsonHandler
     {
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
-        
+
         List<EggInfo> eggs = new List<EggInfo>();
         var eggArray = root
             .GetProperty("data")
             .EnumerateArray();
-        
+
         foreach (var egg in eggArray)
         {
             var attr = egg.GetProperty("attributes");
@@ -36,7 +36,7 @@ public static class JsonHandler
 
         return eggs;
     }
-    
+
     /// <summary>
     /// Extracts the RCON Port from the Input JSON
     /// </summary>
@@ -66,7 +66,7 @@ public static class JsonHandler
         {
             variableName = "RCON_PORT";
         }
-        
+
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
@@ -81,17 +81,17 @@ public static class JsonHandler
                 .GetProperty("relationships")
                 .GetProperty("variables")
                 .GetProperty("data");
-        
+
             foreach (var alloc in variablesArray.EnumerateArray())
             {
                 var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out rconPort)){}
+                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out rconPort)) { }
             }
         }
 
         return rconPort;
     }
-    
+
     /// <summary>
     /// Extracts the RCON Password from the Input JSON
     /// </summary>
@@ -105,7 +105,7 @@ public static class JsonHandler
         {
             variableName = "RCON_PASS";
         }
-        
+
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
@@ -120,7 +120,7 @@ public static class JsonHandler
                 .GetProperty("relationships")
                 .GetProperty("variables")
                 .GetProperty("data");
-        
+
             foreach (var alloc in variablesArray.EnumerateArray())
             {
                 var attr = alloc.GetProperty("attributes");
@@ -133,7 +133,7 @@ public static class JsonHandler
 
         return rconPassword;
     }
-    
+
     /// <summary>
     /// Extracts the Query Port from the Input JSON
     /// </summary>
@@ -163,10 +163,10 @@ public static class JsonHandler
         {
             variableName = "QUERY_PORT";
         }
-        
+
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
-        
+
         int queryPort = 0;
         var serversArray = root.GetProperty("data").EnumerateArray();
         foreach (var data in serversArray)
@@ -178,11 +178,11 @@ public static class JsonHandler
                 .GetProperty("relationships")
                 .GetProperty("variables")
                 .GetProperty("data");
-        
+
             foreach (var alloc in variablesArray.EnumerateArray())
             {
                 var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out queryPort)){}
+                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out queryPort)) { }
             }
         }
 
@@ -206,12 +206,12 @@ public static class JsonHandler
                 return intMaxPlayers;
             }
         }
-        
+
         if (variableName == null || variableName.Trim() == string.Empty)
         {
             variableName = "MAX_PLAYERS";
         }
-        
+
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
@@ -226,14 +226,14 @@ public static class JsonHandler
                 .GetProperty("relationships")
                 .GetProperty("variables")
                 .GetProperty("data");
-        
+
             foreach (var alloc in variablesArray.EnumerateArray())
             {
                 var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out maxPlayers)){}
+                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out maxPlayers)) { }
             }
         }
-        
+
         return maxPlayers;
     }
 
@@ -252,15 +252,15 @@ public static class JsonHandler
         var allocations = new List<ServerAllocation>();
         var serversArray = root
             .GetProperty("data")
-            .EnumerateArray();;
+            .EnumerateArray(); ;
 
         foreach (var data in serversArray)
         {
             var attr = data.GetProperty("attributes");
             var uuid = attr.GetProperty("uuid").GetString() ?? string.Empty;
-            
+
             if ((serverUuid == null || uuid != serverUuid) && serverUuid != null) continue;
-            
+
             var allocationsArray = attr.GetProperty("relationships").GetProperty("allocations").GetProperty("data").EnumerateArray();
             foreach (var alloc in allocationsArray)
             {
@@ -269,7 +269,8 @@ public static class JsonHandler
                 var port = attrib.GetProperty("port").GetInt32();
                 var isDefault = attrib.GetProperty("is_default").GetBoolean();
 
-                allocations.Add(new ServerAllocation {
+                allocations.Add(new ServerAllocation
+                {
                     Uuid = uuid,
                     Ip = ip,
                     Port = port,
@@ -277,10 +278,10 @@ public static class JsonHandler
                 });
             }
         }
-        
+
         return allocations;
     }
-    
+
     /// <summary>
     /// Extracts the Server List from the Input JSON
     /// </summary>
@@ -301,8 +302,9 @@ public static class JsonHandler
             var uuid = server.GetProperty("attributes").GetProperty("uuid").GetString() ?? string.Empty;
             var name = server.GetProperty("attributes").GetProperty("name").GetString() ?? string.Empty;
             var egg = server.GetProperty("attributes").GetProperty("egg").GetInt32();
-            
-            serverInfo.Add(new ServerInfo {
+
+            serverInfo.Add(new ServerInfo
+            {
                 Id = id,
                 Uuid = uuid,
                 Name = name,
@@ -315,7 +317,7 @@ public static class JsonHandler
 
         return serverInfo;
     }
-    
+
     /// <summary>
     /// Extracts the Server Resources from the Input JSON
     /// </summary>
@@ -325,20 +327,21 @@ public static class JsonHandler
     {
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
-        
+
         var attributes = root.GetProperty("attributes");
         var resources = attributes.GetProperty("resources");
-        
+
         var currentState = attributes.GetProperty("current_state").GetString() ?? string.Empty;
-        
+
         var memory = resources.GetProperty("memory_bytes").GetInt64();
         var cpu = resources.GetProperty("cpu_absolute").GetDouble();
         var disk = resources.GetProperty("disk_bytes").GetInt64();
         var networkRx = resources.GetProperty("network_rx_bytes").GetInt64();
         var networkTx = resources.GetProperty("network_tx_bytes").GetInt64();
         var uptime = resources.GetProperty("uptime").GetInt64();
-            
-        var resourcesInfo = new ServerResources {
+
+        var resourcesInfo = new ServerResources
+        {
             CurrentState = currentState,
             MemoryBytes = memory,
             CpuAbsolute = cpu,

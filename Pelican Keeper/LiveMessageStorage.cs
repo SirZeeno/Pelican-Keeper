@@ -19,7 +19,7 @@ public static class LiveMessageStorage
     static LiveMessageStorage()
     {
         Cache = LoadAll();
-        
+
         if (Cache is { LiveStore: null })
         {
             WriteLineWithStepPretext("Failed to read MessageHistory.json!", CurrentStep.MessageHistory, OutputType.Error, new FileLoadException(), true);
@@ -57,7 +57,7 @@ public static class LiveMessageStorage
             }
             else
             {
-                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find MessageHistory File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
+                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find MessageHistory File there!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
 
@@ -92,14 +92,14 @@ public static class LiveMessageStorage
         {
             return;
         }
-        
+
         Cache?.LiveStore?.Add(messageId);
         File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions
         {
             WriteIndented = true
         }));
     }
-    
+
     /// <summary>
     /// Saves the page index of a paginated message.
     /// </summary>
@@ -121,7 +121,7 @@ public static class LiveMessageStorage
             WriteIndented = true
         }));
     }
-    
+
     public static void Remove(ulong? messageId)
     {
         if (Cache != null && messageId != null && Cache.LiveStore != null && Cache.LiveStore.Remove((ulong)messageId))
@@ -139,7 +139,7 @@ public static class LiveMessageStorage
             }));
         }
     }
-    
+
     /// <summary>
     /// Validates the cache and removes any messages that no longer exist in the configured channels.
     /// </summary>
@@ -210,12 +210,12 @@ public static class LiveMessageStorage
         }
 
         if (channels.Count == 1) return false; // I am searching only one channel, so I don't need to log.
-        
+
         if (Program.Config.Debug)
             WriteLineWithStepPretext($"Message {messageId} not found in any channel", CurrentStep.MessageHistory, OutputType.Error);
         return false;
     }
-    
+
     /// <summary>
     /// Gets the message ID from the cache if it exists.
     /// </summary>
@@ -226,7 +226,7 @@ public static class LiveMessageStorage
         if (Cache?.LiveStore == null || Cache.LiveStore.Count == 0 || messageId == null) return null;
         return Cache.LiveStore?.FirstOrDefault(x => x == messageId);
     }
-    
+
     /// <summary>
     /// Gets the page index of a paginated message if it exists.
     /// </summary>

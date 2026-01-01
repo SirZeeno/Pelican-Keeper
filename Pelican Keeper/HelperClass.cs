@@ -9,7 +9,7 @@ using static TemplateClasses;
 public static class HelperClass
 {
     private static readonly Dictionary<string, string> LastEmbedHashes = new();
-    
+
     /// <summary>
     /// Creates a rest request to the Pelican API
     /// </summary>
@@ -54,7 +54,7 @@ public static class HelperClass
             ConsoleExt.WriteLineWithStepPretext("Empty allocations for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Warning);
         return serverInfo.Allocations?.FirstOrDefault(allocation => allocation.IsDefault) ?? serverInfo.Allocations?.FirstOrDefault();
     }
- 
+
     /// <summary>
     /// Determines if the IP is Internal or External and returns the Internal one if it's Internal and the Secrets specified External one if it doesn't match the Internal structure.
     /// </summary>
@@ -68,7 +68,7 @@ public static class HelperClass
             ConsoleExt.WriteLineWithStepPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return "No Connectable Address";
         }
-        
+
         if (Program.Config.InternalIpStructure != null)
         {
             string internalIpPattern = "^" + Regex.Escape(Program.Config.InternalIpStructure).Replace("\\*", "\\d+") + "$";
@@ -80,7 +80,7 @@ public static class HelperClass
 
         return Program.Secrets.ExternalServerIp ?? "0.0.0.0";
     }
-    
+
     /// <summary>
     /// Puts the ServerAllocation of a ServerInfo into a readable string format for the end user
     /// </summary>
@@ -94,10 +94,10 @@ public static class HelperClass
             ConsoleExt.WriteLineWithStepPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return "No Connectable Address";
         }
-        
+
         return $"{GetCorrectIp(serverInfo)}:{allocation.Port}"; //TODO: Allow for usage of domain names in the future
     }
-    
+
     /// <summary>
     /// Sorts a list of ServerInfo's in the desired format and direction.
     /// </summary>
@@ -137,14 +137,14 @@ public static class HelperClass
         {
             return 0; // No digits found in the server response, so player count is 0 (probably a "no players" message or connection error/timeout)
         }
-        
+
         var playerMaxPlayer = Regex.Match(serverResponse, @"^(\d+)\/\d+$");
         if (playerMaxPlayer.Success && int.TryParse(playerMaxPlayer.Groups[1].Value, out var playerCount))
         {
             ConsoleExt.WriteLineWithStepPretext($"Player count extracted using standard format: {playerCount}", ConsoleExt.CurrentStep.Helper);
             return playerCount;
         }
-        
+
         var arkRconPlayerList = Regex.Matches(serverResponse, @"(\d+)\.\s*([^,]+),\s*(.+)$", RegexOptions.Multiline);
         if (arkRconPlayerList.Count > 0)
         {
@@ -158,14 +158,14 @@ public static class HelperClass
             ConsoleExt.WriteLineWithStepPretext($"Player count extracted using Palworld format: {palworldPlayerList.Length}", ConsoleExt.CurrentStep.Helper);
             return palworldPlayerList.Length;
         }
-        
+
         var factorioPlayerList = Regex.Match(serverResponse, @"Online players \((\d+)\):");
         if (factorioPlayerList.Success && int.TryParse(factorioPlayerList.Groups[1].Value, out var factorioPlayerCount))
         {
             ConsoleExt.WriteLineWithStepPretext($"Player count extracted using Factorio format: {factorioPlayerCount}", ConsoleExt.CurrentStep.Helper);
             return factorioPlayerCount;
         }
-        
+
         // Custom User-defined regex pattern
         if (regexPattern != null)
         {
@@ -178,7 +178,7 @@ public static class HelperClass
                 return count;
             }
         }
-        
+
         ConsoleExt.WriteLineWithStepPretext("The Bot was unable to determine the Player Count of the Server!", ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error, new Exception(serverResponse));
         return 0;
     }
@@ -192,12 +192,12 @@ public static class HelperClass
     public static string ServerPlayerCountDisplayCleanup(string? serverResponse, int maxPlayers = 0)
     {
         string maxPlayerCount = "Unknown";
-        
+
         if (string.IsNullOrEmpty(serverResponse) && maxPlayers > 0)
         {
             return $"N/A/{maxPlayers}";
         }
-        
+
         if (string.IsNullOrEmpty(serverResponse))
         {
             return "N/A";
@@ -210,7 +210,7 @@ public static class HelperClass
 
         return $"{serverResponse}/{maxPlayerCount}";
     }
-    
+
     /// <summary>
     /// Chunks any list of items into multiple lists with the desired size
     /// </summary>
@@ -232,7 +232,7 @@ public static class HelperClass
         }
         if (list.Count > 0) yield return list;
     }
-    
+
     /// <summary>
     /// Puts a list of DiscordComponent's each into one line
     /// </summary>
@@ -285,7 +285,7 @@ public static class HelperClass
         if (rowsUsed < maxRows)
             FlushButtons();
     }
-    
+
     /// <summary>
     /// A Console Dump for a list of DiscordComponent's and their contents
     /// </summary>
@@ -344,7 +344,7 @@ public static class HelperClass
         FlushButtons();
         Console.WriteLine($"[SUMMARY] rows={rows}, total components={total}");
     }
-    
+
     /// <summary>
     /// Gets the raw JSON text from a URL
     /// </summary>

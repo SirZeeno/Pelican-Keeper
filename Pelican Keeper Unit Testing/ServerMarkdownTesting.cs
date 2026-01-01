@@ -13,12 +13,12 @@ public class ServerMarkdownTesting
     [Test]
     public void ReadMarkdown()
     {
-        
+
     }
-    
+
     [Test]
     public void TranslateMarkdown()
     {
-        
+
     }
 }

@@ -7,19 +7,19 @@ public class LiveMessageTesting
 {
     private string? _messageHistoryFilePath;
     private readonly ulong _messageId = 0393093003;
-    
+
     [SetUp]
     public void Setup()
     {
         ConsoleExt.SuppressProcessExitForTests = true;
-        
+
         DirectoryInfo? directoryInfo = new DirectoryInfo(Environment.CurrentDirectory);
         if (directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent?.Exists != false)
             directoryInfo = directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent;
 
         bool pelicanKeeperExists = false;
         if (directoryInfo == null) return;
-        
+
         DirectoryInfo[] childDirectories = directoryInfo.GetDirectories();
         foreach (var childDirectory in childDirectories)
         {
@@ -33,19 +33,19 @@ public class LiveMessageTesting
         {
             directoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "Pelican Keeper"));
         }
-        
+
         FileInfo[] fileInfos = directoryInfo.GetFiles();
         foreach (var fileInfo in fileInfos)
         {
             if (fileInfo.Name == "MessageHistory.json")
             {
-                _messageHistoryFilePath =  fileInfo.FullName;
+                _messageHistoryFilePath = fileInfo.FullName;
             }
         }
 
         LiveMessageStorage.LoadAll(_messageHistoryFilePath);
     }
-    
+
     [Test, Order(1)]
     public void WritingLiveHistory()
     {
@@ -61,7 +61,7 @@ public class LiveMessageTesting
         }
         Assert.Pass("Message ID saved successfully!\n");
     }
-    
+
     [Test, Order(2)]
     public void ReadingLiveHistory()
     {
@@ -79,10 +79,10 @@ public class LiveMessageTesting
             ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true);
             Assert.Fail("Failed to retrieve message ID!\n");
         }
-        
+
         Assert.Pass($"Message ID {messageId} retrieved successfully!\n");
     }
-    
+
     [Test, Order(3)]
     public void WritingPaginatedLiveHistory()
     {
@@ -96,10 +96,10 @@ public class LiveMessageTesting
             Assert.Fail("Failed to write message ID and Page Index!\n");
             return;
         }
-        
+
         Assert.Pass("Message ID and Page Index saved successfully!\n");
     }
-    
+
     [Test, Order(4)]
     public void ReadingPaginatedLiveHistory()
     {
@@ -117,10 +117,10 @@ public class LiveMessageTesting
             ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true);
             Assert.Fail("Failed to retrieve Page Index!\n");
         }
-        
+
         Assert.Pass($"Page Index {pageIndex} retrieved successfully!\n");
     }
-    
+
     [Test, Order(5)]
     public void RemoveMessageHistory()
     {

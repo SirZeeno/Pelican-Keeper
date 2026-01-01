@@ -23,7 +23,7 @@ public static class PelicanInterface
     {
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/application/eggs");
         var response = CreateRequest(client, Program.Secrets.ClientToken);
-        
+
         try
         {
             if (!string.IsNullOrWhiteSpace(response.Content))
@@ -31,7 +31,7 @@ public static class PelicanInterface
                 _eggsList = JsonHandler.ExtractEggInfo(response.Content);
                 return;
             }
-            
+
             ConsoleExt.WriteLineWithStepPretext("Empty Egg List response content.", ConsoleExt.CurrentStep.PelicanApiRequest);
         }
         catch (JsonException ex)
@@ -40,7 +40,7 @@ public static class PelicanInterface
             ConsoleExt.WriteLineWithStepPretext("Response content: " + response.Content, ConsoleExt.CurrentStep.PelicanApiRequest);
         }
     }
-    
+
     /// <summary>
     /// Gets the server stats from the Pelican API
     /// </summary>
@@ -53,7 +53,7 @@ public static class PelicanInterface
             ConsoleExt.WriteLineWithStepPretext("UUID is null or empty.", ConsoleExt.CurrentStep.PelicanApiRequest, ConsoleExt.OutputType.Error);
             return;
         }
-        
+
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/servers/" + serverInfo.Uuid + "/resources");
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
@@ -65,7 +65,7 @@ public static class PelicanInterface
                 serverInfo.Resources = stats;
                 return;
             }
-            
+
             ConsoleExt.WriteLineWithStepPretext("Empty Stats response content.", ConsoleExt.CurrentStep.PelicanApiRequest);
         }
         catch (JsonException ex)
@@ -83,7 +83,7 @@ public static class PelicanInterface
     {
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/?type=admin-all");
         var response = CreateRequest(client, Program.Secrets.ClientToken);
-        
+
         try
         {
             if (!string.IsNullOrWhiteSpace(response.Content))
@@ -94,7 +94,7 @@ public static class PelicanInterface
                     serverInfo.Allocations = allocations.Where(s => s.Uuid == serverInfo.Uuid).ToList();
                 }
                 if (!Program.Config.PlayerCountDisplay) return;
-                
+
                 foreach (var serverInfo in serverInfos)
                 {
                     bool isTracked = _shutdownTracker.Any(x => x.Key == serverInfo.Uuid);
@@ -106,7 +106,7 @@ public static class PelicanInterface
                             ConsoleExt.WriteLineWithStepPretext($"{serverInfo.Name} is tracked for shutdown: {isTracked}", ConsoleExt.CurrentStep.PelicanApiRequest);
                         }
                         MonitorServers(serverInfo, response.Content);
-                        
+
                         if (Program.Config.AutomaticShutdown)
                         {
                             if (serverInfo.PlayerCountText != "N/A" && !string.IsNullOrEmpty(serverInfo.PlayerCountText))
@@ -117,7 +117,7 @@ public static class PelicanInterface
                                         ConsoleExt.WriteLineWithStepPretext($"Server {serverInfo.Name} is not in the auto-shutdown list. Skipping shutdown check.", ConsoleExt.CurrentStep.PelicanApiRequest);
                                     continue;
                                 }
-                                
+
                                 if (_gamesToMonitor == null || _gamesToMonitor.Count == 0)
                                 {
                                     if (Program.Config.Debug)
@@ -190,9 +190,9 @@ public static class PelicanInterface
                     if (Program.Config.Debug)
                         ConsoleExt.WriteLineWithStepPretext($"Egg Name found: {serverInfo.Egg.Name}", ConsoleExt.CurrentStep.PelicanApiRequest);
                 }
-                
+
                 _ = GetServerStatsList(servers);
-                
+
                 if (Program.Config.ServersToIgnore != null && Program.Config.ServersToIgnore.Length > 0 && Program.Config.ServersToIgnore[0] != "UUIDS HERE")
                 {
                     servers = servers.Where(s => !Program.Config.ServersToIgnore.Contains(s.Uuid)).ToList();
@@ -202,7 +202,7 @@ public static class PelicanInterface
                 {
                     servers = servers.Where(s => s.Resources?.CurrentState.ToLower() != "offline" && s.Resources?.CurrentState.ToLower() != "missing").ToList();
                 }
-                
+
                 if (Program.Config.IgnoreInternalServers)
                 {
                     if (Program.Config.InternalIpStructure != null)
@@ -212,7 +212,7 @@ public static class PelicanInterface
 
                     }
                 }
-                
+
                 if (Program.Config.LimitServerCount && Program.Config.MaxServerCount > 0)
                 {
                     if (Program.Config.ServersToDisplay != null && Program.Config.ServersToDisplay.Length > 0 && Program.Config.ServersToDisplay[0] != "UUIDS HERE")
@@ -224,7 +224,7 @@ public static class PelicanInterface
                         servers = servers.Take(Program.Config.MaxServerCount).ToList();
                     }
                 }
-                
+
                 return SortServers(servers, Program.Config.MessageSorting, Program.Config.MessageSortingDirection);
             }
             ConsoleExt.WriteLineWithStepPretext("Empty Server List response content.", ConsoleExt.CurrentStep.PelicanApiRequest, ConsoleExt.OutputType.Error);
@@ -258,10 +258,10 @@ public static class PelicanInterface
             }
             finally { sem.Release(); }
         });
-        
+
         // Run them all
         await Task.WhenAll(statsTasks);
-        
+
         GetServerAllocations(servers);
     }
 
@@ -277,16 +277,16 @@ public static class PelicanInterface
             ConsoleExt.WriteLineWithStepPretext("UUID is null or empty.", ConsoleExt.CurrentStep.PelicanApiRequest, ConsoleExt.OutputType.Error);
             return;
         }
-        
+
         if (string.IsNullOrWhiteSpace(command))
         {
             ConsoleExt.WriteLineWithStepPretext("Command is null or empty.", ConsoleExt.CurrentStep.PelicanApiRequest, ConsoleExt.OutputType.Error);
             return;
         }
-        
+
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/servers/");
         var request = new RestRequest($"{uuid}/power", Method.Post);
-        
+
         request.AddHeader("Authorization", $"Bearer {Program.Secrets.ClientToken}");
         request.AddHeader("Content-Type", "application/json");
 
@@ -324,9 +324,9 @@ public static class PelicanInterface
         }
 
         await rcon.Connect();
-        
+
         string response = await rcon.SendCommandAsync(command, regexPattern);
-        
+
         _rconServices.Add(rcon);
         return response;
     }
@@ -340,11 +340,11 @@ public static class PelicanInterface
     public static async Task<string> SendA2SRequest(string ip, int port)
     {
         A2SService a2S = new A2SService(ip, port);
-        
+
         await a2S.Connect();
         string response = await a2S.SendCommandAsync();
         a2S.Dispose();
-        
+
         return response;
     }
 
@@ -357,7 +357,7 @@ public static class PelicanInterface
     public static async Task<string?> SendBedrockMinecraftRequest(string ip, int port)
     {
         BedrockMinecraftQueryService bedrockMinecraftQuery = new BedrockMinecraftQueryService(ip, port);
-        
+
         await bedrockMinecraftQuery.Connect();
         string response = await bedrockMinecraftQuery.SendCommandAsync();
         bedrockMinecraftQuery.Dispose();
@@ -374,11 +374,11 @@ public static class PelicanInterface
     public static async Task<string?> SendJavaMinecraftRequest(string ip, int port)
     {
         JavaMinecraftQueryService javaMinecraftQuery = new JavaMinecraftQueryService(ip, port);
-        
+
         await javaMinecraftQuery.Connect();
         string response = await javaMinecraftQuery.SendCommandAsync();
         javaMinecraftQuery.Dispose();
-        
+
         return response;
     }
 
@@ -390,7 +390,7 @@ public static class PelicanInterface
     private static void MonitorServers(ServerInfo serverInfo, string json)
     {
         if (_gamesToMonitor == null || _gamesToMonitor.Count == 0) return;
-        
+
         var serverToMonitor = _gamesToMonitor.FirstOrDefault(s => s.Game == serverInfo.Egg.Name);
         if (serverToMonitor == null)
         {
@@ -401,95 +401,95 @@ public static class PelicanInterface
         ConsoleExt.WriteLineWithStepPretext($"Found Game to Monitor {serverToMonitor.Game}", ConsoleExt.CurrentStep.GameMonitoring);
 
         int maxPlayers = JsonHandler.ExtractMaxPlayerCount(json, serverInfo.Uuid, serverToMonitor.MaxPlayerVariable, serverToMonitor.MaxPlayer);
-        
+
         switch (serverToMonitor.Protocol)
         {
             case CommandExecutionMethod.A2S:
-            {
-                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
-
-                ConsoleExt.WriteLineWithStepPretext("Query port for server " + serverInfo.Name + ": " + queryPort, ConsoleExt.CurrentStep.A2SRequest);
-                if (queryPort == 0)
                 {
-                    ConsoleExt.WriteLineWithStepPretext("No Query port found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.A2SRequest, ConsoleExt.OutputType.Warning);
+                    int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
+
+                    ConsoleExt.WriteLineWithStepPretext("Query port for server " + serverInfo.Name + ": " + queryPort, ConsoleExt.CurrentStep.A2SRequest);
+                    if (queryPort == 0)
+                    {
+                        ConsoleExt.WriteLineWithStepPretext("No Query port found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.A2SRequest, ConsoleExt.OutputType.Warning);
+                        return;
+                    }
+
+                    if (Program.Secrets.ExternalServerIp != null)
+                    {
+                        ConsoleExt.WriteLineWithStepPretext($"Sending A2S request to {Program.Secrets.ExternalServerIp}:{queryPort} for server {serverInfo.Name}", ConsoleExt.CurrentStep.A2SRequest);
+                        var a2SResponse = SendA2SRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
+                        serverInfo.PlayerCountText = a2SResponse;
+                    }
+
                     return;
                 }
-
-                if (Program.Secrets.ExternalServerIp != null)
-                {
-                    ConsoleExt.WriteLineWithStepPretext($"Sending A2S request to {Program.Secrets.ExternalServerIp}:{queryPort} for server {serverInfo.Name}", ConsoleExt.CurrentStep.A2SRequest);
-                    var a2SResponse = SendA2SRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
-                    serverInfo.PlayerCountText = a2SResponse;
-                }
-
-                return;
-            }
             case CommandExecutionMethod.Rcon:
-            {
-                int rconPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable);
-                var rconPassword = serverToMonitor.RconPassword ?? JsonHandler.ExtractRconPassword(json, serverInfo.Uuid, serverToMonitor.RconPasswordVariable);
-                
-                if (rconPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
                 {
-                    ConsoleExt.WriteLineWithStepPretext($"No RCON port or password found for server: {serverInfo.Name}", ConsoleExt.CurrentStep.RconRequest, ConsoleExt.OutputType.Warning);
-                    return;
+                    int rconPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable);
+                    var rconPassword = serverToMonitor.RconPassword ?? JsonHandler.ExtractRconPassword(json, serverInfo.Uuid, serverToMonitor.RconPasswordVariable);
+
+                    if (rconPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
+                    {
+                        ConsoleExt.WriteLineWithStepPretext($"No RCON port or password found for server: {serverInfo.Name}", ConsoleExt.CurrentStep.RconRequest, ConsoleExt.OutputType.Warning);
+                        return;
+                    }
+
+                    if (Program.Secrets.ExternalServerIp != null && serverToMonitor.Command != null)
+                    {
+                        var rconResponse = SendRconGameServerCommand(GetCorrectIp(serverInfo), rconPort, rconPassword, serverToMonitor.Command, _gamesToMonitor.First(s => s.Game == serverInfo.Egg.Name).PlayerCountExtractRegex).GetAwaiter().GetResult();
+                        serverInfo.PlayerCountText = ServerPlayerCountDisplayCleanup(rconResponse, maxPlayers);
+                    }
+
+                    break;
                 }
-                
-                if (Program.Secrets.ExternalServerIp != null && serverToMonitor.Command != null)
-                {
-                    var rconResponse = SendRconGameServerCommand(GetCorrectIp(serverInfo), rconPort, rconPassword, serverToMonitor.Command, _gamesToMonitor.First(s => s.Game == serverInfo.Egg.Name).PlayerCountExtractRegex).GetAwaiter().GetResult();
-                    serverInfo.PlayerCountText = ServerPlayerCountDisplayCleanup(rconResponse, maxPlayers);
-                }
-                
-                break;
-            }
             case CommandExecutionMethod.MinecraftJava:
-            {
-                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
-                
-                if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
                 {
-                    var minecraftResponse = SendJavaMinecraftRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
-                    if (Program.Config.Debug)
+                    int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
+
+                    if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
                     {
-                        ConsoleExt.WriteLineWithStepPretext($"Sent Java Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftJavaRequest);
-                        ConsoleExt.WriteLineWithStepPretext($"Java Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftJavaRequest);
+                        var minecraftResponse = SendJavaMinecraftRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
+                        if (Program.Config.Debug)
+                        {
+                            ConsoleExt.WriteLineWithStepPretext($"Sent Java Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftJavaRequest);
+                            ConsoleExt.WriteLineWithStepPretext($"Java Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftJavaRequest);
+                        }
+                        serverInfo.PlayerCountText = minecraftResponse;
                     }
-                    serverInfo.PlayerCountText = minecraftResponse;
+                    else
+                    {
+                        if (Program.Config.Debug)
+                            ConsoleExt.WriteLineWithStepPretext("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftJavaRequest, ConsoleExt.OutputType.Error);
+                    }
+
+                    break;
                 }
-                else
-                {
-                    if (Program.Config.Debug)
-                        ConsoleExt.WriteLineWithStepPretext("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftJavaRequest, ConsoleExt.OutputType.Error);
-                }
-                
-                break;
-            }
             case CommandExecutionMethod.MinecraftBedrock:
-            {
-                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
-                
-                if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
                 {
-                    var minecraftResponse = SendBedrockMinecraftRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
-                    if (Program.Config.Debug)
+                    int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
+
+                    if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
                     {
-                        ConsoleExt.WriteLineWithStepPretext($"Sent Bedrock Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftBedrockRequest);
-                        ConsoleExt.WriteLineWithStepPretext($"Bedrock Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftBedrockRequest);
+                        var minecraftResponse = SendBedrockMinecraftRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
+                        if (Program.Config.Debug)
+                        {
+                            ConsoleExt.WriteLineWithStepPretext($"Sent Bedrock Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftBedrockRequest);
+                            ConsoleExt.WriteLineWithStepPretext($"Bedrock Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftBedrockRequest);
+                        }
+                        serverInfo.PlayerCountText = minecraftResponse;
                     }
-                    serverInfo.PlayerCountText = minecraftResponse;
+                    else
+                    {
+                        if (Program.Config.Debug)
+                            ConsoleExt.WriteLineWithStepPretext("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
+                    }
+
+                    break;
                 }
-                else
-                {
-                    if (Program.Config.Debug)
-                        ConsoleExt.WriteLineWithStepPretext("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
-                }
-                
-                break;
-            }
         }
     }
-    
+
     /// <summary>
     /// Runs a Task to continuously get the GamesToMonitor File if continuous reading is enabled.
     /// </summary>

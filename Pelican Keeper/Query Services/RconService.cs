@@ -11,13 +11,13 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
 
     public readonly string Ip = ip;
     public readonly int Port = port;
-    
+
     public async Task Connect()
     {
         _tcpClient = new TcpClient();
         await _tcpClient.ConnectAsync(Ip, Port);
         _stream = _tcpClient.GetStream();
-        
+
         bool authenticated = await AuthenticateAsync();
         if (authenticated && Program.Config.Debug)
             ConsoleExt.WriteLineWithStepPretext("RCON connection established successfully.", ConsoleExt.CurrentStep.RconRequest);
@@ -54,25 +54,25 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         _stream?.Dispose();
         _tcpClient?.Close();
     }
-    
-    private byte[] CreatePacket(int id, int type, string body)   
+
+    private byte[] CreatePacket(int id, int type, string body)
     {
         byte[] bodyBytes = Encoding.UTF8.GetBytes(body);
         byte[] packet = new byte[4 + 4 + bodyBytes.Length + 2]; // Size = Id + Type + Body + 2 null bytes
-        
+
         BitConverter.GetBytes(id).CopyTo(packet, 0);
         BitConverter.GetBytes(type).CopyTo(packet, 4);
         bodyBytes.CopyTo(packet, 8);
         packet[^2] = 0; // Null terminator
         packet[^1] = 0; // Null terminator
-        
+
         byte[] fullPacket = new byte[4 + packet.Length]; // Full packet size = Length + packet
         BitConverter.GetBytes(packet.Length).CopyTo(fullPacket, 0);
         packet.CopyTo(fullPacket, 4);
-        
+
         return fullPacket;
     }
-    
+
     private async Task<(int id, int type, string body)> ReadResponseAsync()
     {
         byte[] sizeBytes = await ReadExactAsync(4);

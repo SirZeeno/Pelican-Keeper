@@ -19,7 +19,7 @@ public static class ServerMarkdown
         var tagDict = new Dictionary<string, string>();
 
         var tagRegex = new Regex(@"\[(\w+)](.*?)\[/\1]", RegexOptions.Singleline);
-    
+
         string strippedTemplate = tagRegex.Replace(_templateText, match =>
         {
             string tag = match.Groups[1].Value;
@@ -63,7 +63,7 @@ public static class ServerMarkdown
         {
             throw new ArgumentException("Server Resource response cannot be null.");
         }
-        
+
         var viewModel = new TemplateClasses.ServerViewModel
         {
             Uuid = serverResponse.Uuid,
@@ -82,7 +82,7 @@ public static class ServerMarkdown
         {
             viewModel.IpAndPort = HelperClass.GetReadableConnectableAddress(serverResponse);
         }
-        
+
         if (Program.Config.PlayerCountDisplay)
         {
             viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText) ? "N/A" : serverResponse.PlayerCountText;
@@ -97,7 +97,7 @@ public static class ServerMarkdown
 
         return (message, serverName);
     }
-    
+
     public static void GetMarkdownFileContentAsync()
     {
         Task.Run(async () =>

@@ -6,7 +6,7 @@ using DSharpPlus.Exceptions;
 namespace Pelican_Keeper;
 
 using static TemplateClasses;
-using static HelperClass; 
+using static HelperClass;
 using static PelicanInterface;
 using static ConsoleExt;
 using static DiscordInteractions;
@@ -32,7 +32,7 @@ public static class Program
     private static async Task Main()
     {
         TargetChannel = [];
-        
+
         await FileManager.ReadSecretsFile();
         await FileManager.ReadConfigFile();
 
@@ -63,11 +63,11 @@ public static class Program
         discord.ComponentInteractionCreated += OnServerStartInteraction;
         discord.ComponentInteractionCreated += OnServerStopInteraction;
         discord.ComponentInteractionCreated += OnDropDownInteration;
-        
+
         await discord.ConnectAsync();
         await Task.Delay(-1);
     }
-    
+
     /// <summary>
     /// Function that is called when the bot is ready to send messages.
     /// </summary>
@@ -126,14 +126,14 @@ public static class Program
                         {
                             var channel = await client.GetChannelAsync(channelId);
                             var tracked = LiveMessageStorage.Get(LiveMessageStorage.Cache?.LiveStore?.LastOrDefault(x => LiveMessageStorage.MessageExistsAsync([channel], x).Result));
-                        
+
                             if (tracked != null && tracked != 0 && !Config.DryRun)
                             {
                                 var msg = await channel.GetMessageAsync((ulong)tracked);
                                 if (Config.Debug)
                                     WriteLineWithPretext($"Updating message {tracked}");
 
-                                if (Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false } or {AllowUserServerStopping: true})
+                                if (Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false } or { AllowUserServerStopping: true })
                                 {
                                     List<string?> selectedServerUuids = uuids;
 
@@ -141,14 +141,14 @@ public static class Program
                                     {
                                         selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStartup.Contains(uuid)).ToList();
                                     }
-                                
+
                                     if (Config.AllowServerStopping is { Length: > 0 } && !string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal))
                                     {
                                         selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStopping.Contains(uuid)).ToList();
                                     }
 
                                     List<DiscordComponent> buttons = [];
-                                
+
                                     // Build START menus
                                     if (Config.AllowUserServerStartup)
                                     {
@@ -172,7 +172,7 @@ public static class Program
                                             buttons.Add(startMenu);
                                         }
                                     }
-                                
+
                                     // Build STOP menus
                                     if (Config.AllowUserServerStopping)
                                     {
@@ -216,16 +216,16 @@ public static class Program
                             else
                             {
                                 if (Config.DryRun) continue;
-                                if (Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false } or {AllowUserServerStopping: true})
+                                if (Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false } or { AllowUserServerStopping: true })
                                 {
                                     List<string?> selectedServerUuids = uuids;
-                                
+
                                     if (Config.AllowServerStartup is { Length: > 0 } && !string.Equals(Config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal))
                                     {
                                         selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStartup.Contains(uuid)).ToList();
                                         WriteLineWithPretext($"Selected Servers: {selectedServerUuids.Count}", OutputType.Warning);
                                     }
-                                
+
                                     if (Config.AllowServerStopping is { Length: > 0 } && !string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal))
                                     {
                                         selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStopping.Contains(uuid)).ToList();
@@ -255,7 +255,7 @@ public static class Program
                                             buttons.Add(startMenu);
                                         }
                                     }
-                                
+
                                     // Build STOP menus
                                     if (Config.AllowUserServerStopping)
                                     {
@@ -279,7 +279,7 @@ public static class Program
                                             buttons.Add(stopMenu);
                                         }
                                     }
-                                
+
                                     WriteLineWithPretext("Buttons created: " + buttons.Count);
                                     DebugDumpComponents(buttons);
                                     var msg = await channel.SendMessageAsync(mb =>
@@ -303,7 +303,7 @@ public static class Program
                 delaySeconds: Config.ServerUpdateInterval + Random.Shared.Next(0, Config.ServerUpdateInterval / 2)
             );
         }
-        
+
         // When the config is set to paginate
         if (Config.MessageFormat == MessageFormat.Paginated)
         {
@@ -340,7 +340,7 @@ public static class Program
                                 // Keeps the current page index instead of resetting to 0
                                 var currentIndex = pagedTracked.Value;
                                 var updatedEmbed = embeds[currentIndex];
-                                
+
                                 var msg = await channel.GetMessageAsync(cacheEntry.Key);
 
                                 if (EmbedHasChanged(uuids, updatedEmbed))
@@ -358,32 +358,32 @@ public static class Program
                                 {
                                     bool allowAllStart = Config.AllowServerStartup == null || Config.AllowServerStartup.Length == 0 || string.Equals(Config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal);
                                     bool showStart = Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false, AllowServerStartup: not null } && (allowAllStart || Config.AllowServerStartup.Contains(uuids[0], StringComparer.OrdinalIgnoreCase));
-                                    
+
                                     WriteLineWithPretext("show all Start: " + allowAllStart);
                                     WriteLineWithPretext("show Start: " + showStart);
-                                    
+
                                     bool allowAllStop = Config.AllowServerStopping == null || Config.AllowServerStopping.Length == 0 || string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal);
                                     bool showStop = Config is { AllowUserServerStopping: true, IgnoreOfflineServers: false, AllowServerStopping: not null } && (allowAllStop || Config.AllowServerStopping.Contains(uuids[0], StringComparer.OrdinalIgnoreCase));
-                                    
+
                                     WriteLineWithPretext("show all Stop: " + allowAllStop);
                                     WriteLineWithPretext("show Stop: " + showStop);
-                                    
+
                                     switch (showStart)
                                     {
                                         case true when !showStop:
-                                        {
-                                            string? uuid = uuids[0];
-                                            var msg = await channel.SendPaginatedMessageAsync(embeds, uuid);
-                                            LiveMessageStorage.Save(msg.Id, 0);
-                                            break;
-                                        }
+                                            {
+                                                string? uuid = uuids[0];
+                                                var msg = await channel.SendPaginatedMessageAsync(embeds, uuid);
+                                                LiveMessageStorage.Save(msg.Id, 0);
+                                                break;
+                                            }
                                         case false when showStop:
-                                        {
-                                            string? uuid = uuids[0];
-                                            var msg = await channel.SendPaginatedMessageAsync(embeds, null, uuid);
-                                            LiveMessageStorage.Save(msg.Id, 0);
-                                            break;
-                                        }
+                                            {
+                                                string? uuid = uuids[0];
+                                                var msg = await channel.SendPaginatedMessageAsync(embeds, null, uuid);
+                                                LiveMessageStorage.Save(msg.Id, 0);
+                                                break;
+                                            }
                                     }
 
                                     if (showStart && showStop)
@@ -405,7 +405,7 @@ public static class Program
                 delaySeconds: Config.ServerUpdateInterval + Random.Shared.Next(0, Config.ServerUpdateInterval / 2)
             );
         }
-        
+
         // When the config is set to PerServerMessages
         if (Config.MessageFormat == MessageFormat.PerServer)
         {
@@ -442,10 +442,10 @@ public static class Program
                                     var msg = await channel.GetMessageAsync((ulong)tracked);
                                     if (Config.Debug)
                                         WriteLineWithPretext($"Updating message {tracked}");
-                                    
+
                                     bool allowAll = Config.AllowServerStartup == null || Config.AllowServerStartup.Length == 0 || string.Equals(Config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal);
                                     bool showStart = Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false, AllowServerStartup: not null } && (allowAll || Config.AllowServerStartup.Contains(uuid[0], StringComparer.OrdinalIgnoreCase));
-                                    
+
                                     bool allowAllStop = Config.AllowServerStopping == null || Config.AllowServerStopping.Length == 0 || string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal);
                                     bool showStop = Config is { AllowUserServerStopping: true, IgnoreOfflineServers: false, AllowServerStopping: not null } && (allowAllStop || Config.AllowServerStopping.Contains(uuid[0], StringComparer.OrdinalIgnoreCase));
 
@@ -464,10 +464,10 @@ public static class Program
                                     if (Config.DryRun) continue;
                                     bool allowAll = Config.AllowServerStartup == null || Config.AllowServerStartup.Length == 0 || string.Equals(Config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal);
                                     bool showStart = Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false, AllowServerStartup: not null } && (allowAll || Config.AllowServerStartup.Contains(uuid[0], StringComparer.OrdinalIgnoreCase));
-                                    
+
                                     bool allowAllStop = Config.AllowServerStopping == null || Config.AllowServerStopping.Length == 0 || string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal);
                                     bool showStop = Config is { AllowUserServerStopping: true, IgnoreOfflineServers: false, AllowServerStopping: not null } && (allowAllStop || Config.AllowServerStopping.Contains(uuid[0], StringComparer.OrdinalIgnoreCase));
-                                    
+
                                     var msg = await channel.SendMessageAsync(mb =>
                                     {
                                         mb.WithEmbed(embed);
@@ -538,7 +538,7 @@ public static class Program
         ];
         if (serverUuidStart != null)
         {
-            buttons.Add(new DiscordButtonComponent(ButtonStyle.Primary,$"Start: {serverUuidStart}", "Start"));
+            buttons.Add(new DiscordButtonComponent(ButtonStyle.Primary, $"Start: {serverUuidStart}", "Start"));
             if (serverUuidStop != null)
                 buttons.Add(new DiscordButtonComponent(ButtonStyle.Primary, $"Stop: {serverUuidStop}", "Stop"));
         }

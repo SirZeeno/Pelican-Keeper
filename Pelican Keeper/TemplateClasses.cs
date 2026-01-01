@@ -12,7 +12,7 @@ public abstract class TemplateClasses
         Paginated,
         None
     }
-    
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MessageSorting
     {
@@ -21,7 +21,7 @@ public abstract class TemplateClasses
         Uptime,
         None
     }
-    
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MessageSortingDirection
     {
@@ -29,7 +29,7 @@ public abstract class TemplateClasses
         Descending,
         None
     }
-    
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CommandExecutionMethod
     {
@@ -47,7 +47,7 @@ public abstract class TemplateClasses
         Starting,
         Stopping
     }
-    
+
     public enum ReleasePlatform
     {
         WinX86,
@@ -59,7 +59,7 @@ public abstract class TemplateClasses
         OsxArm64,
         None
     }
-    
+
     public record Secrets
     (
         string? ClientToken,
@@ -69,7 +69,7 @@ public abstract class TemplateClasses
         ulong[]? ChannelIds,
         string? ExternalServerIp
     );
-    
+
     public class Config
     {
         public string? InternalIpStructure { get; init; }
@@ -79,11 +79,11 @@ public abstract class TemplateClasses
         public bool IgnoreOfflineServers { get; init; }
         public bool IgnoreInternalServers { get; init; }
         public string[]? ServersToIgnore { get; init; }
-        
+
         public bool JoinableIpDisplay { get; init; }
         public bool PlayerCountDisplay { get; init; }
         public string[]? ServersToMonitor { get; init; }
-        
+
         public bool AutomaticShutdown { get; init; }
         public string[]? ServersToAutoShutdown { get; init; }
         public string? EmptyServerTimeout { get; init; }
@@ -103,16 +103,16 @@ public abstract class TemplateClasses
             get => _serverUpdateInterval;
             init => _serverUpdateInterval = Math.Max(value, 10);
         }
-        
+
         public bool LimitServerCount { get; init; }
         public int MaxServerCount { get; init; }
         public string[]? ServersToDisplay { get; init; }
-        
+
         public bool Debug { get; init; }
         public bool DryRun { get; init; }
         public bool AutoUpdate { get; init; }
     }
-    
+
     public class ServerInfo
     {
         public int Id { get; init; }
@@ -134,7 +134,7 @@ public abstract class TemplateClasses
         public long NetworkTxBytes { get; init; }
         public long Uptime { get; init; }
     }
-    
+
     public class ServerAllocation
     {
         public string Uuid { get; init; } = null!;
@@ -142,13 +142,13 @@ public abstract class TemplateClasses
         public int Port { get; init; }
         public bool IsDefault { get; init; }
     }
-    
+
     public class LiveMessageJsonStorage
     {
         public HashSet<ulong>? LiveStore { get; set; } = new();
         public Dictionary<ulong, int>? PaginatedLiveStore { get; set; } = new();
     }
-    
+
     public class ServerViewModel
     {
         public string PlayerCount { get; set; } = null!;
@@ -164,7 +164,7 @@ public abstract class TemplateClasses
         public string NetworkTx { get; set; } = null!;
         public string Uptime { get; set; } = null!;
     }
-    
+
     public class GamesToMonitor
     {
         public string Game { get; init; } = null!;
@@ -178,7 +178,7 @@ public abstract class TemplateClasses
         public string? MaxPlayer { get; set; }
         public string? PlayerCountExtractRegex { get; set; }
     }
-    
+
     public class EggInfo
     {
         public int Id { get; init; }

@@ -9,11 +9,11 @@ public static class VersionUpdater
 {
     public static string CurrentVersion = "v2.0.3";
     private static HttpClient _http = null!;
-    
+
     public static async Task UpdateProgram()
     {
         SetupUserAgent();
-        
+
         string? targetPath = await DownloadLatestAssetIfNewerAsync(CurrentVersion); // Downloads the appropriate version of the latest update for your platform if there is one available.
         if (string.IsNullOrEmpty(targetPath))
         {
@@ -24,11 +24,11 @@ public static class VersionUpdater
             }
             return;
         }
-        
+
         ConsoleExt.WriteLineWithStepPretext($"Download Completed! Path: {targetPath}", ConsoleExt.CurrentStep.Updater);
         BackupOldConfigs();
         ConsoleExt.WriteLineWithStepPretext("Configs Backed up!", ConsoleExt.CurrentStep.Updater);
-        
+
         string scriptPath = Path.Combine(Environment.CurrentDirectory, "update.sh");
 
         if (!File.Exists(scriptPath))
@@ -67,19 +67,19 @@ public static class VersionUpdater
     private static void BackupOldConfigs()
     {
         string oldDirectory = Path.Combine(Environment.CurrentDirectory, "old");
-        
+
         if (!Directory.Exists(oldDirectory))
         {
             Directory.CreateDirectory(oldDirectory);
         }
-        
+
         DirectoryInfo directoryInfo = new(Environment.CurrentDirectory);
         FileInfo[] files = directoryInfo.GetFiles();
 
         foreach (var file in files)
         {
             if (!file.Name.EndsWith(".json")) continue;
-            file.MoveTo(Path.Combine(oldDirectory,  file.Name), true);
+            file.MoveTo(Path.Combine(oldDirectory, file.Name), true);
             ConsoleExt.WriteLineWithStepPretext($"Moving {file.Name} to {Path.Combine(oldDirectory, file.Name)}. If the File already exists in the Directory, it will be overwritten.", ConsoleExt.CurrentStep.Updater);
         }
     }
@@ -87,7 +87,7 @@ public static class VersionUpdater
     private static void SetupUserAgent()
     {
         _http = new HttpClient();
-        
+
         // GitHub requires a User-Agent header to download and access the releases according to what I read, so just in case I am creating a User-Agent.
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("PelicanKeeper-Updater/1.0");
         _http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
@@ -105,7 +105,7 @@ public static class VersionUpdater
             ConsoleExt.WriteLineWithStepPretext($"No update. Current={currentVersionString}, latest={latestTag}", ConsoleExt.CurrentStep.Updater);
             return null;
         }
-        
+
         ConsoleExt.WriteLineWithStepPretext($"Update available! Current={currentVersionString}, latest={latestTag}", ConsoleExt.CurrentStep.Updater);
 
         if (release?.Assets == null || release.Assets.Length == 0)
@@ -124,19 +124,19 @@ public static class VersionUpdater
         }
 
         ConsoleExt.WriteLineWithStepPretext($"Downloading {asset.Name} from {asset.BrowserDownloadUrl}", ConsoleExt.CurrentStep.Updater);
-        
+
         var targetPath = Path.Combine(Environment.CurrentDirectory, asset.Name);
 
         using var resp = await _http.GetAsync(asset.BrowserDownloadUrl);
         resp.EnsureSuccessStatusCode();
 
-        await using var s  = await resp.Content.ReadAsStreamAsync();
+        await using var s = await resp.Content.ReadAsStreamAsync();
         await using var fs = File.Create(targetPath);
         await s.CopyToAsync(fs);
 
         return targetPath; // path to the downloaded zip
     }
-    
+
     private static async Task<(bool hasUpdate, string latestTag, Version? latestVersion, GitHubRelease? release)> CheckForUpdateAsync(string currentVersionString)
     {
         // 1. Get latest release JSON
@@ -155,7 +155,7 @@ public static class VersionUpdater
         var latestTag = release.TagName; // e.g. "v2.0.3"
 
         // 2. Parse both versions
-        var latestVersion  = TryParseVersion(latestTag);
+        var latestVersion = TryParseVersion(latestTag);
         var currentVersion = TryParseVersion(currentVersionString);
 
         // If parsing fails, it falls back to simple "tag != current" style check
@@ -176,10 +176,10 @@ public static class VersionUpdater
         {
             return RuntimeInformation.OSArchitecture switch
             {
-                Architecture.X86   => "win-x86",
-                Architecture.X64   => "win-x64",
+                Architecture.X86 => "win-x86",
+                Architecture.X64 => "win-x64",
                 Architecture.Arm64 => "win-arm64", // if this ever gets released from microsoft, it's implemented,
-                _                  => "win-x64"
+                _ => "win-x64"
             };
         }
 
@@ -187,10 +187,10 @@ public static class VersionUpdater
         {
             return RuntimeInformation.OSArchitecture switch
             {
-                Architecture.X64   => "linux-x64",
-                Architecture.Arm   => "linux-arm",
+                Architecture.X64 => "linux-x64",
+                Architecture.Arm => "linux-arm",
                 Architecture.Arm64 => "linux-arm64",
-                _                  => "linux-x64"
+                _ => "linux-x64"
             };
         }
 
@@ -199,7 +199,7 @@ public static class VersionUpdater
             return RuntimeInformation.OSArchitecture switch
             {
                 Architecture.Arm64 => "osx-arm64",
-                _                  => "osx-x64"
+                _ => "osx-x64"
             };
         }
 
@@ -230,12 +230,12 @@ public static class VersionUpdater
         TemplateClasses.Config? oldConfig = await FileManager.ReadConfigFile(Path.Combine(Environment.CurrentDirectory, "old"));
 
         await FileManager.ReadSecretsFile(); // Creating the Default Secrets file
-        
+
         await File.WriteAllTextAsync(Path.Combine(Environment.CurrentDirectory, "Secrets.json"), JsonSerializer.Serialize(oldSecrets, new JsonSerializerOptions
         {
             WriteIndented = true
         }));
-        
+
         await File.WriteAllTextAsync(Path.Combine(Environment.CurrentDirectory, "Config.json"), JsonSerializer.Serialize(oldConfig, new JsonSerializerOptions
         {
             WriteIndented = true

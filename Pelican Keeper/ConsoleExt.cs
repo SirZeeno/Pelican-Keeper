@@ -9,10 +9,10 @@ public static class ConsoleExt
     public static IReadOnlyCollection<Exception> Exceptions => _exceptions;
     // ReSharper disable once InconsistentNaming
     private static readonly LinkedList<Exception> _exceptions = new();
-    
+
     // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
     public static bool SuppressProcessExitForTests { get; set; }
-    
+
     public enum OutputType
     {
         Error,
@@ -64,7 +64,7 @@ public static class ConsoleExt
         {
             Console.Write(output);
         }
-        
+
         if (exception == null)
         {
             Console.WriteLine();
@@ -73,7 +73,7 @@ public static class ConsoleExt
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
-        
+
         if (!exit) return;
         if (SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
@@ -95,7 +95,7 @@ public static class ConsoleExt
         var length1 = CurrentTime();
         var length2 = DetermineCurrentStep(currentStep);
         var length3 = DetermineOutputType(outputType);
-        
+
         if (output is IEnumerable enumerable && !(output is string))
         {
             Console.Write(string.Join(", ", enumerable.Cast<object>()));
@@ -104,7 +104,7 @@ public static class ConsoleExt
         {
             Console.Write(output);
         }
-        
+
         if (exception == null)
         {
             Console.WriteLine();
@@ -113,7 +113,7 @@ public static class ConsoleExt
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
-                  
+
         if (!exit) return;
         if (SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
@@ -141,7 +141,7 @@ public static class ConsoleExt
         {
             Console.Write(output);
         }
-        
+
         if (exception == null)
         {
             Console.WriteLine();
@@ -150,7 +150,7 @@ public static class ConsoleExt
         ExceptionOccurred = true;
         _exceptions.AddLast(exception);
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
-        
+
         if (!exit) return;
         if (SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
@@ -216,7 +216,7 @@ public static class ConsoleExt
             CurrentStep.MinecraftJavaRequest => CreateCurrentStep("Minecraft Java Request"),
             CurrentStep.MinecraftBedrockRequest => CreateCurrentStep("Minecraft Bedrock Request"),
             CurrentStep.DiscordMessage => CreateCurrentStep("Discord Message"),
-            CurrentStep.DiscordReaction=> CreateCurrentStep("Discord Reaction"),
+            CurrentStep.DiscordReaction => CreateCurrentStep("Discord Reaction"),
             CurrentStep.Updater => CreateCurrentStep("Updater"),
             CurrentStep.Markdown => CreateCurrentStep("Markdown"),
             CurrentStep.Helper => CreateCurrentStep("Helper"),

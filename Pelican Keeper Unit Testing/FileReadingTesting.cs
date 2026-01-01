@@ -8,19 +8,19 @@ public class FileReadingTesting
     private string? _secretsFilePath;
     private string? _messageHistoryFilePath;
     private string? _gamesToMonitorFilePath;
-    
+
     [SetUp]
     public void Setup()
     {
         ConsoleExt.SuppressProcessExitForTests = true;
-        
+
         DirectoryInfo? directoryInfo = new DirectoryInfo(Environment.CurrentDirectory);
         if (directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent?.Exists != false)
             directoryInfo = directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent;
 
         bool pelicanKeeperExists = false;
         if (directoryInfo == null) return;
-        
+
         DirectoryInfo[] childDirectories = directoryInfo.GetDirectories();
         foreach (var childDirectory in childDirectories)
         {
@@ -34,7 +34,7 @@ public class FileReadingTesting
         {
             directoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "Pelican Keeper"));
         }
-        
+
         FileInfo[] fileInfos = directoryInfo.GetFiles();
         foreach (var fileInfo in fileInfos)
         {
@@ -69,7 +69,7 @@ public class FileReadingTesting
             Assert.Pass("Config file read successfully.\n");
         }
     }
-    
+
     [Test]
     public async Task ReadingSecrets()
     {
@@ -83,7 +83,7 @@ public class FileReadingTesting
             Assert.Pass("Secrets file read successfully.\n");
         }
     }
-    
+
     [Test]
     public void ReadingMessageHistory()
     {
@@ -97,7 +97,7 @@ public class FileReadingTesting
             Assert.Pass("LiveMessageJsonStorage file read successfully.\n");
         }
     }
-    
+
     [Test]
     public async Task ReadingGamesToMonitor()
     {

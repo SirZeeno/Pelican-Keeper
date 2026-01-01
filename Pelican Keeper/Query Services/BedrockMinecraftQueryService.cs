@@ -10,7 +10,7 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
 {
     private UdpClient? _udpClient;
     private IPEndPoint? _endPoint;
-    
+
     // RakNet "magic" bytes used in ping/pong
     private static readonly byte[] Magic =
     {
@@ -30,7 +30,7 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
         {
             ConsoleExt.WriteLineWithStepPretext($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error, ex);
         }
-        
+
         ConsoleExt.WriteLineWithStepPretext("Connected to Bedrock Minecraft server at " + _endPoint, ConsoleExt.CurrentStep.MinecraftBedrockRequest);
         return Task.CompletedTask;
     }
@@ -39,7 +39,7 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
     {
         if (_udpClient == null || _endPoint == null)
             throw new InvalidOperationException("Call Connect() before sending commands.");
-        
+
         using var cts = new CancellationTokenSource(_udpClient.Client.ReceiveTimeout);
 
         // Build Unconnected Ping
