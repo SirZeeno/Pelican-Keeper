@@ -43,16 +43,8 @@ public static class VersionUpdater
 
         Logger.WriteLineWithStep($"Update available: {RuntimeContext.Version} → {_latestVersion}", Logger.Step.Initialization, Logger.OutputType.Warning);
 
-        if (RuntimeContext.Config.NotifyOnUpdate)
-        {
-            await SendDiscordNotificationAsync();
-        }
-
-        if (IsAutoUpdateEnabled())
-        {
-            Logger.WriteLineWithStep("AUTO_UPDATE enabled. Starting automatic update...", Logger.Step.Initialization);
-            await PerformUpdateAsync();
-        }
+        // Notification is sent after Discord connects in Program.OnClientReady
+        // Auto-update is also handled there to ensure channels are available
     }
 
     /// <summary>

@@ -110,6 +110,18 @@ public static class Program
             Logger.WriteLineWithStep($"Target channel: {channel.Name}", Logger.Step.Discord);
         }
 
+        // Send update notification now that channels are available
+        if (VersionUpdater.UpdateAvailable && RuntimeContext.Config.NotifyOnUpdate)
+        {
+            await VersionUpdater.SendDiscordNotificationAsync();
+        }
+
+        // Handle auto-update after notification
+        if (VersionUpdater.UpdateAvailable && (RuntimeContext.Config.AutoUpdate || VersionUpdater.IsAutoUpdateEnabled()))
+        {
+            await VersionUpdater.PerformUpdateAsync();
+        }
+
         StartStatsUpdater(sender);
         VersionUpdater.StartPeriodicUpdateCheck(TimeSpan.FromHours(24));
     }

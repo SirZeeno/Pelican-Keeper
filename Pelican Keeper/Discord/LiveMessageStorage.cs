@@ -78,9 +78,10 @@ public static class LiveMessageStorage
     /// </summary>
     public static void Save(ulong messageId)
     {
-        if (Get(messageId) != null) return;
+        if (Cache?.LiveStore == null) return;
+        if (Cache.LiveStore.Contains(messageId)) return;
 
-        Cache?.LiveStore?.Add(messageId);
+        Cache.LiveStore.Add(messageId);
         PersistCache();
     }
 
@@ -123,7 +124,7 @@ public static class LiveMessageStorage
     public static ulong? Get(ulong? messageId)
     {
         if (Cache?.LiveStore == null || messageId == null) return null;
-        return Cache.LiveStore.FirstOrDefault(x => x == messageId);
+        return Cache.LiveStore.Contains((ulong)messageId) ? messageId : null;
     }
 
     /// <summary>
