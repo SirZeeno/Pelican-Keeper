@@ -94,11 +94,13 @@ jobs:
 
       - name: Publish (${{ matrix.rid }})
         run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
           OUTDIR="dist/${{ matrix.rid }}"
           mkdir -p "$OUTDIR"
           dotnet publish "$PROJECT_PATH" \
             -c Release -r ${{ matrix.rid }} --no-restore --nologo \
             -p:PublishSingleFile=true -p:SelfContained=true -p:EnableCompressionInSingleFile=true \
+            -p:Version="$VERSION" \
             -o "$OUTDIR"
           echo "OUTDIR=$OUTDIR" >> "$GITHUB_ENV"
 

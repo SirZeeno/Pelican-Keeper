@@ -4,6 +4,7 @@
 # Usage: ./build.sh [platform] [configuration]
 # Platforms: linux, windows, osx, all (default: current)
 # Configuration: debug, release (default: release)
+# Version is auto-detected from latest git tag
 
 set -e
 
@@ -14,6 +15,10 @@ OUTPUT_DIR="$SCRIPT_DIR/dist"
 # Parse arguments
 PLATFORM="${1:-current}"
 CONFIG="${2:-release}"
+
+# Get version from latest git tag (strips 'v' prefix)
+VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0-dev")
+echo "📦 Version: $VERSION"
 
 # Normalize configuration
 CONFIG=$(echo "$CONFIG" | tr '[:upper:]' '[:lower:]')
@@ -41,7 +46,7 @@ build_platform() {
         -r "$rid" \
         --self-contained true \
         -p:PublishSingleFile=true \
-
+        -p:Version="$VERSION" \
         -o "$OUTPUT_DIR/$output_name"
     
     echo "✅ Built: $OUTPUT_DIR/$output_name"
