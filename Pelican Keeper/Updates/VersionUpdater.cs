@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Pelican_Keeper.Core;
@@ -200,7 +201,13 @@ public static class VersionUpdater
             Directory.CreateDirectory(tempPath);
 
             var archivePath = Path.Combine(tempPath, "update.zip");
+            var currentDir = AppDomain.CurrentDomain.BaseDirectory;
+            var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "Pelican Keeper.exe"
+                : "Pelican Keeper";
+            var executablePath = Path.Combine(currentDir, executableName);
 
+            // Download the zip
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", $"PelicanKeeper/{RuntimeContext.Version}");
@@ -208,24 +215,30 @@ public static class VersionUpdater
                 await File.WriteAllBytesAsync(archivePath, data);
             }
 
-            var scriptPath = Path.Combine(tempPath, "update.sh");
-            var currentDir = AppDomain.CurrentDomain.BaseDirectory;
-            var scriptContent = GenerateUpdateScript(archivePath, currentDir);
+            Logger.WriteLineWithStep("Extracting update...", Logger.Step.Initialization);
 
-            await File.WriteAllTextAsync(scriptPath, scriptContent);
+            // Extract zip directly using .NET
+            ZipFile.ExtractToDirectory(archivePath, currentDir, overwriteFiles: true);
 
-            var startInfo = new ProcessStartInfo
+            // Set executable permission on Linux
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                FileName = "/bin/bash",
-                Arguments = scriptPath,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+                var chmod = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "/bin/chmod",
+                    Arguments = $"+x \"{executablePath}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+                chmod?.WaitForExit();
+            }
 
-            Process.Start(startInfo);
-            Logger.WriteLineWithStep("Update initiated. Application will restart.", Logger.Step.Initialization);
+            // Cleanup temp files
+            try { Directory.Delete(tempPath, true); } catch { /* ignore cleanup errors */ }
 
-            await Task.Delay(1000);
+            Logger.WriteLineWithStep("Update complete. Restarting...", Logger.Step.Initialization);
+
+            // Exit cleanly - Pelican will restart with updated binary
             Environment.Exit(0);
         }
         catch (Exception ex)
@@ -270,33 +283,6 @@ public static class VersionUpdater
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Generates the update shell script.
-    /// </summary>
-    private static string GenerateUpdateScript(string archivePath, string targetDir)
-    {
-        var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? "Pelican Keeper.exe"
-            : "Pelican Keeper";
-
-        // For Docker/Pelican: extract update and exit. Pelican will restart the container.
-        return $@"#!/bin/bash
-sleep 1
-
-cd ""{targetDir}""
-
-# Extract zip (CI builds .zip files)
-unzip -o ""{archivePath}"" -d ""{targetDir}""
-
-chmod +x ""{Path.Combine(targetDir, executableName)}""
-
-rm -rf ""{Path.GetDirectoryName(archivePath)}""
-
-# Exit cleanly - Pelican will restart with updated binary
-exit 0
-";
     }
 
     /// <summary>
