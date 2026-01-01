@@ -103,6 +103,12 @@ public static class FileManager
         {
             var configJson = await File.ReadAllTextAsync(configPath);
             var config = JsonSerializer.Deserialize<Config>(configJson);
+            Validator.ValidateConfig(config);
+            if (config == null)
+            {
+                WriteLineWithStepPretext("Config file invalid.", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                return null;
+            }
 
             // --- ENV VAR OVERRIDES (Syncs with Pelican Panel) ---
             string? val;
@@ -113,8 +119,9 @@ public static class FileManager
             val = Environment.GetEnvironmentVariable("MessageSorting");
             if (!string.IsNullOrEmpty(val) && Enum.TryParse(val, true, out MessageSorting ms)) config.MessageSorting = ms;
 
+            // FIX: Parsing Enum correctly here instead of direct string assignment
             val = Environment.GetEnvironmentVariable("MessageSortingDirection");
-            if (!string.IsNullOrEmpty(val)) config.MessageSortingDirection = val;
+            if (!string.IsNullOrEmpty(val) && Enum.TryParse(val, true, out MessageSortingDirection msd)) config.MessageSortingDirection = msd;
 
             // Bools
             val = Environment.GetEnvironmentVariable("IgnoreOfflineServers");
@@ -198,8 +205,6 @@ public static class FileManager
             if (!string.IsNullOrEmpty(val) && int.TryParse(val, out int msc)) config.MaxServerCount = msc;
             // ----------------------------------------------------
 
-            Validator.ValidateConfig(config);
-            if (config == null) { WriteLineWithStepPretext("Config file invalid.", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true); return null; }
             Program.Config = config;
             return config;
         }

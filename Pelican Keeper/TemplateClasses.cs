@@ -72,45 +72,47 @@ public abstract class TemplateClasses
 
     public class Config
     {
-        public string? InternalIpStructure { get; init; }
-        public MessageFormat MessageFormat { get; init; } = MessageFormat.None;
-        public MessageSorting MessageSorting { get; init; } = MessageSorting.None;
-        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
-        public bool IgnoreOfflineServers { get; init; }
-        public bool IgnoreInternalServers { get; init; }
-        public string[]? ServersToIgnore { get; init; }
+        public string? InternalIpStructure { get; set; }
+        public MessageFormat MessageFormat { get; set; } = MessageFormat.None;
+        public MessageSorting MessageSorting { get; set; } = MessageSorting.None;
+        public MessageSortingDirection MessageSortingDirection { get; set; } = MessageSortingDirection.None;
+        public bool IgnoreOfflineServers { get; set; }
+        public bool IgnoreInternalServers { get; set; }
+        public string[]? ServersToIgnore { get; set; }
 
-        public bool JoinableIpDisplay { get; init; }
-        public bool PlayerCountDisplay { get; init; }
-        public string[]? ServersToMonitor { get; init; }
+        public bool JoinableIpDisplay { get; set; }
+        public bool PlayerCountDisplay { get; set; }
+        public string[]? ServersToMonitor { get; set; }
 
-        public bool AutomaticShutdown { get; init; }
-        public string[]? ServersToAutoShutdown { get; init; }
-        public string? EmptyServerTimeout { get; init; }
-        public bool AllowUserServerStartup { get; init; }
-        public string[]? AllowServerStartup { get; init; }
-        public string[]? UsersAllowedToStartServers { get; init; }
-        public bool AllowUserServerStopping { get; init; }
-        public string[]? AllowServerStopping { get; init; }
-        public string[]? UsersAllowedToStopServers { get; init; }
+        public bool AutomaticShutdown { get; set; }
+        public string[]? ServersToAutoShutdown { get; set; }
+        public string? EmptyServerTimeout { get; set; }
+        public bool AllowUserServerStartup { get; set; }
+        public string[]? AllowServerStartup { get; set; }
+        public string[]? UsersAllowedToStartServers { get; set; }
+        public bool AllowUserServerStopping { get; set; }
+        public string[]? AllowServerStopping { get; set; }
+        public string[]? UsersAllowedToStopServers { get; set; }
 
-        public bool ContinuesMarkdownRead { get; init; }
-        public bool ContinuesGamesToMonitorRead { get; init; }
-        public int MarkdownUpdateInterval { get; init; }
-        private readonly int _serverUpdateInterval;
+        public bool ContinuesMarkdownRead { get; set; }
+        public bool ContinuesGamesToMonitorRead { get; set; }
+        public int MarkdownUpdateInterval { get; set; }
+
+        // Removed 'readonly' so 'set' can modify it
+        private int _serverUpdateInterval;
         public int ServerUpdateInterval
         {
             get => _serverUpdateInterval;
-            init => _serverUpdateInterval = Math.Max(value, 10);
+            set => _serverUpdateInterval = Math.Max(value, 10);
         }
 
-        public bool LimitServerCount { get; init; }
-        public int MaxServerCount { get; init; }
-        public string[]? ServersToDisplay { get; init; }
+        public bool LimitServerCount { get; set; }
+        public int MaxServerCount { get; set; }
+        public string[]? ServersToDisplay { get; set; }
 
-        public bool Debug { get; init; }
-        public bool DryRun { get; init; }
-        public bool AutoUpdate { get; init; }
+        public bool Debug { get; set; }
+        public bool DryRun { get; set; }
+        public bool AutoUpdate { get; set; }
     }
 
     public class ServerInfo
