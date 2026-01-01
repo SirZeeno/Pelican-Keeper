@@ -38,6 +38,84 @@
     },
     "variables": [
         {
+            "name": "Discord Bot Token",
+            "description": "Discord bot authentication token from Discord Developer Portal.",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 0
+        },
+        {
+            "name": "Discord Channel IDs",
+            "description": "Discord channel IDs where status messages are posted. Comma-separated for multiple channels.",
+            "env_variable": "CHANNEL_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 1
+        },
+        {
+            "name": "Pelican Server URL",
+            "description": "Base URL of your Pelican Panel instance (e.g., https://panel.example.com).",
+            "env_variable": "SERVER_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 2
+        },
+        {
+            "name": "Pelican Client API Token",
+            "description": "Client API token from Pelican Panel for server resource queries.",
+            "env_variable": "CLIENT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 3
+        },
+        {
+            "name": "Pelican Server API Token",
+            "description": "Application API token from Pelican Panel for server listing.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 4
+        },
+        {
+            "name": "External Server IP",
+            "description": "Public IP to display for internal/local servers.",
+            "env_variable": "EXTERNAL_SERVER_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
+            "sort": 5
+        },
+        {
             "name": "Repository Owner",
             "description": "GitHub repository owner for updates. Change to use a fork or custom repository.",
             "env_variable": "REPO_OWNER",
@@ -48,7 +126,7 @@
                 "string",
                 "required"
             ],
-            "sort": 0
+            "sort": 6
         },
         {
             "name": "Repository Name",
@@ -61,7 +139,7 @@
                 "string",
                 "required"
             ],
-            "sort": 1
+            "sort": 7
         },
         {
             "name": "Repository Branch",
@@ -74,7 +152,7 @@
                 "string",
                 "required"
             ],
-            "sort": 2
+            "sort": 8
         },
         {
             "name": "Auto Update",
@@ -87,7 +165,7 @@
                 "in:true,false,1,0",
                 "required"
             ],
-            "sort": 3
+            "sort": 9
         },
         {
             "name": "Notify On Update",
@@ -99,7 +177,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 4
+            "sort": 10
         },
         {
             "name": "Internal IP Structure",
@@ -111,7 +189,7 @@
             "rules": [
                 "string"
             ],
-            "sort": 5
+            "sort": 11
         },
         {
             "name": "Message Format",
@@ -124,7 +202,7 @@
                 "in:Consolidated,PerServer,Paginated",
                 "required"
             ],
-            "sort": 6
+            "sort": 12
         },
         {
             "name": "Message Sorting",
@@ -138,7 +216,7 @@
                 "in:Name,Status,Uptime",
                 "required"
             ],
-            "sort": 7
+            "sort": 13
         },
         {
             "name": "Message Sorting Direction",
@@ -152,7 +230,7 @@
                 "in:Ascending,Descending",
                 "required"
             ],
-            "sort": 8
+            "sort": 14
         },
         {
             "name": "Ignore Offline Servers",
@@ -164,7 +242,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 9
+            "sort": 15
         },
         {
             "name": "Ignore Internal Servers",
@@ -176,7 +254,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 10
+            "sort": 16
         },
         {
             "name": "Servers To Ignore",
@@ -189,7 +267,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 11
+            "sort": 17
         },
         {
             "name": "Joinable IP Display",
@@ -201,7 +279,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 12
+            "sort": 18
         },
         {
             "name": "Player Count Display",
@@ -213,7 +291,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 13
+            "sort": 19
         },
         {
             "name": "Servers To Monitor",
@@ -226,7 +304,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 14
+            "sort": 20
         },
         {
             "name": "Automatic Shutdown",
@@ -238,7 +316,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 15
+            "sort": 21
         },
         {
             "name": "Servers To Auto Shutdown",
@@ -251,7 +329,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 16
+            "sort": 22
         },
         {
             "name": "Empty Server Timeout",
@@ -264,7 +342,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 17
+            "sort": 23
         },
         {
             "name": "Allow User Server Startup",
@@ -276,7 +354,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 18
+            "sort": 24
         },
         {
             "name": "Allow Server Startup",
@@ -289,7 +367,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 19
+            "sort": 25
         },
         {
             "name": "Users Allowed To Start Servers",
@@ -302,7 +380,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 20
+            "sort": 26
         },
         {
             "name": "Allow User Server Stopping",
@@ -314,7 +392,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 21
+            "sort": 27
         },
         {
             "name": "Allow Server Stopping",
@@ -326,7 +404,7 @@
             "rules": [
                 "string"
             ],
-            "sort": 22
+            "sort": 28
         },
         {
             "name": "Users Allowed To Stop Servers",
@@ -339,7 +417,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 23
+            "sort": 29
         },
         {
             "name": "Continues Markdown Read",
@@ -351,7 +429,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 24
+            "sort": 30
         },
         {
             "name": "Continues Games To Monitor Read",
@@ -363,7 +441,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 25
+            "sort": 31
         },
         {
             "name": "Markdown Update Interval",
@@ -376,7 +454,7 @@
                 "min:10",
                 "integer"
             ],
-            "sort": 26
+            "sort": 32
         },
         {
             "name": "Server Update Interval",
@@ -389,7 +467,7 @@
                 "min:10",
                 "integer"
             ],
-            "sort": 27
+            "sort": 33
         },
         {
             "name": "Limit Server Count",
@@ -401,7 +479,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 28
+            "sort": 34
         },
         {
             "name": "Max Server Count",
@@ -413,7 +491,7 @@
             "rules": [
                 "integer"
             ],
-            "sort": 29
+            "sort": 35
         },
         {
             "name": "Servers To Display",
@@ -426,7 +504,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 30
+            "sort": 36
         },
         {
             "name": "Debug",
@@ -438,7 +516,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 31
+            "sort": 37
         },
         {
             "name": "Dry Run",
@@ -450,7 +528,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 32
+            "sort": 38
         }
     ]
 }
