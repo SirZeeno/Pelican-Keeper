@@ -243,8 +243,8 @@ public static class FileManager
         if ((val = GetEnv("EmptyServerTimeout")) != null) config.EmptyServerTimeout = val;
 
         // String arrays (comma-separated, with whitespace trimming)
-        static string[] ParseArray(string? v) => string.IsNullOrWhiteSpace(v) 
-            ? [] 
+        static string[] ParseArray(string? v) => string.IsNullOrWhiteSpace(v)
+            ? []
             : v.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if ((val = GetEnv("ServersToIgnore")) != null) config.ServersToIgnore = ParseArray(val);
         if ((val = GetEnv("ServersToMonitor")) != null) config.ServersToMonitor = ParseArray(val);
