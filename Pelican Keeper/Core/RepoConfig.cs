@@ -2,44 +2,37 @@ namespace Pelican_Keeper.Core;
 
 /// <summary>
 /// Centralized repository configuration for update checking and default file downloads.
-/// All values are configured via environment variables set in Pelican Panel.
 /// </summary>
 public static class RepoConfig
 {
     /// <summary>
-    /// Repository owner. Set via REPO_OWNER environment variable.
+    /// Repository owner.
     /// </summary>
-    public static string? Owner => Environment.GetEnvironmentVariable("REPO_OWNER");
+    public static string Owner => "SirZeeno";
 
     /// <summary>
-    /// Repository name. Set via REPO_NAME environment variable.
+    /// Repository name.
     /// </summary>
-    public static string? Repo => Environment.GetEnvironmentVariable("REPO_NAME");
+    public static string Repo => "Pelican-Keeper";
 
     /// <summary>
-    /// Branch name for raw content downloads. Set via REPO_BRANCH environment variable.
+    /// Branch name for raw content downloads.
     /// </summary>
-    public static string Branch => Environment.GetEnvironmentVariable("REPO_BRANCH") ?? "main";
+    public static string Branch => "main";
 
     /// <summary>
     /// Generates a raw GitHub content URL for the specified file path.
-    /// Returns null if REPO_OWNER or REPO_NAME are not configured.
     /// </summary>
     /// <param name="path">Relative path within the repository.</param>
-    /// <returns>Full URL to the raw file content, or null if repo not configured.</returns>
-    public static string? GetRawContentUrl(string path) =>
-        Owner != null && Repo != null
-            ? $"https://raw.githubusercontent.com/{Owner}/{Repo}/refs/heads/{Branch}/{path}"
-            : null;
+    /// <returns>Full URL to the raw file content.</returns>
+    public static string GetRawContentUrl(string path) =>
+        $"https://raw.githubusercontent.com/{Owner}/{Repo}/refs/heads/{Branch}/{path}";
 
     /// <summary>
     /// GitHub API URL for fetching the latest release information.
-    /// Returns null if REPO_OWNER or REPO_NAME are not configured.
     /// </summary>
-    public static string? LatestReleaseApiUrl =>
-        Owner != null && Repo != null
-            ? $"https://api.github.com/repos/{Owner}/{Repo}/releases/latest"
-            : null;
+    public static string LatestReleaseApiUrl =>
+        $"https://api.github.com/repos/{Owner}/{Repo}/releases/latest";
 
     /// <summary>
     /// Gets the expected asset filename pattern for the current platform.

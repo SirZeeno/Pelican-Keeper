@@ -31,15 +31,15 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\n\napt update\napt install -y curl unzip\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nset -euo pipefail\n\n# Dynamic repository configuration - override with environment variables\nREPO_OWNER=\"${REPO_OWNER:-SirZeeno}\"\nREPO_NAME=\"${REPO_NAME:-Pelican-Keeper}\"\nREPO=\"${REPO_OWNER}/${REPO_NAME}\"\n\n# Platform-specific asset pattern\nASSET_PATTERN=\"linux-x64.zip\"\n\n# Installation directory\nINSTALL_DIR=\"${INSTALL_DIR:-./}\"\n\n# Verify required commands\nfor cmd in curl unzip; do\n  command -v \"$cmd\" >/dev/null 2>&1 || {\n    echo \"Error: '$cmd' is required but not installed.\" >&2\n    exit 1\n  }\ndone\n\ntmpdir=\"$(mktemp -d)\"\ncleanup() { rm -rf \"$tmpdir\"; }\ntrap cleanup EXIT\n\necho \"Fetching latest release from ${REPO}...\"\n\n# Get download URL for the platform-specific asset\ndownload_url=$(\n  curl -fsSL \"https://api.github.com/repos/$REPO/releases/latest\" |\n  grep -oE '\"browser_download_url\":\\s*\"[^\"]+' |\n  cut -d'\"' -f4 |\n  grep \"$ASSET_PATTERN\" |\n  head -n 1\n)\n\nif [[ -z \"${download_url:-}\" ]]; then\n  echo \"Error: Could not find an asset matching '${ASSET_PATTERN}' in the latest release.\" >&2\n  echo \"Repository: ${REPO}\" >&2\n  echo \"Check that releases exist at: https://github.com/${REPO}/releases\" >&2\n  exit 1\nfi\n\nzip_name=\"$(basename \"$download_url\")\"\nzip_path=\"${tmpdir}/${zip_name}\"\n\necho \"Downloading: $download_url\"\ncurl -fL --retry 3 --retry-delay 1 -o \"$zip_path\" \"$download_url\"\n\necho \"Extracting to: $INSTALL_DIR\"\nmkdir -p \"$INSTALL_DIR\"\nunzip -o \"$zip_path\" -d \"$INSTALL_DIR\" >/dev/null\n\nrm -f \"$zip_path\"\n\necho \"-----------------------------------------\"\necho \"Installation completed successfully!\"\necho \"Repository: ${REPO}\"\necho \"-----------------------------------------\"",
+            "script": "#!/bin/bash\n\napt update\napt install -y curl unzip\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nset -euo pipefail\n\nREPO=\"SirZeeno/Pelican-Keeper\"\nASSET_PATTERN=\"linux-x64.zip\"\nINSTALL_DIR=\"${INSTALL_DIR:-./}\"\n\nfor cmd in curl unzip; do\n  command -v \"$cmd\" >/dev/null 2>&1 || { echo \"Error: '$cmd' is required.\" >&2; exit 1; }\ndone\n\ntmpdir=\"$(mktemp -d)\"\ncleanup() { rm -rf \"$tmpdir\"; }\ntrap cleanup EXIT\n\necho \"Fetching latest release from ${REPO}...\"\n\ndownload_url=$(\n  curl -fsSL \"https://api.github.com/repos/$REPO/releases/latest\" |\n  grep -oE '\"browser_download_url\":\\s*\"[^\"]+' |\n  cut -d'\"' -f4 |\n  grep \"$ASSET_PATTERN\" |\n  head -n 1\n)\n\nif [[ -z \"${download_url:-}\" ]]; then\n  echo \"Error: Could not find release asset.\" >&2\n  exit 1\nfi\n\nzip_path=\"${tmpdir}/update.zip\"\ncurl -fL --retry 3 -o \"$zip_path\" \"$download_url\"\nmkdir -p \"$INSTALL_DIR\"\nunzip -o \"$zip_path\" -d \"$INSTALL_DIR\" >/dev/null\n\necho \"Installation completed successfully!\"",
             "container": "ghcr.io/parkervcp/installers:debian",
             "entrypoint": "bash"
         }
     },
     "variables": [
         {
-            "name": "Discord Bot Token",
-            "description": "Discord bot authentication token from Discord Developer Portal.",
+            "name": "🔑 Discord Bot Token",
+            "description": "Your Discord bot token from the Discord Developer Portal",
             "env_variable": "BOT_TOKEN",
             "default_value": "",
             "user_viewable": true,
@@ -51,9 +51,9 @@
             "sort": 0
         },
         {
-            "name": "Discord Channel IDs",
-            "description": "Discord channel IDs where status messages are posted. Comma-separated for multiple channels.",
-            "env_variable": "CHANNEL_IDS",
+            "name": "🔑 Pelican Panel URL",
+            "description": "Your Pelican Panel URL (e.g., https://panel.example.com)",
+            "env_variable": "SERVER_URL",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -64,22 +64,22 @@
             "sort": 1
         },
         {
-            "name": "Notification Channel ID",
-            "description": "Discord channel ID for update notifications. If empty, uses first status channel.",
-            "env_variable": "NOTIFICATION_CHANNEL_ID",
+            "name": "🔑 Client API Token",
+            "description": "Client API token from Pelican Panel → API Credentials",
+            "env_variable": "CLIENT_TOKEN",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
                 "string",
-                "nullable"
+                "required"
             ],
             "sort": 2
         },
         {
-            "name": "Pelican Server URL",
-            "description": "Base URL of your Pelican Panel instance (e.g., https://panel.example.com).",
-            "env_variable": "SERVER_URL",
+            "name": "🔑 Application API Token",
+            "description": "Application API token from Pelican Admin → API",
+            "env_variable": "SERVER_TOKEN",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -90,9 +90,9 @@
             "sort": 3
         },
         {
-            "name": "Pelican Client API Token",
-            "description": "Client API token from Pelican Panel for server resource queries.",
-            "env_variable": "CLIENT_TOKEN",
+            "name": "📢 Status Channel ID",
+            "description": "Discord channel ID where server statuses are posted",
+            "env_variable": "CHANNEL_IDS",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -103,22 +103,9 @@
             "sort": 4
         },
         {
-            "name": "Pelican Server API Token",
-            "description": "Application API token from Pelican Panel for server listing.",
-            "env_variable": "SERVER_TOKEN",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "required"
-            ],
-            "sort": 5
-        },
-        {
-            "name": "External Server IP",
-            "description": "Public IP to display for internal/local servers.",
-            "env_variable": "EXTERNAL_SERVER_IP",
+            "name": "📢 Notification Channel ID",
+            "description": "Channel for update notifications (leave empty to use status channel)",
+            "env_variable": "NOTIFICATION_CHANNEL_ID",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -126,63 +113,76 @@
                 "string",
                 "nullable"
             ],
-            "sort": 6
+            "sort": 5
         },
         {
-            "name": "Repository Owner",
-            "description": "GitHub repository owner for updates. Change to use a fork or custom repository.",
-            "env_variable": "REPO_OWNER",
-            "default_value": "SirZeeno",
+            "name": "🎨 Display Format",
+            "description": "How servers are displayed: Consolidated (dropdown), PerServer (separate embeds), Paginated (pages)",
+            "env_variable": "MessageFormat",
+            "default_value": "Consolidated",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "string",
+                "in:Consolidated,PerServer,Paginated",
+                "required"
+            ],
+            "sort": 6
+        },
+        {
+            "name": "🎨 Sort Servers By",
+            "description": "How to sort the server list",
+            "env_variable": "MessageSorting",
+            "default_value": "Name",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "in:Name,Status,Uptime",
                 "required"
             ],
             "sort": 7
         },
         {
-            "name": "Repository Name",
-            "description": "GitHub repository name for updates.",
-            "env_variable": "REPO_NAME",
-            "default_value": "Pelican-Keeper",
+            "name": "🎨 Sort Direction",
+            "description": "Sort order for server list",
+            "env_variable": "MessageSortingDirection",
+            "default_value": "Ascending",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "string",
+                "in:Ascending,Descending",
                 "required"
             ],
             "sort": 8
         },
         {
-            "name": "Repository Branch",
-            "description": "Branch to use for configuration file downloads. Use 'main' for stable releases.",
-            "env_variable": "REPO_BRANCH",
-            "default_value": "main",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "required"
-            ],
-            "sort": 9
-        },
-        {
-            "name": "Auto Update",
-            "description": "Automatically download and install updates when available. Pelican will restart the container.",
-            "env_variable": "AUTO_UPDATE",
+            "name": "👁️ Hide Offline Servers",
+            "description": "Don't show offline servers in the status display",
+            "env_variable": "IgnoreOfflineServers",
             "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
                 "boolean"
             ],
+            "sort": 9
+        },
+        {
+            "name": "👁️ Hidden Servers",
+            "description": "Server UUIDs to hide from display (comma-separated)",
+            "env_variable": "ServersToIgnore",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "nullable"
+            ],
             "sort": 10
         },
         {
-            "name": "Notify On Update",
-            "description": "Send a Discord notification when a new version is available.",
-            "env_variable": "NotifyOnUpdate",
+            "name": "🎮 Show Player Count",
+            "description": "Query and display player counts for supported games",
+            "env_variable": "PlayerCountDisplay",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -192,62 +192,45 @@
             "sort": 11
         },
         {
-            "name": "Internal IP Structure",
-            "description": "IP structure pattern for local network. Use * as wildcard for octets.",
-            "env_variable": "InternalIpStructure",
-            "default_value": "192.168.*.*",
+            "name": "🎮 Show Connection IP",
+            "description": "Display the IP:Port for connecting to servers",
+            "env_variable": "JoinableIpDisplay",
+            "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "string"
+                "boolean"
             ],
             "sort": 12
         },
         {
-            "name": "Message Format",
-            "description": "Display format: Consolidated (single embed with dropdowns), PerServer (one embed per server), Paginated (single embed with page buttons).",
-            "env_variable": "MessageFormat",
-            "default_value": "Consolidated",
+            "name": "🎮 Allow Start Servers",
+            "description": "Let Discord users start servers via bot buttons",
+            "env_variable": "AllowUserServerStartup",
+            "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "in:Consolidated,PerServer,Paginated",
-                "required"
-            ],
-            "sort": 12
-        },
-        {
-            "name": "Message Sorting",
-            "description": "How to sort servers in the display list.",
-            "env_variable": "MessageSorting",
-            "default_value": "Name",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "in:Name,Status,Uptime",
-                "required"
+                "boolean"
             ],
             "sort": 13
         },
         {
-            "name": "Message Sorting Direction",
-            "description": "Sort direction for server list.",
-            "env_variable": "MessageSortingDirection",
-            "default_value": "Ascending",
+            "name": "🎮 Allow Stop Servers",
+            "description": "Let Discord users stop servers via bot buttons",
+            "env_variable": "AllowUserServerStopping",
+            "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "string",
-                "in:Ascending,Descending",
-                "required"
+                "boolean"
             ],
             "sort": 14
         },
         {
-            "name": "Ignore Offline Servers",
-            "description": "Hide servers that are offline from the display.",
-            "env_variable": "IgnoreOfflineServers",
+            "name": "⏰ Auto-Shutdown Empty Servers",
+            "description": "Automatically stop servers when empty for the timeout period",
+            "env_variable": "AutomaticShutdown",
             "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
@@ -257,21 +240,22 @@
             "sort": 15
         },
         {
-            "name": "Ignore Internal Servers",
-            "description": "Hide servers matching the internal IP structure pattern.",
-            "env_variable": "IgnoreInternalServers",
-            "default_value": "0",
+            "name": "⏰ Empty Server Timeout",
+            "description": "Time before empty server stops (format: HH:MM:SS, e.g., 01:00:00 = 1 hour)",
+            "env_variable": "EmptyServerTimeout",
+            "default_value": "01:00:00",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "boolean"
+                "string",
+                "nullable"
             ],
             "sort": 16
         },
         {
-            "name": "Servers To Ignore",
-            "description": "Server UUIDs to exclude from display. Comma-separated.",
-            "env_variable": "ServersToIgnore",
+            "name": "⏰ Auto-Shutdown Servers",
+            "description": "Server UUIDs for auto-shutdown (comma-separated, empty = all)",
+            "env_variable": "ServersToAutoShutdown",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -282,10 +266,10 @@
             "sort": 17
         },
         {
-            "name": "Joinable IP Display",
-            "description": "Show the connection IP/port in server displays.",
-            "env_variable": "JoinableIpDisplay",
-            "default_value": "1",
+            "name": "🔄 Auto-Update",
+            "description": "Automatically download and apply updates",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
@@ -294,9 +278,9 @@
             "sort": 18
         },
         {
-            "name": "Player Count Display",
-            "description": "Show player counts for supported games.",
-            "env_variable": "PlayerCountDisplay",
+            "name": "🔄 Update Notifications",
+            "description": "Post to Discord when updates are available",
+            "env_variable": "NotifyOnUpdate",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -306,209 +290,22 @@
             "sort": 19
         },
         {
-            "name": "Servers To Monitor",
-            "description": "Server UUIDs to query for player counts. Empty = all servers. Comma-separated.",
-            "env_variable": "ServersToMonitor",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "nullable"
-            ],
-            "sort": 20
-        },
-        {
-            "name": "Automatic Shutdown",
-            "description": "Automatically stop empty servers after timeout.",
-            "env_variable": "AutomaticShutdown",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "boolean"
-            ],
-            "sort": 21
-        },
-        {
-            "name": "Servers To Auto Shutdown",
-            "description": "Server UUIDs for auto-shutdown. Empty = all servers. Comma-separated.",
-            "env_variable": "ServersToAutoShutdown",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "nullable"
-            ],
-            "sort": 22
-        },
-        {
-            "name": "Empty Server Timeout",
-            "description": "Time before empty server shutdown. Format: Days:Hours:Minutes (e.g., 00:01:00 = 1 hour).",
-            "env_variable": "EmptyServerTimeout",
-            "default_value": "00:01:00",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "nullable"
-            ],
-            "sort": 23
-        },
-        {
-            "name": "Allow User Server Startup",
-            "description": "Allow Discord users to start servers via bot controls.",
-            "env_variable": "AllowUserServerStartup",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "boolean"
-            ],
-            "sort": 24
-        },
-        {
-            "name": "Allow Server Startup",
-            "description": "Server UUIDs users can start. Empty = all servers. Comma-separated.",
-            "env_variable": "AllowServerStartup",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "nullable"
-            ],
-            "sort": 25
-        },
-        {
-            "name": "Users Allowed To Start Servers",
-            "description": "Discord user IDs allowed to start servers. Empty = all users. Comma-separated.",
-            "env_variable": "UsersAllowedToStartServers",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "nullable"
-            ],
-            "sort": 26
-        },
-        {
-            "name": "Allow User Server Stopping",
-            "description": "Allow Discord users to stop servers via bot controls.",
-            "env_variable": "AllowUserServerStopping",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "boolean"
-            ],
-            "sort": 27
-        },
-        {
-            "name": "Allow Server Stopping",
-            "description": "Server UUIDs users can stop. Empty = all servers. Comma-separated.",
-            "env_variable": "AllowServerStopping",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string"
-            ],
-            "sort": 28
-        },
-        {
-            "name": "Users Allowed To Stop Servers",
-            "description": "Discord user IDs allowed to stop servers. Empty = all users. Comma-separated.",
-            "env_variable": "UsersAllowedToStopServers",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "string",
-                "nullable"
-            ],
-            "sort": 29
-        },
-        {
-            "name": "Continues Markdown Read",
-            "description": "Reload MessageMarkdown.txt periodically for live template updates.",
-            "env_variable": "ContinuesMarkdownRead",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "boolean"
-            ],
-            "sort": 30
-        },
-        {
-            "name": "Continues Games To Monitor Read",
-            "description": "Reload GamesToMonitor.json periodically for live game config updates.",
-            "env_variable": "ContinuesGamesToMonitorRead",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "boolean"
-            ],
-            "sort": 31
-        },
-        {
-            "name": "Markdown Update Interval",
-            "description": "Seconds between template/config reloads. Minimum: 10.",
-            "env_variable": "MarkdownUpdateInterval",
-            "default_value": "30",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "min:10",
-                "integer"
-            ],
-            "sort": 32
-        },
-        {
-            "name": "Server Update Interval",
-            "description": "Seconds between server data refreshes from Pelican. Minimum: 10.",
+            "name": "⚙️ Refresh Interval",
+            "description": "Seconds between server data refreshes (minimum 10)",
             "env_variable": "ServerUpdateInterval",
             "default_value": "10",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
-                "min:10",
-                "integer"
+                "integer",
+                "min:10"
             ],
-            "sort": 33
+            "sort": 20
         },
         {
-            "name": "Limit Server Count",
-            "description": "Limit the number of servers displayed.",
-            "env_variable": "LimitServerCount",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "boolean"
-            ],
-            "sort": 34
-        },
-        {
-            "name": "Max Server Count",
-            "description": "Maximum servers to display when limit is enabled.",
-            "env_variable": "MaxServerCount",
-            "default_value": "10",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "integer"
-            ],
-            "sort": 35
-        },
-        {
-            "name": "Servers To Display",
-            "description": "Specific server UUIDs to display. Empty = all servers. Comma-separated.",
-            "env_variable": "ServersToDisplay",
+            "name": "⚙️ External Server IP",
+            "description": "Public IP to display for local network servers (optional)",
+            "env_variable": "EXTERNAL_SERVER_IP",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -516,11 +313,11 @@
                 "string",
                 "nullable"
             ],
-            "sort": 36
+            "sort": 21
         },
         {
-            "name": "Debug",
-            "description": "Enable verbose console output for troubleshooting.",
+            "name": "⚙️ Debug Mode",
+            "description": "Enable verbose logging for troubleshooting",
             "env_variable": "Debug",
             "default_value": "0",
             "user_viewable": true,
@@ -528,19 +325,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 37
-        },
-        {
-            "name": "Dry Run",
-            "description": "Run without sending Discord messages. Useful for testing.",
-            "env_variable": "DryRun",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "boolean"
-            ],
-            "sort": 38
+            "sort": 22
         }
     ]
 }
