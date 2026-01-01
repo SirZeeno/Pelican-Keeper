@@ -152,7 +152,7 @@ Pelican-Keeper/
 │   ├── Configuration/       # File management and validation
 │   ├── Discord/             # Discord embeds, interactions, markdown parser
 │   ├── Pelican/             # Pelican API client and server monitoring
-│   ├── Query/               # Game server query services (A2S, RCON, Minecraft, etc.)
+│   ├── Query/               # Game server query services
 │   ├── Utilities/           # Helpers (formatting, logging, network)
 │   └── Updates/             # Version checking and auto-updates
 ├── Tests/                   # Unit tests
