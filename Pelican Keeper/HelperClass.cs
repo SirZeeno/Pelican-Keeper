@@ -48,7 +48,7 @@ public static class HelperClass
     /// </summary>
     /// <param name="serverInfo">ServerInfo of the server</param>
     /// <returns>The allocation that's marked as the default</returns>
-    private static ServerAllocation? GetConnectableAllocation(ServerInfo serverInfo) //TODO: I need more logic here to determine the best allocation to use and to determine the right port if the main port is not he joining port, for example in ark se its the query port
+    public static ServerAllocation? GetConnectableAllocation(ServerInfo serverInfo) // Changed to public
     {
         if (serverInfo.Allocations == null || serverInfo.Allocations.Count == 0)
             ConsoleExt.WriteLineWithStepPretext("Empty allocations for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Warning);

@@ -36,7 +36,8 @@ public abstract class TemplateClasses
         MinecraftJava,
         MinecraftBedrock,
         Rcon,
-        A2S
+        A2S,
+        Terraria
     }
 
     public enum ServerStatus
@@ -98,7 +99,6 @@ public abstract class TemplateClasses
         public bool ContinuesGamesToMonitorRead { get; set; }
         public int MarkdownUpdateInterval { get; set; }
 
-        // Removed 'readonly' so 'set' can modify it
         private int _serverUpdateInterval;
         public int ServerUpdateInterval
         {
@@ -121,6 +121,7 @@ public abstract class TemplateClasses
         public string Uuid { get; init; } = null!;
         public string Name { get; init; } = null!;
         public EggInfo Egg { get; init; } = null!;
+        public long MaxMemoryBytes { get; set; }
         public ServerResources? Resources { get; set; }
         public List<ServerAllocation>? Allocations { get; set; }
         public string? PlayerCountText { get; set; }

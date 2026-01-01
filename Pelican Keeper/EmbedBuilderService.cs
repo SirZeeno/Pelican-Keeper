@@ -26,7 +26,7 @@ public class EmbedBuilderService
 
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter
         {
-            Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" //TODO: allow for an expanded format per users choice like this DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")
+            Text = $"Last Updated: {DateTime.Now:HH:mm:ss}"
         };
 
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
@@ -36,7 +36,7 @@ public class EmbedBuilderService
         return Task.FromResult(embed.Build());
     }
 
-    public Task<DiscordEmbed> BuildMultiServerEmbed(List<ServerInfo> servers) //TODO: Add the ability to use the game icon as the emoji next to the server name
+    public Task<DiscordEmbed> BuildMultiServerEmbed(List<ServerInfo> servers)
     {
         var embed = new DiscordEmbedBuilder
         {
@@ -47,7 +47,7 @@ public class EmbedBuilderService
         for (int i = 0; i < servers.Count && embed.Fields.Count < 25; i++)
         {
             var serverInfo = ServerMarkdown.ParseTemplate(servers[i]);
-            embed.AddField(serverInfo.serverName, serverInfo.message, inline: true); //TODO:Allow customization of this but test first if this is worth customizing
+            embed.AddField(serverInfo.serverName, serverInfo.message, inline: true);
 
             if (Program.Config.DryRun)
             {
@@ -110,7 +110,6 @@ public class EmbedBuilderService
 
 public static class EmbedBuilderHelper
 {
-    // Keeping for future reference, if needed. Currently not used or planned to be used.
     public static void SafeAddField(this DiscordEmbedBuilder builder, string name, string? value, bool inline = false)
     {
         builder.AddField(name, string.IsNullOrEmpty(value) ? "N/A" : value, inline);
@@ -118,6 +117,7 @@ public static class EmbedBuilderHelper
 
     internal static string FormatBytes(long bytes)
     {
+        // Changed to 1000 for GB (Decimal), instead of 1024 (GiB)
         const long kb = 1000;
         const long mb = kb * 1000;
         const long gb = mb * 1000;
@@ -153,25 +153,15 @@ public static class EmbedBuilderHelper
     internal static int GetEmbedCharacterCount(DiscordEmbedBuilder embed)
     {
         var count = 0;
-
-        if (embed.Title != null)
-            count += embed.Title.Length;
-
-        if (embed.Description != null)
-            count += embed.Description.Length;
-
-        if (embed.Footer?.Text != null)
-            count += embed.Footer.Text.Length;
-
-        if (embed.Author?.Name != null)
-            count += embed.Author.Name.Length;
-
+        if (embed.Title != null) count += embed.Title.Length;
+        if (embed.Description != null) count += embed.Description.Length;
+        if (embed.Footer?.Text != null) count += embed.Footer.Text.Length;
+        if (embed.Author?.Name != null) count += embed.Author.Name.Length;
         foreach (var field in embed.Fields)
         {
             count += field.Name?.Length ?? 0;
             count += field.Value?.Length ?? 0;
         }
-
         return count;
     }
 }

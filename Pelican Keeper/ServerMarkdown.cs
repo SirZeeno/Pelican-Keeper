@@ -5,63 +5,45 @@ namespace Pelican_Keeper;
 public static class ServerMarkdown
 {
     private record PreprocessedTemplate(string Body, Dictionary<string, string> Tags);
-    private static readonly string MessageMarkdownPath = FileManager.GetFilePath("MessageMarkdown.txt"); //TODO: Add error handling for missing file and Validation for correct format
+    private static readonly string MessageMarkdownPath = FileManager.GetFilePath("MessageMarkdown.txt");
     private static string _templateText = File.ReadAllText(MessageMarkdownPath);
 
-    /// <summary>
-    /// Processes [Tag]...[/Tag] blocks, replaces placeholders inside them,
-    /// and removes them from the final template body.
-    /// </summary>
-    /// <param name="model">The template model to use</param>
-    /// <returns>A preprocessed template</returns>
     private static PreprocessedTemplate PreprocessTemplateTags(object model)
     {
         var tagDict = new Dictionary<string, string>();
-
         var tagRegex = new Regex(@"\[(\w+)](.*?)\[/\1]", RegexOptions.Singleline);
-
         string strippedTemplate = tagRegex.Replace(_templateText, match =>
         {
             string tag = match.Groups[1].Value;
             string content = match.Groups[2].Value;
-
             string rendered = ReplacePlaceholders(content, model);
-
             tagDict[tag] = rendered.Trim();
-            return ""; // removes the tagged content from the final template body
+            return "";
         });
-
         return new PreprocessedTemplate(strippedTemplate.Trim(), tagDict);
     }
 
-    /// <summary>
-    /// Replaces {{VariableName}} placeholders in text using reflection on the model.
-    /// </summary>
-    /// <param name="text">Input text</param>
-    /// <param name="model">The template model to use</param>
-    /// <returns>The text with placeholders replaced</returns>
     private static string ReplacePlaceholders(string text, object model)
     {
         return Regex.Replace(text, @"\{\{(\w+)\}\}", match =>
         {
             var propName = match.Groups[1].Value;
             var prop = model.GetType().GetProperty(propName);
-            if (prop == null) return match.Value; // leaves the placeholder as-is if not found
+            if (prop == null) return match.Value;
             var value = prop.GetValue(model);
             return value?.ToString() ?? "";
         });
     }
 
-    /// <summary>
-    /// Parses the message template and returns the final message and server title.
-    /// </summary>
-    /// <param name="serverResponse">The server response</param>
-    /// <returns>A tuple containing the final message and server title</returns>
     public static (string message, string serverName) ParseTemplate(TemplateClasses.ServerInfo serverResponse)
     {
-        if (serverResponse.Resources == null)
+        if (serverResponse.Resources == null) throw new ArgumentException("Server Resource response cannot be null.");
+
+        // Calculate Memory String
+        string memoryString = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes);
+        if (serverResponse.MaxMemoryBytes > 0)
         {
-            throw new ArgumentException("Server Resource response cannot be null.");
+            memoryString += " / " + EmbedBuilderHelper.FormatBytes(serverResponse.MaxMemoryBytes);
         }
 
         var viewModel = new TemplateClasses.ServerViewModel
@@ -71,7 +53,7 @@ public static class ServerMarkdown
             Status = serverResponse.Resources.CurrentState,
             StatusIcon = EmbedBuilderHelper.GetStatusIcon(serverResponse.Resources.CurrentState),
             Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
-            Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes),
+            Memory = memoryString,
             Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes),
             NetworkRx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkRxBytes),
             NetworkTx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkTxBytes),
