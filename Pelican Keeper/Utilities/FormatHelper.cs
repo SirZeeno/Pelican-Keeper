@@ -7,16 +7,15 @@ public static class FormatHelper
 {
     /// <summary>
     /// Formats byte count to human-readable string (KB, MB, GB, TB).
-    /// Uses 1024 for byte-to-MB conversion (matching Pelican's internal storage),
-    /// but 1000 for MB-to-GB display (so 4000 MB = 4 GB as users expect).
+    /// Uses decimal units (1000-based) to match Pelican Panel's display.
     /// </summary>
     public static string FormatBytes(long bytes)
     {
-        // Pelican stores memory as MiB internally (1024-based)
-        const long kb = 1024;
-        const long mb = kb * 1024;           // 1,048,576 bytes = 1 MB (matching Pelican)
-        const long gb = mb * 1000;           // 1000 MB = 1 GB (user expectation)
-        const long tb = gb * 1000;           // 1000 GB = 1 TB
+        // Pelican uses SI/decimal units (1000-based) throughout
+        const long kb = 1000;
+        const long mb = 1000 * 1000;              // 1,000,000 bytes = 1 MB
+        const long gb = 1000 * 1000 * 1000;       // 1,000,000,000 bytes = 1 GB
+        const long tb = 1000L * 1000 * 1000 * 1000; // 1,000,000,000,000 bytes = 1 TB
 
         return bytes switch
         {
