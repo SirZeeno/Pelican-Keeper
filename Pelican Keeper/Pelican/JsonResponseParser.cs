@@ -68,7 +68,8 @@ public static class JsonResponseParser
                 limits.TryGetProperty("memory", out var memElement))
             {
                 var memMb = memElement.GetInt64();
-                if (memMb > 0) memoryLimitBytes = memMb * 1024 * 1024;
+                // Pelican uses SI/decimal units: 1 MB = 1,000,000 bytes
+                if (memMb > 0) memoryLimitBytes = memMb * 1000 * 1000;
             }
 
             servers.Add(new ServerInfo
