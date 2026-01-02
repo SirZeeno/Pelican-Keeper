@@ -150,17 +150,14 @@ public static class ServerMonitorService
 
     private static void QueryTerrariaServer(ServerInfo server, string json, GamesToMonitor config, string ip, int maxPlayers)
     {
-        var port = JsonResponseParser.ExtractQueryPort(json, server.Uuid, config.QueryPortVariable);
-        if (port == 0) port = NetworkHelper.GetDefaultAllocation(server)?.Port ?? 0;
+        // Terraria doesn't have a proper query protocol - TCP connections spam the server logs.
+        // Just use Pelican's status instead of actively querying.
+        // For TShock with REST API, a separate implementation would be needed.
 
-        if (string.IsNullOrEmpty(RuntimeContext.Secrets.ExternalServerIp) || port == 0) return;
-
-        using var service = new TerrariaQueryService(ip, port);
-        var response = service.QueryAsync().GetAwaiter().GetResult();
-
-        server.PlayerCountText = response == "Online" && maxPlayers > 0
-            ? $"?/{maxPlayers}"
-            : response;
+        var isOnline = server.Resources?.CurrentState?.Equals("running", StringComparison.OrdinalIgnoreCase) == true;
+        if (isOnline && maxPlayers > 0)
+            server.PlayerCountText = $"?/{maxPlayers}";
+        // Otherwise leave PlayerCountText as default (shows status from Pelican)
     }
 
     private static void QueryA2SServer(ServerInfo server, string json, GamesToMonitor config, string ip)
