@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -252,17 +251,14 @@ public static class VersionUpdater
                 // Copy new executable in place
                 File.Copy(newExecutablePath, executablePath);
 
-                // Set executable permission on Linux
+                // Set executable permission on Linux using .NET API (no Process.Start needed)
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    var chmod = Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "/bin/chmod",
-                        Arguments = $"+x \"{executablePath}\"",
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    });
-                    chmod?.WaitForExit();
+                    // rwxr-xr-x = 755
+                    File.SetUnixFileMode(executablePath,
+                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                        UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+                        UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
                 }
 
                 // Try to delete old executable (may fail if still in use, that's ok)
