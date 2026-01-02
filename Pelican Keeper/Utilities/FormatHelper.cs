@@ -6,21 +6,22 @@ namespace Pelican_Keeper.Utilities;
 public static class FormatHelper
 {
     /// <summary>
-    /// Formats byte count to human-readable string (KB, MB, GB, TB).
+    /// Formats byte count to human-readable string (KiB, MiB, GiB, TiB).
+    /// Uses binary units (1024-based) which matches how memory is typically measured.
     /// </summary>
     public static string FormatBytes(long bytes)
     {
-        const long kb = 1000;
-        const long mb = kb * 1000;
-        const long gb = mb * 1000;
-        const long tb = gb * 1000;
+        const long kib = 1024;
+        const long mib = kib * 1024;
+        const long gib = mib * 1024;
+        const long tib = gib * 1024;
 
         return bytes switch
         {
-            >= tb => $"{bytes / (double)tb:F2} TB",
-            >= gb => $"{bytes / (double)gb:F2} GB",
-            >= mb => $"{bytes / (double)mb:F2} MB",
-            >= kb => $"{bytes / (double)kb:F2} kB",
+            >= tib => $"{bytes / (double)tib:F2} TB",
+            >= gib => $"{bytes / (double)gib:F2} GB",
+            >= mib => $"{bytes / (double)mib:F2} MB",
+            >= kib => $"{bytes / (double)kib:F2} KB",
             _ => $"{bytes} B"
         };
     }
