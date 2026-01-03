@@ -15,25 +15,15 @@ public class FileReadingTesting
         ConsoleExt.SuppressProcessExitForTests = true;
         
         DirectoryInfo? directoryInfo = new DirectoryInfo(Environment.CurrentDirectory);
-        if (directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent?.Exists != false)
-            directoryInfo = directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent;
+        if (directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent?.Exists != false) directoryInfo = directoryInfo.Parent?.Parent?.Parent?.Parent?.Parent;
 
         bool pelicanKeeperExists = false;
         if (directoryInfo == null) return;
         
         DirectoryInfo[] childDirectories = directoryInfo.GetDirectories();
-        foreach (var childDirectory in childDirectories)
-        {
-            if (childDirectory.Name == "Pelican Keeper")
-            {
-                pelicanKeeperExists = true;
-            }
-        }
+        foreach (var childDirectory in childDirectories) if (childDirectory.Name == "Pelican Keeper") pelicanKeeperExists = true;
 
-        if (pelicanKeeperExists)
-        {
-            directoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "Pelican Keeper"));
-        }
+        if (pelicanKeeperExists) directoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "Pelican Keeper"));
         
         FileInfo[] fileInfos = directoryInfo.GetFiles();
         foreach (var fileInfo in fileInfos)
@@ -60,55 +50,31 @@ public class FileReadingTesting
     public async Task ReadingConfig()
     {
         TemplateClasses.Config? config = await FileManager.ReadConfigFile(_configFilePath);
-        if (config == null || ConsoleExt.ExceptionOccurred)
-        {
-            Assert.Fail("Config file failed to read.\n");
-        }
-        else
-        {
-            Assert.Pass("Config file read successfully.\n");
-        }
+        if (config == null || ConsoleExt.ExceptionOccurred) Assert.Fail("Config file failed to read.\n");
+        else Assert.Pass("Config file read successfully.\n");
     }
     
     [Test]
     public async Task ReadingSecrets()
     {
         TemplateClasses.Secrets? secrets = await FileManager.ReadSecretsFile(_secretsFilePath);
-        if (secrets == null || ConsoleExt.ExceptionOccurred)
-        {
-            Assert.Fail("Secrets file failed to read.\n");
-        }
-        else
-        {
-            Assert.Pass("Secrets file read successfully.\n");
-        }
+        if (secrets == null || ConsoleExt.ExceptionOccurred) Assert.Fail("Secrets file failed to read.\n");
+        else Assert.Pass("Secrets file read successfully.\n");
     }
     
     [Test]
     public void ReadingMessageHistory()
     {
         TemplateClasses.LiveMessageJsonStorage? liveMessageJsonStorage = LiveMessageStorage.LoadAll(_messageHistoryFilePath);
-        if (liveMessageJsonStorage == null || ConsoleExt.ExceptionOccurred)
-        {
-            Assert.Fail("LiveMessageJsonStorage file failed to read.\n");
-        }
-        else
-        {
-            Assert.Pass("LiveMessageJsonStorage file read successfully.\n");
-        }
+        if (liveMessageJsonStorage == null || ConsoleExt.ExceptionOccurred) Assert.Fail("LiveMessageJsonStorage file failed to read.\n");
+        else Assert.Pass("LiveMessageJsonStorage file read successfully.\n");
     }
     
     [Test]
     public async Task ReadingGamesToMonitor()
     {
         List<TemplateClasses.GamesToMonitor>? gamesToMonitor = await FileManager.ReadGamesToMonitorFile(_gamesToMonitorFilePath);
-        if (gamesToMonitor == null || ConsoleExt.ExceptionOccurred)
-        {
-            Assert.Fail("GamesToMonitor file failed to read.\n");
-        }
-        else
-        {
-            Assert.Pass($"GamesToMonitor file read successfully. Supported Games count: {gamesToMonitor.Count}\n");
-        }
+        if (gamesToMonitor == null || ConsoleExt.ExceptionOccurred) Assert.Fail("GamesToMonitor file failed to read.\n");
+        else Assert.Pass($"GamesToMonitor file read successfully. Supported Games count: {gamesToMonitor.Count}\n");
     }
 }

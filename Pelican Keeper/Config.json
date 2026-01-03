@@ -5,6 +5,7 @@
   "MessageSortingDirection": "Ascending",
   "IgnoreOfflineServers": false,
   "IgnoreInternalServers": false,
+  "IgnoreServersWithoutAllocations": true,
   "ServersToIgnore": ["UUIDS HERE"],
   
   "JoinableIpDisplay": true,

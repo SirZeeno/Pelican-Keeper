@@ -59,10 +59,7 @@ public static class ServerMarkdown
     /// <returns>A tuple containing the final message and server title</returns>
     public static (string message, string serverName) ParseTemplate(TemplateClasses.ServerInfo serverResponse)
     {
-        if (serverResponse.Resources == null)
-        {
-            throw new ArgumentException("Server Resource response cannot be null.");
-        }
+        if (serverResponse.Resources == null) throw new ArgumentException("Server Resource response cannot be null.");
         
         var viewModel = new TemplateClasses.ServerViewModel
         {
@@ -70,23 +67,17 @@ public static class ServerMarkdown
             ServerName = serverResponse.Name,
             Status = serverResponse.Resources.CurrentState,
             StatusIcon = EmbedBuilderHelper.GetStatusIcon(serverResponse.Resources.CurrentState),
-            Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
-            Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes),
-            Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes),
+            Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%", //TODO: Allow the ability to see the max cpu and current usage
+            Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes), //TODO: Allow the ability to see the max memory and current usage
+            Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes), //TODO: Allow the ability to see the max disk and current usage
             NetworkRx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkRxBytes),
             NetworkTx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkTxBytes),
             Uptime = EmbedBuilderHelper.FormatUptime(serverResponse.Resources.Uptime)
         };
 
-        if (Program.Config.JoinableIpDisplay)
-        {
-            viewModel.IpAndPort = HelperClass.GetReadableConnectableAddress(serverResponse);
-        }
+        if (Program.Config.JoinableIpDisplay) viewModel.IpAndPort = HelperClass.GetReadableConnectableAddress(serverResponse);
         
-        if (Program.Config.PlayerCountDisplay)
-        {
-            viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText) ? "N/A" : serverResponse.PlayerCountText;
-        }
+        if (Program.Config.PlayerCountDisplay) viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText) ? "N/A" : serverResponse.PlayerCountText;
 
         var result = PreprocessTemplateTags(viewModel);
         var serverName = result.Tags.GetValueOrDefault("Title", "Default Title");

@@ -466,5 +466,25 @@
     "Game": "Garry's Mod - Reworked",
     "Protocol": "A2S",
     "QueryPortVariable": "SERVER_PORT"
+  },
+  {
+    "Game": "Terraria Vanilla",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
+  },
+  {
+    "Game": "TShock",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
+  },
+  {
+    "Game": "tModLoader",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
+  },
+  {
+    "Game": "Terraria",
+    "Protocol": "Terraria",
+    "QueryPortVariable": "SERVER_PORT"
   }
 ]

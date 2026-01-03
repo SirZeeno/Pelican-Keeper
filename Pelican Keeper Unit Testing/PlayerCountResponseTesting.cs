@@ -43,10 +43,7 @@ public class PlayerCountResponseTesting
                         await rcon.Connect();
                         response = await rcon.SendCommandAsync(_command, null);
                     }
-                    else
-                    {
-                        ConsoleExt.WriteLineWithPretext($"Password or Command is null. Password: {_password}, Command: {_command}");
-                    }
+                    else ConsoleExt.WriteLineWithPretext($"Password or Command is null. Password: {_password}, Command: {_command}");
                     break;
                 }
                 case CommandExecutionMethod.MinecraftJava:
@@ -91,9 +88,6 @@ public class PlayerCountResponseTesting
                 Assert.Fail($"{response}, {cleanResponse}\n");
             }
         }
-        else
-        {
-            Assert.Fail("Response not returned or Empty!\n");
-        }
+        else Assert.Fail("Response not returned or Empty!\n");
     }
 }

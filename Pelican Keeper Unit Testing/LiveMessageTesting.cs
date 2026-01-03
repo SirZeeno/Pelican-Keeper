@@ -21,27 +21,12 @@ public class LiveMessageTesting
         if (directoryInfo == null) return;
         
         DirectoryInfo[] childDirectories = directoryInfo.GetDirectories();
-        foreach (var childDirectory in childDirectories)
-        {
-            if (childDirectory.Name == "Pelican Keeper")
-            {
-                pelicanKeeperExists = true;
-            }
-        }
+        foreach (var childDirectory in childDirectories) if (childDirectory.Name == "Pelican Keeper") pelicanKeeperExists = true;
 
-        if (pelicanKeeperExists)
-        {
-            directoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "Pelican Keeper"));
-        }
+        if (pelicanKeeperExists) directoryInfo = new DirectoryInfo(Path.Combine(directoryInfo.FullName, "Pelican Keeper"));
         
         FileInfo[] fileInfos = directoryInfo.GetFiles();
-        foreach (var fileInfo in fileInfos)
-        {
-            if (fileInfo.Name == "MessageHistory.json")
-            {
-                _messageHistoryFilePath =  fileInfo.FullName;
-            }
-        }
+        foreach (var fileInfo in fileInfos) if (fileInfo.Name == "MessageHistory.json") _messageHistoryFilePath =  fileInfo.FullName;
 
         LiveMessageStorage.LoadAll(_messageHistoryFilePath);
     }
@@ -69,10 +54,7 @@ public class LiveMessageTesting
         try
         {
             messageId = LiveMessageStorage.Get(_messageId);
-            if (messageId == null)
-            {
-                Assert.Fail("Failed to retrieve message ID from message history!\n");
-            }
+            if (messageId == null) Assert.Fail("Failed to retrieve message ID from message history!\n");
         }
         catch (Exception e)
         {
@@ -107,10 +89,7 @@ public class LiveMessageTesting
         try
         {
             pageIndex = LiveMessageStorage.GetPaginated(_messageId);
-            if (pageIndex == null)
-            {
-                Assert.Fail("Failed to retrieve Page Index from message history!\n");
-            }
+            if (pageIndex == null) Assert.Fail("Failed to retrieve Page Index from message history!\n");
         }
         catch (Exception e)
         {

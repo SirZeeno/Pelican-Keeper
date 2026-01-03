@@ -78,6 +78,7 @@ public abstract class TemplateClasses
         public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
         public bool IgnoreOfflineServers { get; init; }
         public bool IgnoreInternalServers { get; init; }
+        public bool IgnoreServersWithoutAllocations { get; init; }
         public string[]? ServersToIgnore { get; init; }
         
         public bool JoinableIpDisplay { get; init; }
@@ -96,12 +97,17 @@ public abstract class TemplateClasses
 
         public bool ContinuesMarkdownRead { get; init; }
         public bool ContinuesGamesToMonitorRead { get; init; }
-        public int MarkdownUpdateInterval { get; init; }
-        private readonly int _serverUpdateInterval;
+        private readonly int _markdownUpdateInterval;
+        public int MarkdownUpdateInterval 
+        {
+            get => _markdownUpdateInterval;
+            init => _markdownUpdateInterval = Math.Max(value, 10);
+        }
+        private int _serverUpdateInterval;
         public int ServerUpdateInterval
         {
             get => _serverUpdateInterval;
-            init => _serverUpdateInterval = Math.Max(value, 10);
+            set => _serverUpdateInterval = Math.Max(value, 10);
         }
         
         public bool LimitServerCount { get; init; }

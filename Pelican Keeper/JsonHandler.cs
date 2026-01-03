@@ -17,9 +17,7 @@ public static class JsonHandler
         var root = doc.RootElement;
         
         List<EggInfo> eggs = new List<EggInfo>();
-        var eggArray = root
-            .GetProperty("data")
-            .EnumerateArray();
+        var eggArray = root.GetProperty("data").EnumerateArray();
         
         foreach (var egg in eggArray)
         {
@@ -27,11 +25,7 @@ public static class JsonHandler
             string name = attr.GetProperty("name").GetString() ?? string.Empty;
             int id = attr.GetProperty("id").GetInt32();
 
-            eggs.Add(new EggInfo
-            {
-                Id = id,
-                Name = name
-            });
+            eggs.Add(new EggInfo { Id = id, Name = name });
         }
 
         return eggs;
@@ -62,10 +56,7 @@ public static class JsonHandler
             var allocations = ExtractNetworkAllocations(json, uuid);
             return allocations.Find(x => x.IsDefault)!.Port;
         }
-        if (variableName == null || variableName.Trim() == string.Empty)
-        {
-            variableName = "RCON_PORT";
-        }
+        if (variableName == null || variableName.Trim() == string.Empty) variableName = "RCON_PORT";
         
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -76,11 +67,7 @@ public static class JsonHandler
         {
             var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data
-                .GetProperty("attributes")
-                .GetProperty("relationships")
-                .GetProperty("variables")
-                .GetProperty("data");
+            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
@@ -101,10 +88,7 @@ public static class JsonHandler
     /// <returns>String of The Password if found or Empty string if not found</returns>
     internal static string ExtractRconPassword(string json, string uuid, string? variableName)
     {
-        if (variableName == null || variableName.Trim() == string.Empty)
-        {
-            variableName = "RCON_PASS";
-        }
+        if (variableName == null || variableName.Trim() == string.Empty) variableName = "RCON_PASS";
         
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -115,19 +99,12 @@ public static class JsonHandler
         {
             var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data
-                .GetProperty("attributes")
-                .GetProperty("relationships")
-                .GetProperty("variables")
-                .GetProperty("data");
+            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
                 var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName)
-                {
-                    rconPassword = attr.GetProperty("server_value").GetString() ?? string.Empty;
-                }
+                if (attr.GetProperty("env_variable").GetString() == variableName) rconPassword = attr.GetProperty("server_value").GetString() ?? string.Empty;
             }
         }
 
@@ -159,10 +136,7 @@ public static class JsonHandler
             var allocations = ExtractNetworkAllocations(json, uuid);
             return allocations.Find(x => x.IsDefault)!.Port;
         }
-        if (variableName == null || variableName.Trim() == string.Empty)
-        {
-            variableName = "QUERY_PORT";
-        }
+        if (variableName == null || variableName.Trim() == string.Empty) variableName = "QUERY_PORT";
         
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -173,11 +147,7 @@ public static class JsonHandler
         {
             var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data
-                .GetProperty("attributes")
-                .GetProperty("relationships")
-                .GetProperty("variables")
-                .GetProperty("data");
+            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
@@ -199,18 +169,9 @@ public static class JsonHandler
     /// <returns>The Max Player Count if found or 0 if not found</returns>
     public static int ExtractMaxPlayerCount(string json, string uuid, string? variableName, string? maxPlayer)
     {
-        if (!string.IsNullOrEmpty(maxPlayer))
-        {
-            if (int.TryParse(maxPlayer, out int intMaxPlayers))
-            {
-                return intMaxPlayers;
-            }
-        }
+        if (!string.IsNullOrEmpty(maxPlayer)) if (int.TryParse(maxPlayer, out int intMaxPlayers)) return intMaxPlayers;
         
-        if (variableName == null || variableName.Trim() == string.Empty)
-        {
-            variableName = "MAX_PLAYERS";
-        }
+        if (variableName == null || variableName.Trim() == string.Empty) variableName = "MAX_PLAYERS";
         
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -221,11 +182,7 @@ public static class JsonHandler
         {
             var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data
-                .GetProperty("attributes")
-                .GetProperty("relationships")
-                .GetProperty("variables")
-                .GetProperty("data");
+            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
@@ -250,9 +207,7 @@ public static class JsonHandler
 
         // Extract allocations
         var allocations = new List<ServerAllocation>();
-        var serversArray = root
-            .GetProperty("data")
-            .EnumerateArray();;
+        var serversArray = root.GetProperty("data").EnumerateArray();
 
         foreach (var data in serversArray)
         {
@@ -292,9 +247,7 @@ public static class JsonHandler
         var root = doc.RootElement;
 
         var serverInfo = new List<ServerInfo>();
-        var serversArray = root
-            .GetProperty("data")
-            .EnumerateArray();
+        var serversArray = root.GetProperty("data").EnumerateArray();
         foreach (var server in serversArray)
         {
             var id = server.GetProperty("attributes").GetProperty("id").GetInt32();
@@ -306,10 +259,7 @@ public static class JsonHandler
                 Id = id,
                 Uuid = uuid,
                 Name = name,
-                Egg = new EggInfo
-                {
-                    Id = egg
-                }
+                Egg = new EggInfo { Id = egg }
             });
         }
 

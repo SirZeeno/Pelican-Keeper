@@ -91,8 +91,7 @@ public class QueryTesting
 
         string? response = null;
         
-        if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendJavaMinecraftRequest(_secrets.ExternalServerIp, 1251);
+        if (_secrets.ExternalServerIp != null) response = await PelicanInterface.SendJavaMinecraftRequest(_secrets.ExternalServerIp, 1251);
         
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");

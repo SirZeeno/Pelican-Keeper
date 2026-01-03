@@ -9,11 +9,7 @@ public class EmbedBuilderService
     {
         var serverInfo = ServerMarkdown.ParseTemplate(server);
         
-        var embed = new DiscordEmbedBuilder
-        {
-            Title = serverInfo.serverName,
-            Color = DiscordColor.Azure
-        };
+        var embed = new DiscordEmbedBuilder { Title = serverInfo.serverName, Color = DiscordColor.Azure };
         
         embed.AddField("\u200B", serverInfo.message, inline: true);
         
@@ -23,10 +19,7 @@ public class EmbedBuilderService
             ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
         
-        embed.Footer = new DiscordEmbedBuilder.EmbedFooter
-        {
-            Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" //TODO: allow for an expanded format per users choice like this DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")
-        };
+        embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" }; //TODO: allow for an expanded format per users choice like this DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")
         
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
         
@@ -37,28 +30,19 @@ public class EmbedBuilderService
 
     public Task<DiscordEmbed> BuildMultiServerEmbed(List<ServerInfo> servers) //TODO: Add the ability to use the game icon as the emoji next to the server name
     {
-        var embed = new DiscordEmbedBuilder
-        {
-            Title = "📡 Game Server Status Overview",
-            Color = DiscordColor.Azure
-        };
+        var embed = new DiscordEmbedBuilder { Title = "📡 Game Server Status Overview", Color = DiscordColor.Azure };
 
         for (int i = 0; i < servers.Count && embed.Fields.Count < 25; i++)
         {
             var serverInfo = ServerMarkdown.ParseTemplate(servers[i]);
             embed.AddField(serverInfo.serverName, serverInfo.message, inline: true); //TODO:Allow customization of this but test first if this is worth customizing
-            
-            if (Program.Config.DryRun)
-            {
-                ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
-                ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
-            }
+
+            if (!Program.Config.DryRun) continue;
+            ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
+            ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
         
-        embed.Footer = new DiscordEmbedBuilder.EmbedFooter
-        {
-            Text = $"Last Updated: {DateTime.Now:HH:mm:ss}"
-        };
+        embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
         
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
         
@@ -71,17 +55,11 @@ public class EmbedBuilderService
     {
         var embeds = new List<DiscordEmbed>();
 
-        for (int i = 0; i < servers.Count; i++)
+        foreach (var server in servers)
         {
-            var server = servers[i];
-
             var serverInfo = ServerMarkdown.ParseTemplate(server);
 
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = serverInfo.serverName,
-                Color = DiscordColor.Azure
-            };
+            var embed = new DiscordEmbedBuilder { Title = serverInfo.serverName, Color = DiscordColor.Azure };
 
             embed.AddField("\u200B", serverInfo.message,true);
             
@@ -91,10 +69,8 @@ public class EmbedBuilderService
                 ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
             
-            embed.Footer = new DiscordEmbedBuilder.EmbedFooter
-            {
-                Text = $"Last Updated: {DateTime.Now:HH:mm:ss}"
-            };
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
+            
             if (Program.Config.Debug)
             {
                 ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);

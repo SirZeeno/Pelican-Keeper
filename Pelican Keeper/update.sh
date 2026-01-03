@@ -8,6 +8,7 @@ APP_NAME="$4"     # executable name, e.g. "Pelican-Keeper"
 
 echo "Updater: waiting for process $PID to exit..."
 
+# do i actually need to kill the bot before updating?
 # Wait until the process is gone
 while kill -0 "$PID" 2>/dev/null; do
     sleep 1

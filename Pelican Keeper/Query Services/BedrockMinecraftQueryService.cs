@@ -28,10 +28,10 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
         }
         catch (SocketException ex)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLineWithStepPretext($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error, ex);
         }
         
-        ConsoleExt.WriteLineWithStepPretext("Connected to Bedrock Minecraft server at " + _endPoint, ConsoleExt.CurrentStep.MinecraftBedrockRequest);
+        ConsoleExt.WriteLineWithStepPretext("Connected to Bedrock Minecraft server at " + _endPoint, ConsoleExt.CurrentStep.MinecraftBedrockQuery);
         return Task.CompletedTask;
     }
 
@@ -62,26 +62,26 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
             var completed = await Task.WhenAny(recvTask, Task.Delay(_udpClient.Client.ReceiveTimeout, cts.Token));
             if (completed != recvTask)
             {
-                ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
+                ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
                 return string.Empty;
             }
             resp = recvTask.Result;
         }
         catch (SocketException)
         {
-            ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
 
         var buf = resp.Buffer;
         if (buf.Length < 1 + 8 + 8 + 16 + 2)
         {
-            ConsoleExt.WriteLineWithStepPretext("Error: response too short", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("Error: response too short", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
         if (buf[0] != 0x1C)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Error: unexpected packet id 0x{buf[0]:X2}", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext($"Error: unexpected packet id 0x{buf[0]:X2}", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
             return string.Empty; // ID_UNCONNECTED_PONG
         }
 
@@ -94,7 +94,7 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
         // 16B magic
         if (!buf.AsSpan(offset, 16).SequenceEqual(Magic))
         {
-            ConsoleExt.WriteLineWithStepPretext("Error: bad magic", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("Error: bad magic", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
         offset += 16;
@@ -132,7 +132,7 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
         var parts = motdString.Split(';');
         if (parts.Length < 6 || !string.Equals(parts[0], "MCPE", StringComparison.OrdinalIgnoreCase))
         {
-            ConsoleExt.WriteLineWithStepPretext("Error: invalid Bedrock pong", ConsoleExt.CurrentStep.MinecraftBedrockRequest, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("Error: invalid Bedrock pong", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
 

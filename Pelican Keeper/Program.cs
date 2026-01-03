@@ -15,7 +15,7 @@ using static DiscordInteractions;
 public static class Program
 {
     internal static List<DiscordChannel?> TargetChannel = null!;
-    internal static Secrets Secrets = null!;
+    public static Secrets Secrets = null!;
     public static Config Config = null!;
     private static readonly EmbedBuilderService EmbedService = new();
     internal static List<DiscordEmbed> EmbedPages = null!;
@@ -44,6 +44,8 @@ public static class Program
 
         GetGamesToMonitorFileAsync();
         ServerMarkdown.GetMarkdownFileContentAsync();
+        
+        WriteLineWithPretext($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
 
         if (Config.AutoUpdate)
         {
@@ -213,9 +215,8 @@ public static class Program
                                     });
                                 }
                             }
-                            else
+                            else if (Config.DryRun)
                             {
-                                if (Config.DryRun) continue;
                                 if (Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false } or {AllowUserServerStopping: true})
                                 {
                                     List<string?> selectedServerUuids = uuids;
@@ -299,8 +300,7 @@ public static class Program
                     }
                     else if (Config.Debug)
                         WriteLineWithPretext("Message has not changed. Skipping.");
-                },
-                delaySeconds: Config.ServerUpdateInterval + Random.Shared.Next(0, Config.ServerUpdateInterval / 2)
+                }, Config.ServerUpdateInterval + Random.Shared.Next(0, Config.ServerUpdateInterval / 2)
             );
         }
         
@@ -401,8 +401,7 @@ public static class Program
                             }
                         }
                     }
-                },
-                delaySeconds: Config.ServerUpdateInterval + Random.Shared.Next(0, Config.ServerUpdateInterval / 2)
+                }, Config.ServerUpdateInterval + Random.Shared.Next(0, Config.ServerUpdateInterval / 2)
             );
         }
         
@@ -454,9 +453,9 @@ public static class Program
                                         mb.WithEmbed(embed);
                                         mb.ClearComponents();
                                         if (showStart)
-                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, uuid[0]!, "Start"));
+                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, $"Start: {uuid[0]}", "Start"));
                                         if (showStop)
-                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, uuid[0]!, "Stop"));
+                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, $"Stop: {uuid[0]}", "Stop"));
                                     });
                                 }
                                 else
@@ -472,9 +471,9 @@ public static class Program
                                     {
                                         mb.WithEmbed(embed);
                                         if (showStart)
-                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, uuid[0]!, "Start"));
+                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, $"Start: {uuid[0]}", "Start"));
                                         if (showStop)
-                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, uuid[0]!, "Stop"));
+                                            mb.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, $"Stop: {uuid[0]}", "Stop"));
                                     });
                                     LiveMessageStorage.Save(msg.Id);
                                 }
@@ -484,8 +483,7 @@ public static class Program
                         {
                             WriteLineWithPretext("Message has not changed. Skipping.");
                         }
-                    },
-                    delaySeconds: Config.ServerUpdateInterval + Random.Shared.Next(0, 3) // randomized per-server delay
+                    }, Config.ServerUpdateInterval + Random.Shared.Next(0, 3) // randomized per-server delay
                 );
             }
         }

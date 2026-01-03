@@ -16,7 +16,7 @@ public static class HelperClass
     /// <param name="client">RestClient</param>
     /// <param name="token">Pelican API token</param>
     /// <returns>The RestResponse</returns>
-    internal static RestResponse CreateRequest(RestClient client, string? token)
+    public static RestResponse CreateRequest(RestClient client, string? token)
     {
         var request = new RestRequest("");
         request.AddHeader("Accept", "application/json");
@@ -224,11 +224,9 @@ public static class HelperClass
         foreach (var item in source)
         {
             list.Add(item);
-            if (list.Count == size)
-            {
-                yield return list;
-                list.Clear();
-            }
+            if (list.Count != size) continue;
+            yield return list;
+            list.Clear();
         }
         if (list.Count > 0) yield return list;
     }

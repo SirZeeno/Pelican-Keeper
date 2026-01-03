@@ -16,20 +16,10 @@ public static class FileManager
     /// <returns>The File path or empty string</returns>
     public static string GetFilePath(string fileNameWithExtension, string? originDirectory = null)
     {
-        if (File.Exists(fileNameWithExtension))
-        {
-            return fileNameWithExtension;
-        }
-
-        if (string.IsNullOrEmpty(originDirectory))
-        {
-            originDirectory = Environment.CurrentDirectory;
-        }
+        if (File.Exists(fileNameWithExtension)) return fileNameWithExtension;
+        originDirectory ??= Environment.CurrentDirectory;
         
-        foreach (var file in Directory.GetFiles(originDirectory, fileNameWithExtension, SearchOption.AllDirectories))
-        {
-            return file;
-        }
+        foreach (var file in Directory.GetFiles(originDirectory, fileNameWithExtension, SearchOption.AllDirectories)) return file;
         
         WriteLineWithStepPretext($"Couldn't find {fileNameWithExtension} file in program directory!", CurrentStep.FileReading, OutputType.Error, new FileNotFoundException());
         return string.Empty;
@@ -44,9 +34,7 @@ public static class FileManager
     public static string GetCustomFilePath(string fileNameWithExtension, string? customDirectoryOrFile = null)
     {
         if (string.IsNullOrEmpty(customDirectoryOrFile))
-        {
             return File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath(fileNameWithExtension, customDirectoryOrFile);
-        }
 
         return GetFilePath(fileNameWithExtension);
     }
@@ -103,13 +91,9 @@ public static class FileManager
         string secretsPath;
 
         if (string.IsNullOrEmpty(customDirectoryOrFile))
-        {
             secretsPath = File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath("Secrets.json", customDirectoryOrFile);
-        }
         else
-        {
             secretsPath = GetFilePath("Secrets.json");
-        }
         
         if (secretsPath == string.Empty)
         {
@@ -139,11 +123,7 @@ public static class FileManager
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 NullValueHandling = NullValueHandling.Include,
-                Error = (sender, args) =>
-                {
-                    // skip invalid values instead of throwing
-                    args.ErrorContext.Handled = true;
-                }
+                Error = (_, args) => { args.ErrorContext.Handled = true; } // skip invalid values instead of throwing
             };
             
             var secretsJson = await File.ReadAllTextAsync(secretsPath);
@@ -176,13 +156,9 @@ public static class FileManager
         string configPath;
         
         if (string.IsNullOrEmpty(customDirectoryOrFile))
-        {
             configPath = File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath("Config.json", customDirectoryOrFile);
-        }
         else
-        {
             configPath = GetFilePath("Config.json");
-        }
         
         if (configPath == string.Empty)
         {
@@ -212,6 +188,29 @@ public static class FileManager
             var config = JsonSerializer.Deserialize<Config>(configJson);
             Validator.ValidateConfig(config);
             
+            //For the environment variables that have to get written into the config from the pelican panel
+            /*
+            // --- ENV VAR OVERRIDES (Syncs with Pelican Panel) ---
+            // Helper to get raw env var (returns null if missing, string if present)
+            string? GetEnv(string key) => Environment.GetEnvironmentVariable(key);
+            string? val;
+
+            // Enums
+            val = GetEnv("MessageFormat");
+            if (!string.IsNullOrEmpty(val) && Enum.TryParse(val, true, out MessageFormat mf)) config.MessageFormat = mf;
+            
+            // Ints
+            val = GetEnv("MarkdownUpdateInterval");
+            if (!string.IsNullOrEmpty(val) && int.TryParse(val, out int mui)) config.MarkdownUpdateInterval = mui;
+            
+            // Strings & Arrays
+            val = GetEnv("ServersToIgnore");
+            if (val != null) config.ServersToIgnore = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
+            
+            val = GetEnv("EmptyServerTimeout");
+            if (val != null) config.EmptyServerTimeout = val;
+            */
+            
             if (config == null)
             {
                 WriteLineWithStepPretext("Config file is empty or not in the correct format. Please check Config.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
@@ -237,13 +236,9 @@ public static class FileManager
         string gameCommPath;
         
         if (string.IsNullOrEmpty(customDirectoryOrFile))
-        {
             gameCommPath = File.Exists(customDirectoryOrFile) ? customDirectoryOrFile : GetFilePath("GamesToMonitor.json", customDirectoryOrFile);
-        }
         else
-        {
             gameCommPath = GetFilePath("GamesToMonitor.json");
-        }
         
         if (gameCommPath == string.Empty)
         {

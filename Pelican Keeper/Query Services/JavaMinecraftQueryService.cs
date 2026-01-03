@@ -5,6 +5,7 @@ using System.Text.Json;
 
 namespace Pelican_Keeper.Query_Services;
 
+//TODO: make sure the queries in general only get done when the server is online, otherwise there is nothing to query or check
 public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDisposable
 {
     private TcpClient? _tcpClient;
@@ -21,7 +22,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         }
         catch (SocketException ex)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftJavaRequest, ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLineWithStepPretext($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error, ex);
         }
     }
 
@@ -66,12 +67,12 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         }
         catch (OperationCanceledException)
         {
-            ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftJavaRequest, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
         catch (Exception ex)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Error: {ex.Message}", ConsoleExt.CurrentStep.MinecraftJavaRequest, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLineWithStepPretext($"Error: {ex.Message}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
     }

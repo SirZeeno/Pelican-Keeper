@@ -21,16 +21,12 @@ public static class LiveMessageStorage
         Cache = LoadAll();
         
         if (Cache is { LiveStore: null })
-        {
             WriteLineWithStepPretext("Failed to read MessageHistory.json!", CurrentStep.MessageHistory, OutputType.Error, new FileLoadException(), true);
-        }
 
         if (Cache is { LiveStore: not null })
         {
             foreach (var liveStore in Cache.LiveStore)
-            {
                 WriteLineWithStepPretext($"Cache contents: {liveStore}", CurrentStep.MessageHistory);
-            }
         }
 
         _ = ValidateCache();
@@ -88,16 +84,10 @@ public static class LiveMessageStorage
     /// <param name="messageId">discord message ID</param>
     public static void Save(ulong messageId)
     {
-        if (Get(messageId) != null)
-        {
-            return;
-        }
+        if (Get(messageId) != null) return;
         
         Cache?.LiveStore?.Add(messageId);
-        File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        }));
+        File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
     }
     
     /// <summary>
@@ -113,31 +103,18 @@ public static class LiveMessageStorage
             Cache.PaginatedLiveStore[messageId] = currentPageIndex;
         }
         else
-        {
             Cache?.PaginatedLiveStore?.Add(messageId, currentPageIndex);
-        }
-        File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        }));
+        
+        File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
     }
     
     public static void Remove(ulong? messageId)
     {
         if (Cache != null && messageId != null && Cache.LiveStore != null && Cache.LiveStore.Remove((ulong)messageId))
-        {
-            File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            }));
-        }
+            File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
+        
         if (Cache != null && messageId != null && Cache.PaginatedLiveStore != null && Cache.PaginatedLiveStore.Remove((ulong)messageId))
-        {
-            File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            }));
-        }
+            File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
     }
     
     /// <summary>
@@ -150,28 +127,17 @@ public static class LiveMessageStorage
 
         if (Cache is { LiveStore: not null })
         {
-            var filtered = await Cache.LiveStore
-                .ToAsyncEnumerable()
-                .WhereAwait(async id =>
-                    haveChannels && await MessageExistsAsync(channels!, id))
-                .ToHashSetAsync();
+            var filtered = await Cache.LiveStore.ToAsyncEnumerable().WhereAwait(async id => haveChannels && await MessageExistsAsync(channels!, id)).ToHashSetAsync();
             Cache.LiveStore = filtered;
         }
 
         if (Cache is { PaginatedLiveStore: not null })
         {
-            var filtered = await Cache.PaginatedLiveStore
-                .ToAsyncEnumerable()
-                .WhereAwait(async kvp =>
-                    haveChannels && await MessageExistsAsync(channels!, kvp.Key))
-                .ToDictionaryAsync(kvp => kvp.Key, kvp => kvp.Value);
+            var filtered = await Cache.PaginatedLiveStore.ToAsyncEnumerable().WhereAwait(async kvp => haveChannels && await MessageExistsAsync(channels!, kvp.Key)).ToDictionaryAsync(kvp => kvp.Key, kvp => kvp.Value);
             Cache.PaginatedLiveStore = filtered;
         }
 
-        await File.WriteAllTextAsync(
-            _historyFilePath,
-            JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true })
-        );
+        await File.WriteAllTextAsync(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
     }
 
 

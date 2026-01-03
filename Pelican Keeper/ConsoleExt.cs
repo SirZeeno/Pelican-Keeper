@@ -6,9 +6,8 @@ namespace Pelican_Keeper;
 public static class ConsoleExt
 {
     public static bool ExceptionOccurred;
-    public static IReadOnlyCollection<Exception> Exceptions => _exceptions;
-    // ReSharper disable once InconsistentNaming
-    private static readonly LinkedList<Exception> _exceptions = new();
+    public static IReadOnlyCollection<Exception> Exceptions => ExceptionsList;
+    private static readonly LinkedList<Exception> ExceptionsList = new();
     
     // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
     public static bool SuppressProcessExitForTests { get; set; }
@@ -20,26 +19,26 @@ public static class ConsoleExt
         Warning,
         Question
     }
-
-    //TODO: Update all the current console outputs to use these enums for better logging and tracking of issues and steps
+    
     // This is changeable to be whatever necessary
     public enum CurrentStep
     {
         FileChecks,
         MessageHistory,
-        PelicanApiRequest,
-        A2SRequest,
-        RconRequest,
-        MinecraftJavaRequest,
-        MinecraftBedrockRequest,
+        PelicanApi,
+        A2SQuery,
+        RconQuery,
+        MinecraftJavaQuery,
+        MinecraftBedrockQuery,
         DiscordMessage,
-        DiscordReaction,
+        DiscordInteraction,
         Updater,
         Markdown,
         Helper,
         GameMonitoring,
         EmbedBuilding,
         FileReading,
+        Initialization,
         None
     }
 
@@ -49,13 +48,13 @@ public static class ConsoleExt
     /// <param name="output">Output</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
-    /// <param name="exit">Should the Program Exit</param>
+    /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool exit = false)
+    public static void WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldExit = false)
     {
-        var length1 = CurrentTime();
-        var length2 = DetermineOutputType(outputType);
+        CurrentTime();
+        WriteOutputType(outputType);
         if (output is IEnumerable enumerable && !(output is string))
         {
             Console.Write(string.Join(", ", enumerable.Cast<object>()));
@@ -71,11 +70,10 @@ public static class ConsoleExt
             return;
         }
         ExceptionOccurred = true;
-        _exceptions.AddLast(exception);
+        ExceptionsList.AddLast(exception);
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
         
-        if (!exit) return;
-        if (SuppressProcessExitForTests) return;
+        if (!shouldExit || SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
         Environment.Exit(1);
     }
@@ -87,14 +85,14 @@ public static class ConsoleExt
     /// <param name="currentStep">Current step, default is none</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
-    /// <param name="exit">Should the Program Exit</param>
+    /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithStepPretext<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool exit = false)
+    public static void WriteLineWithStepPretext<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldExit = false)
     {
-        var length1 = CurrentTime();
-        var length2 = DetermineCurrentStep(currentStep);
-        var length3 = DetermineOutputType(outputType);
+        CurrentTime();
+        WriteStep(currentStep);
+        WriteOutputType(outputType);
         
         if (output is IEnumerable enumerable && !(output is string))
         {
@@ -111,11 +109,10 @@ public static class ConsoleExt
             return;
         }
         ExceptionOccurred = true;
-        _exceptions.AddLast(exception);
+        ExceptionsList.AddLast(exception);
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
                   
-        if (!exit) return;
-        if (SuppressProcessExitForTests) return;
+        if (!shouldExit || SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
         Environment.Exit(1);
     }
@@ -126,13 +123,13 @@ public static class ConsoleExt
     /// <param name="output">Output</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
-    /// <param name="exit">Should the Program Exit</param>
+    /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool exit = false)
+    public static void WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldExit = false)
     {
-        var length1 = CurrentTime();
-        var length2 = DetermineOutputType(outputType);
+        CurrentTime();
+        WriteOutputType(outputType);
         if (output is IEnumerable enumerable && !(output is string))
         {
             Console.Write(string.Join(", ", enumerable.Cast<object>()));
@@ -148,93 +145,72 @@ public static class ConsoleExt
             return;
         }
         ExceptionOccurred = true;
-        _exceptions.AddLast(exception);
+        ExceptionsList.AddLast(exception);
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
         
-        if (!exit) return;
-        if (SuppressProcessExitForTests) return;
+        if (!shouldExit || SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
         Environment.Exit(1);
     }
 
     /// <summary>
-    /// Determines the output type and returns the length of the pretext.
+    /// Determines the output type and writes it in the appropriate color.
     /// </summary>
     /// <param name="outputType">Output type</param>
     /// <returns>The length of the pretext</returns>
-    private static (int length, string pretext) DetermineOutputType(OutputType outputType)
+    private static void WriteOutputType(OutputType outputType)
     {
-        return outputType switch
+        var (color, label) = outputType switch
         {
-            OutputType.Error => CreateOutputType(nameof(OutputType.Error), ConsoleColor.DarkRed),
-            OutputType.Info => CreateOutputType(nameof(OutputType.Info), ConsoleColor.Green),
-            OutputType.Warning => CreateOutputType(nameof(OutputType.Info), ConsoleColor.DarkYellow),
-            OutputType.Question => CreateOutputType(nameof(OutputType.Info), ConsoleColor.DarkGreen),
-            _ => (0, String.Empty)
+            OutputType.Error => (ConsoleColor.DarkRed, "Error"),
+            OutputType.Warning => (ConsoleColor.DarkYellow, "Warning"),
+            OutputType.Question => (ConsoleColor.DarkGreen, "Question"),
+            _ => (ConsoleColor.Green, "Info")
         };
+        
+        Console.ForegroundColor = color;
+        Console.Write($"[{label}] ");
+        Console.ResetColor();
     }
 
-    /// <summary>
-    /// Creates the pretext for the output type.
-    /// </summary>
-    /// <param name="outputType">Output type</param>
-    /// <param name="consoleColor">Console color to use for the pretext</param>
-    /// <returns>The length of the pretext</returns>
-    private static (int length, string pretext) CreateOutputType(string outputType, ConsoleColor consoleColor)
-    {
-        var oldColor = Console.ForegroundColor;
-        Console.ForegroundColor = consoleColor;
-        Console.Write($"[{outputType}] ");
-        Console.ForegroundColor = oldColor;
-        return (outputType.Length, $"[{outputType}] ");
-    }
-
-    private static (int length, string pretext) CurrentTime()
+    private static void CurrentTime()
     {
         var dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
-        var oldColor = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.White;
         Console.Write($"[{dateTime}] ");
-        Console.ForegroundColor = oldColor;
-        return (dateTime.Length + 3, $"[{dateTime}] ");
+        Console.ResetColor();
     }
 
     /// <summary>
     /// Determines the current step and returns the length of the pretext.
     /// </summary>
-    /// <param name="currentStep">Current step</param>
+    /// <param name="step">Current step</param>
     /// <returns>The length of the pretext</returns>
-    private static (int length, string pretext) DetermineCurrentStep(CurrentStep currentStep)
+    private static void WriteStep(CurrentStep step)
     {
-        return currentStep switch
-        {
-            CurrentStep.FileChecks => CreateCurrentStep("Files Integrity Check"),
-            CurrentStep.MessageHistory => CreateCurrentStep("Message History"),
-            CurrentStep.PelicanApiRequest => CreateCurrentStep("Pelican API Request"),
-            CurrentStep.A2SRequest => CreateCurrentStep("A2S Query"),
-            CurrentStep.RconRequest => CreateCurrentStep("RCON Request"),
-            CurrentStep.MinecraftJavaRequest => CreateCurrentStep("Minecraft Java Request"),
-            CurrentStep.MinecraftBedrockRequest => CreateCurrentStep("Minecraft Bedrock Request"),
-            CurrentStep.DiscordMessage => CreateCurrentStep("Discord Message"),
-            CurrentStep.DiscordReaction=> CreateCurrentStep("Discord Reaction"),
-            CurrentStep.Updater => CreateCurrentStep("Updater"),
-            CurrentStep.Markdown => CreateCurrentStep("Markdown"),
-            CurrentStep.Helper => CreateCurrentStep("Helper"),
-            CurrentStep.GameMonitoring => CreateCurrentStep("Game Monitoring"),
-            CurrentStep.EmbedBuilding => CreateCurrentStep("Embed Building"),
-            CurrentStep.FileReading => CreateCurrentStep("File Reading"),
-            _ => (0, String.Empty)
-        };
-    }
+        if (step == CurrentStep.None) return;
 
-    /// <summary>
-    /// Creates the pretext for the current step.
-    /// </summary>
-    /// <param name="currentStep">Current step</param>
-    /// <returns>The length of the pretext</returns>
-    private static (int length, string pretext) CreateCurrentStep(string currentStep)
-    {
-        Console.Write($"[{currentStep}] ");
-        return (currentStep.Length, $"[{currentStep}] ");
+        var label = step switch
+        {
+            CurrentStep.FileChecks => "FileChecks",
+            CurrentStep.FileReading => "File Reading",
+            CurrentStep.MessageHistory => "Message History",
+            CurrentStep.PelicanApi => "Pelican API",
+            CurrentStep.A2SQuery => "A2S Query",
+            CurrentStep.RconQuery => "RCON Query",
+            CurrentStep.MinecraftJavaQuery => "MC Java Query",
+            CurrentStep.MinecraftBedrockQuery => "MC Bedrock Query",
+            CurrentStep.DiscordMessage => "Discord Message",
+            CurrentStep.DiscordInteraction => "Discord Interaction",
+            CurrentStep.Updater => "Updater",
+            CurrentStep.Markdown => "Markdown",
+            CurrentStep.Helper => "Helper",
+            CurrentStep.GameMonitoring => "Game Monitoring",
+            CurrentStep.EmbedBuilding => "Embed Building",
+            CurrentStep.Initialization => "Initialization",
+            _ => step.ToString()
+        };
+
+        Console.Write($"[{label}] ");
     }
 }

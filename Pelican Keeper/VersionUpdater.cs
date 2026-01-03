@@ -10,8 +10,10 @@ public static class VersionUpdater
     public static string CurrentVersion = "v2.0.3";
     private static HttpClient _http = null!;
     
+    //TODO: add a function in here that allows the check of an update without a automatic update and without automatic updates being on.
     public static async Task UpdateProgram()
     {
+        ConsoleExt.WriteLineWithPretext("Checking for updates...");
         SetupUserAgent();
         
         string? targetPath = await DownloadLatestAssetIfNewerAsync(CurrentVersion); // Downloads the appropriate version of the latest update for your platform if there is one available.
@@ -40,7 +42,15 @@ public static class VersionUpdater
         // Making sure it is executable on Linux (just in case)
         try
         {
-            await Process.Start("chmod", $"+x \"{scriptPath}\"").WaitForExitAsync();
+            //await Process.Start("chmod", $"+x \"{scriptPath}\"").WaitForExitAsync();
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // rwxr-xr-x = 755
+                File.SetUnixFileMode(scriptPath,
+                    UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                    UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
+                    UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
+            }
         }
         catch
         {
