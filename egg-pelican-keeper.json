@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": null
     },
-    "exported_at": "2025-12-27T20:47:29+00:00",
+    "exported_at": "2026-01-08T22:33:36+00:00",
     "name": "Pelican Keeper",
     "author": "Leon@logocomp.com",
     "uuid": "b9f6a260-8be9-4de0-90bb-4251ef5f9524",
@@ -20,7 +20,7 @@
         "Default": "./\"Pelican Keeper\";"
     },
     "config": {
-        "files": "{}",
+        "files": "{\n    \"Config.json\": {\n        \"parser\": \"json\",\n        \"find\": {\n            \"InternalIpStructure\": \"{{server.environment.InternalIpStructure}}\",\n            \"MessageFormat\": \"{{server.environment.MessageFormat}}\",\n            \"MessageSorting\": \"{{server.environment.MessageSorting}}\",\n            \"MessageSortingDirection\": \"{{server.environment.MessageSortingDirection}}\",\n            \"IgnoreOfflineServers\": \"{{server.environment.IgnoreOfflineServers}}\",\n            \"IgnoreInternalServers\": \"{{server.environment.IgnoreInternalServers}}\",\n\t\t\t\"IgnoreServersWithoutAllocations\": \"{{server.environment.IgnoreInternalServers}}\",\n\t\t\t\"ServersToIgnore\": \"{{server.environment.ServersToIgnore}}\",\n\t\t\t\"JoinableIpDisplay\": \"{{server.environment.JoinableIpDisplay}}\",\n\t\t\t\"PlayerCountDisplay\": \"{{server.environment.PlayerCountDisplay}}\",\n\t\t\t\"ServersToMonitor\": \"{{server.environment.ServersToMonitor}}\",\n\t\t\t\"AutomaticShutdown\": \"{{server.environment.AutomaticShutdown}}\",\n\t\t\t\"ServersToAutoShutdown\": \"{{server.environment.ServersToAutoShutdown}}\",\n\t\t\t\"EmptyServerTimeout\": \"{{server.environment.EmptyServerTimeout}}\",\n\t\t\t\"AllowUserServerStartup\": \"{{server.environment.AllowUserServerStartup}}\",\n\t\t\t\"AllowServerStartup\": \"{{server.environment.AllowServerStartup}}\",\n\t\t\t\"UsersAllowedToStartServers\": \"{{server.environment.UsersAllowedToStartServers}}\",\n\t\t\t\"AllowUserServerStopping\": \"{{server.environment.AllowUserServerStopping}}\",\n\t\t\t\"AllowServerStopping\": \"{{server.environment.AllowServerStopping}}\",\n\t\t\t\"UsersAllowedToStopServers\": \"{{server.environment.UsersAllowedToStopServers}}\",\n\t\t\t\"ContinuesMarkdownRead\": \"{{server.environment.ContinuesMarkdownRead}}\",\n\t\t    \"ContinuesGamesToMonitorRead\": \"{{server.environment.ContinuesGamesToMonitorRead}}\",\n\t\t\t\"MarkdownUpdateInterval\": \"{{server.environment.MarkdownUpdateInterval}}\",\n\t\t\t\"ServerUpdateInterval\": \"{{server.environment.ServerUpdateInterval}}\",\n\t\t\t\"LimitServerCount\": \"{{server.environment.LimitServerCount}}\",\n\t\t\t\"MaxServerCount\": \"{{server.environment.MaxServerCount}}\",\n\t\t\t\"ServersToDisplay\": \"{{server.environment.ServersToDisplay}}\",\n\t\t\t\"Debug\": \"{{server.environment.Debug}}\",\n\t\t\t\"DryRun\": \"{{server.environment.DryRun}}\",\n\t\t\t\"AutoUpdate\": \"{{server.environment.AutoUpdate}}\"\n        }\n    }\n}",
         "startup": "{\n    \"done\": [\n        \"Bot is connected and ready!\"\n    ]\n}",
         "logs": "{}",
         "stop": "^^C"
@@ -44,7 +44,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 15
+            "sort": 16
         },
         {
             "name": "Allow Server Stopping",
@@ -56,7 +56,7 @@
             "rules": [
                 "string"
             ],
-            "sort": 18
+            "sort": 19
         },
         {
             "name": "Allow User Server Startup",
@@ -68,7 +68,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 14
+            "sort": 15
         },
         {
             "name": "Allow User Server Stopping",
@@ -80,7 +80,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 17
+            "sort": 18
         },
         {
             "name": "Auto Update",
@@ -92,7 +92,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 29
+            "sort": 30
         },
         {
             "name": "Automatic Shutdown",
@@ -104,7 +104,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 11
+            "sort": 12
         },
         {
             "name": "Continues Games To Monitor Read",
@@ -116,7 +116,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 21
+            "sort": 22
         },
         {
             "name": "Continues Markdown Read",
@@ -128,7 +128,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 20
+            "sort": 21
         },
         {
             "name": "Debug",
@@ -140,7 +140,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 27
+            "sort": 28
         },
         {
             "name": "Dry Run",
@@ -152,7 +152,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 28
+            "sort": 29
         },
         {
             "name": "Empty Server Timeout",
@@ -165,7 +165,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 13
+            "sort": 14
         },
         {
             "name": "Ignore Internal Servers",
@@ -192,6 +192,18 @@
             "sort": 5
         },
         {
+            "name": "Ignore Servers Without Allocations",
+            "description": "",
+            "env_variable": "IgnoreServersWithoutAllocations",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 7
+        },
+        {
             "name": "Internal IP Structure",
             "description": "IP Structure in the local Network Pelican is sitting in.",
             "env_variable": "InternalIpStructure",
@@ -213,7 +225,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 8
+            "sort": 9
         },
         {
             "name": "Limit Server Count",
@@ -225,7 +237,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 24
+            "sort": 25
         },
         {
             "name": "Markdown Update Interval",
@@ -238,7 +250,7 @@
                 "min:10",
                 "integer"
             ],
-            "sort": 22
+            "sort": 23
         },
         {
             "name": "Max Server Count",
@@ -250,7 +262,7 @@
             "rules": [
                 "integer"
             ],
-            "sort": 25
+            "sort": 26
         },
         {
             "name": "Message Format",
@@ -303,7 +315,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 9
+            "sort": 10
         },
         {
             "name": "Server Update Interval",
@@ -316,7 +328,7 @@
                 "min:10",
                 "integer"
             ],
-            "sort": 23
+            "sort": 24
         },
         {
             "name": "Servers To Auto Shutdown",
@@ -329,7 +341,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 12
+            "sort": 13
         },
         {
             "name": "Servers To Display",
@@ -342,7 +354,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 26
+            "sort": 27
         },
         {
             "name": "Servers To Ignore",
@@ -355,7 +367,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 7
+            "sort": 8
         },
         {
             "name": "Servers To Monitor",
@@ -368,7 +380,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 10
+            "sort": 11
         },
         {
             "name": "Users Allowed To Start Servers",
@@ -381,7 +393,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 16
+            "sort": 17
         },
         {
             "name": "Users Allowed To Stop Servers",
@@ -394,7 +406,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 19
+            "sort": 20
         }
     ]
 }

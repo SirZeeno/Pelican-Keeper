@@ -17,8 +17,8 @@ public static class PelicanInterface
 {
     private static List<GamesToMonitor>? _gamesToMonitor = FileManager.ReadGamesToMonitorFile().GetAwaiter().GetResult();
     private static List<EggInfo>? _eggsList;
-    private static List<RconService> _rconServices = new();
-    private static Dictionary<string, DateTime> _shutdownTracker = new();
+    private static readonly List<RconService> RconServices = new();
+    private static readonly Dictionary<string, DateTime> ShutdownTracker = new();
 
     public static List<EggInfo>? GetLocalEggList()
     {
@@ -112,13 +112,13 @@ public static class PelicanInterface
                 
                 foreach (var serverInfo in serversToProcess)
                 {
-                    bool isTracked = _shutdownTracker.Any(x => x.Key == serverInfo.Uuid);
+                    bool isTracked = ShutdownTracker.Any(x => x.Key == serverInfo.Uuid);
                     string? serverState = serverInfo.Resources?.CurrentState.ToLower();
                     if (serverState != "offline" && serverState != "stopping" && serverState != "starting" && serverState != "missing")
                     {
                         if (!isTracked)
                         {
-                            _shutdownTracker[serverInfo.Uuid] = DateTime.Now;
+                            ShutdownTracker[serverInfo.Uuid] = DateTime.Now;
                             ConsoleExt.WriteLineWithStepPretext($"{serverInfo.Name} is tracked for shutdown: {isTracked}", ConsoleExt.CurrentStep.PelicanApi);
                         }
                         MonitorServers(serverInfo, response.Content);
@@ -145,18 +145,18 @@ public static class PelicanInterface
                                     ConsoleExt.WriteLineWithStepPretext($"Player count: {playerCount} for server: {serverInfo.Name}", ConsoleExt.CurrentStep.PelicanApi);
                                 if (playerCount > 0)
                                 {
-                                    _shutdownTracker[serverInfo.Uuid] = DateTime.Now;
+                                    ShutdownTracker[serverInfo.Uuid] = DateTime.Now;
                                 }
                                 else
                                 {
                                     TimeSpan.TryParseExact(Program.Config.EmptyServerTimeout, @"d\:hh\:mm", CultureInfo.InvariantCulture, out var timeTillShutdown);
                                     if (timeTillShutdown == TimeSpan.Zero)
                                         timeTillShutdown = TimeSpan.FromHours(1);
-                                    if (DateTime.Now - _shutdownTracker[serverInfo.Uuid] >= timeTillShutdown)
+                                    if (DateTime.Now - ShutdownTracker[serverInfo.Uuid] >= timeTillShutdown)
                                     {
                                         SendPowerCommand(serverInfo.Uuid, "stop");
                                         ConsoleExt.WriteLineWithStepPretext($"Server {serverInfo.Name} has been empty for over an hour. Sending shutdown command.", ConsoleExt.CurrentStep.PelicanApi);
-                                        _shutdownTracker.Remove(serverInfo.Uuid);
+                                        ShutdownTracker.Remove(serverInfo.Uuid);
                                         if (Program.Config.Debug)
                                             ConsoleExt.WriteLineWithStepPretext($"Server {serverInfo.Name} is stopping and removed from shutdown tracker.", ConsoleExt.CurrentStep.PelicanApi);
                                     }
@@ -166,7 +166,7 @@ public static class PelicanInterface
                     }
                     else if (isTracked)
                     {
-                        _shutdownTracker.Remove(serverInfo.Uuid);
+                        ShutdownTracker.Remove(serverInfo.Uuid);
                         if (Program.Config.Debug)
                             ConsoleExt.WriteLineWithStepPretext($"Server {serverInfo.Name} is offline or stopping. Removed from shutdown tracker.", ConsoleExt.CurrentStep.PelicanApi);
                     }
@@ -317,9 +317,9 @@ public static class PelicanInterface
     public static async Task<string> SendRconGameServerCommand(string ip, int port, string password, string command, string? regexPattern = null)
     {
         RconService rcon = new RconService(ip, port, password);
-        if (_rconServices.Any(x => x.Ip == ip && x.Port == port))
+        if (RconServices.Any(x => x.Ip == ip && x.Port == port))
         {
-            rcon = _rconServices.First(x => x.Ip == ip && x.Port == port);
+            rcon = RconServices.First(x => x.Ip == ip && x.Port == port);
             if (Program.Config.Debug)
                 ConsoleExt.WriteLineWithStepPretext("Reusing existing RCON connection to " + ip + ":" + port, ConsoleExt.CurrentStep.RconQuery);
         }
@@ -333,7 +333,7 @@ public static class PelicanInterface
         
         string response = await rcon.SendCommandAsync(command, regexPattern);
         
-        _rconServices.Add(rcon);
+        RconServices.Add(rcon);
         return response;
     }
 

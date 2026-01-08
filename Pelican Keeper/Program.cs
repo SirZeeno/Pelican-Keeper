@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Exceptions;
 
 namespace Pelican_Keeper;
 
