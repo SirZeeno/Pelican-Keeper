@@ -7,6 +7,7 @@ namespace Pelican_Keeper;
 using static TemplateClasses;
 using static ConsoleExt;
 
+//TODO: Create a check to see if there are already authored messages and update that message instead of creating a new one.
 public static class LiveMessageStorage
 {
     private static string _historyFilePath = "MessageHistory.json";
@@ -129,12 +130,28 @@ public static class LiveMessageStorage
         {
             var filtered = await Cache.LiveStore.ToAsyncEnumerable().WhereAwait(async id => haveChannels && await MessageExistsAsync(channels!, id)).ToHashSetAsync();
             Cache.LiveStore = filtered;
+            if (Cache.LiveStore.Count == 0)
+            {
+                foreach (var channel in channels)
+                {
+                    ulong? messageId = await GetPreviousMessage(channel);
+                    if (messageId != null) Cache.LiveStore.Add(messageId.Value);
+                }
+            }
         }
 
         if (Cache is { PaginatedLiveStore: not null })
         {
             var filtered = await Cache.PaginatedLiveStore.ToAsyncEnumerable().WhereAwait(async kvp => haveChannels && await MessageExistsAsync(channels!, kvp.Key)).ToDictionaryAsync(kvp => kvp.Key, kvp => kvp.Value);
             Cache.PaginatedLiveStore = filtered;
+            if (Cache.PaginatedLiveStore.Count == 0)
+            {
+                foreach (var channel in channels)
+                {
+                    ulong? messageId = await GetPreviousMessage(channel);
+                    if (messageId != null) Cache.PaginatedLiveStore.Add(messageId.Value, 0);
+                }
+            }
         }
 
         await File.WriteAllTextAsync(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
@@ -194,7 +211,17 @@ public static class LiveMessageStorage
     }
     
     /// <summary>
-    /// Gets the page index of a paginated message if it exists.
+    /// Gets the last message ID in the cache if it exists in the channel.
+    /// </summary>
+    /// <param name="channel">Discord Channel to search in</param>
+    /// <returns>discord message ID</returns>
+    public static ulong? TryGetLast(DiscordChannel channel)
+    {
+        return Cache?.LiveStore?.LastOrDefault(x => MessageExistsAsync([channel], x).Result); //TODO: try to also use a fallback by using the GetPreviousMessage function.
+    }
+    
+    /// <summary>
+    /// Gets the page index of the paginated message if it exists.
     /// </summary>
     /// <param name="messageId">discord message ID</param>
     /// <returns>page index</returns>
@@ -202,5 +229,35 @@ public static class LiveMessageStorage
     {
         if (Cache?.PaginatedLiveStore == null || Cache.PaginatedLiveStore.Count == 0 || messageId == null) return null;
         return Cache.PaginatedLiveStore?.First(x => x.Key == messageId).Value;
+    }
+
+    /// <summary>
+    /// Gets the Key Value Pair of the paginated message if it exists in the channel.
+    /// </summary>
+    /// <param name="channel">Discord Channel to search in</param>
+    /// <returns>discord message ID</returns>
+    public static KeyValuePair<ulong, int>? TryGetLastPaginated(DiscordChannel channel)
+    {
+        return Cache?.PaginatedLiveStore?.LastOrDefault(x => MessageExistsAsync([channel], x.Key).Result); //TODO: try to also use a fallback by using the GetPreviousMessage function.
+    }
+    
+    /// <summary>
+    /// Gets the previous message if any authored by the bot
+    /// </summary>
+    /// <param name="channel">Discord Channel to check</param>
+    /// <returns></returns>
+    private static async Task<ulong?> GetPreviousMessage(DiscordChannel channel)
+    {
+        IReadOnlyList<DiscordMessage> messages = await channel.GetMessagesAsync();
+
+        foreach (var message in messages)
+        {
+            if (message.Author.Id == Program.BotId)
+            {
+                return message.Id;
+            }
+        }
+        
+        return null;
     }
 }

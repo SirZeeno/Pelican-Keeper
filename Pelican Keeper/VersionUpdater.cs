@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -7,10 +8,9 @@ namespace Pelican_Keeper;
 
 public static class VersionUpdater
 {
-    public static string CurrentVersion = "v2.0.3";
+    public static string CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "2.0.4";
     private static HttpClient _http = null!;
     
-    //TODO: add a function in here that allows the check of an update without a automatic update and without automatic updates being on.
     public static async Task UpdateProgram()
     {
         ConsoleExt.WriteLineWithPretext("Checking for updates...");

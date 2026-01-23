@@ -41,6 +41,7 @@ public static class TestConfigCreator
             ServersToDisplay = ["UUIDS HERE"],
             
             Debug = true,
+            OutputMode =  TemplateClasses.OutputMode.Debug,
             DryRun = true,
             AutoUpdate =  true
         };

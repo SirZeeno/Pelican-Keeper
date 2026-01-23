@@ -40,7 +40,7 @@ public class LiveMessageTesting
         }
         catch (Exception e)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true);
+            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true, true);
             Assert.Fail("Failed to write message ID!\n");
             return;
         }
@@ -58,7 +58,7 @@ public class LiveMessageTesting
         }
         catch (Exception e)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true);
+            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true, true);
             Assert.Fail("Failed to retrieve message ID!\n");
         }
         
@@ -74,7 +74,7 @@ public class LiveMessageTesting
         }
         catch (Exception e)
         {
-            ConsoleExt.WriteLineWithStepPretext(e.Message, ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true);
+            ConsoleExt.WriteLineWithStepPretext(e.Message, ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true, true);
             Assert.Fail("Failed to write message ID and Page Index!\n");
             return;
         }
@@ -93,7 +93,7 @@ public class LiveMessageTesting
         }
         catch (Exception e)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true);
+            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true, true);
             Assert.Fail("Failed to retrieve Page Index!\n");
         }
         
@@ -109,7 +109,7 @@ public class LiveMessageTesting
         }
         catch (Exception e)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true);
+            ConsoleExt.WriteLineWithStepPretext($"Message: {e.Message} StackTrace: {e.StackTrace}", ConsoleExt.CurrentStep.FileReading, ConsoleExt.OutputType.Error, e, true, true);
             Assert.Fail("Failed to remove message ID from message history!\n");
             return;
         }

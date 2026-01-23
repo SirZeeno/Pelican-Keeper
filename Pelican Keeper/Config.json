@@ -31,7 +31,8 @@
   "MaxServerCount": 10,
   "ServersToDisplay": ["UUIDS HERE"],
   
-  "Debug": true,
+  "Debug": false,
+  "OutputMode": "None",
   "DryRun": false,
   "AutoUpdate": false
 }

@@ -39,6 +39,7 @@ public abstract class TemplateClasses
         A2S
     }
 
+    //TODO: for Server status in the template class, so i dont have to compare the literal string but instead use a enum which is more predicatable
     public enum ServerStatus
     {
         Online,
@@ -48,15 +49,13 @@ public abstract class TemplateClasses
         Stopping
     }
     
-    public enum ReleasePlatform
+    //TODO: for the Debug output to regulate what is being show to the user in debug mode and hone in on the issue being looked for.
+    public enum OutputMode
     {
-        WinX86,
-        WinX64,
-        LinuxX64,
-        LinuxArm,
-        LinuxArm64,
-        OsxX64,
-        OsxArm64,
+        Info,
+        Warning,
+        Error,
+        Debug,
         None
     }
     
@@ -115,6 +114,7 @@ public abstract class TemplateClasses
         public string[]? ServersToDisplay { get; init; }
         
         public bool Debug { get; init; }
+        public OutputMode  OutputMode { get; init; }
         public bool DryRun { get; init; }
         public bool AutoUpdate { get; init; }
     }

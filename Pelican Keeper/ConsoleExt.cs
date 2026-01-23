@@ -2,7 +2,14 @@
 
 namespace Pelican_Keeper;
 
-//TODO: Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per message
+/// <summary>
+/// TODOs
+///
+/// Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per message
+/// Move the config debug mode check into here so i only have to call the write line function and not also check if debug is on, before the call
+/// Add the OutputMode enum into here to allow for granular control of what type of output is being displayed
+/// Re-Organize the output types of all the console write calls to better reflect the new Debug Output type
+/// </summary>
 public static class ConsoleExt
 {
     public static bool ExceptionOccurred;
@@ -17,7 +24,7 @@ public static class ConsoleExt
         Error,
         Info,
         Warning,
-        Question
+        Debug
     }
     
     // This is changeable to be whatever necessary
@@ -48,11 +55,19 @@ public static class ConsoleExt
     /// <param name="output">Output</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
+    /// <param name="shouldBypassDebug">Should the console Log Bypass Debug Mode</param>
     /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldExit = false)
+    public static void WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
     {
+        // It needs to write if the output is info
+        // It needs to write if the output is an error
+        // It needs to write if the bypass is true
+        // It shouldn't write it the output is not info or error and the debug is off
+        // It should only allow the output of the type that corresponds to the output mode if debug is on and output mode is set to anything but none
+        if (!Program.Config.Debug && outputType != OutputType.Info && !shouldBypassDebug) return;
+        
         CurrentTime();
         WriteOutputType(outputType);
         if (output is IEnumerable enumerable && !(output is string))
@@ -85,11 +100,14 @@ public static class ConsoleExt
     /// <param name="currentStep">Current step, default is none</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
+    /// <param name="shouldBypassDebug">Should the console Log Bypass Debug Mode</param>
     /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithStepPretext<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldExit = false)
+    public static void WriteLineWithStepPretext<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
     {
+        if (!Program.Config.Debug && !shouldBypassDebug) return;
+        
         CurrentTime();
         WriteStep(currentStep);
         WriteOutputType(outputType);
@@ -123,11 +141,14 @@ public static class ConsoleExt
     /// <param name="output">Output</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
+    /// <param name="shouldBypassDebug">Should the console Log Bypass Debug Mode</param>
     /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldExit = false)
+    public static void WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
     {
+        if (!Program.Config.Debug && !shouldBypassDebug) return;
+        
         CurrentTime();
         WriteOutputType(outputType);
         if (output is IEnumerable enumerable && !(output is string))
@@ -164,7 +185,7 @@ public static class ConsoleExt
         {
             OutputType.Error => (ConsoleColor.DarkRed, "Error"),
             OutputType.Warning => (ConsoleColor.DarkYellow, "Warning"),
-            OutputType.Question => (ConsoleColor.DarkGreen, "Question"),
+            OutputType.Debug => (ConsoleColor.DarkMagenta, "Debug"),
             _ => (ConsoleColor.Green, "Info")
         };
         
