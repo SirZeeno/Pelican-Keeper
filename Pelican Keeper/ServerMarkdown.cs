@@ -84,7 +84,7 @@ public static class ServerMarkdown
         var message = ReplacePlaceholders(result.Body, viewModel);
 
         if (Program.Config.Debug)
-            ConsoleExt.WriteLineWithStepPretext($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}", ConsoleExt.CurrentStep.Markdown);
+            ConsoleExt.WriteLine($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}", ConsoleExt.CurrentStep.Markdown);
 
         return (message, serverName);
     }

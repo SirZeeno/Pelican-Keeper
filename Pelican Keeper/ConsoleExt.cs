@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Pelican_Keeper;
 
@@ -21,10 +22,11 @@ public static class ConsoleExt
     
     public enum OutputType
     {
-        Error,
         Info,
         Warning,
-        Debug
+        Error,
+        Debug,
+        None
     }
     
     // This is changeable to be whatever necessary
@@ -46,6 +48,7 @@ public static class ConsoleExt
         EmbedBuilding,
         FileReading,
         Initialization,
+        Ignore,
         None
     }
 
@@ -53,125 +56,46 @@ public static class ConsoleExt
     /// Writes a line to the console with a pretext based on the output type.
     /// </summary>
     /// <param name="output">Output</param>
+    /// <param name="currentStep">Current step, default is Ignore</param>
     /// <param name="outputType">Output type, default is info</param>
     /// <param name="exception">Exception, default is null</param>
     /// <param name="shouldBypassDebug">Should the console Log Bypass Debug Mode</param>
     /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
+    public static void WriteLine<T>(T output, CurrentStep currentStep = CurrentStep.Ignore, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
     {
-        // It needs to write if the output is info
-        // It needs to write if the output is an error
-        // It needs to write if the bypass is true
         // It shouldn't write it the output is not info or error and the debug is off
-        // It should only allow the output of the type that corresponds to the output mode if debug is on and output mode is set to anything but none
-        if (!Program.Config.Debug && outputType != OutputType.Info && !shouldBypassDebug) return;
-        
-        CurrentTime();
-        WriteOutputType(outputType);
-        if (output is IEnumerable enumerable && !(output is string))
-        {
-            Console.Write(string.Join(", ", enumerable.Cast<object>()));
-        }
-        else
-        {
-            Console.Write(output);
-        }
-        
-        if (exception == null)
-        {
-            Console.WriteLine();
-            return;
-        }
-        ExceptionOccurred = true;
-        ExceptionsList.AddLast(exception);
-        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
-        
-        if (!shouldExit || SuppressProcessExitForTests) return;
-        Thread.Sleep(TimeSpan.FromSeconds(5));
-        Environment.Exit(1);
-    }
+        if (outputType != OutputType.Error && outputType != OutputType.Info && !Program.Config.Debug && !shouldBypassDebug) return;
 
-    /// <summary>
-    /// Writes a line to the console with a pretext based on the output type.
-    /// </summary>
-    /// <param name="output">Output</param>
-    /// <param name="currentStep">Current step, default is none</param>
-    /// <param name="outputType">Output type, default is info</param>
-    /// <param name="exception">Exception, default is null</param>
-    /// <param name="shouldBypassDebug">Should the console Log Bypass Debug Mode</param>
-    /// <param name="shouldExit">Should the Program Exit</param>
-    /// <typeparam name="T">Any type</typeparam>
-    /// <returns>The length of the pretext</returns>
-    public static void WriteLineWithStepPretext<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
-    {
-        if (!Program.Config.Debug && !shouldBypassDebug) return;
-        
-        CurrentTime();
-        WriteStep(currentStep);
-        WriteOutputType(outputType);
-        
-        if (output is IEnumerable enumerable && !(output is string))
+        // It needs to write if the bypass is true
+        if (shouldBypassDebug && outputType != OutputType.Info && outputType != OutputType.Error)
         {
-            Console.Write(string.Join(", ", enumerable.Cast<object>()));
-        }
-        else
-        {
-            Console.Write(output);
+            WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
         }
         
-        if (exception == null)
+        // It needs to write if the output is info or an error
+        if (outputType is OutputType.Error or OutputType.Info)
         {
-            Console.WriteLine();
-            return;
+            WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
         }
-        ExceptionOccurred = true;
-        ExceptionsList.AddLast(exception);
-        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
-                  
-        if (!shouldExit || SuppressProcessExitForTests) return;
-        Thread.Sleep(TimeSpan.FromSeconds(5));
-        Environment.Exit(1);
-    }
 
-    /// <summary>
-    /// Writes a single line to the console with a pretext based on the output type.
-    /// </summary>
-    /// <param name="output">Output</param>
-    /// <param name="outputType">Output type, default is info</param>
-    /// <param name="exception">Exception, default is null</param>
-    /// <param name="shouldBypassDebug">Should the console Log Bypass Debug Mode</param>
-    /// <param name="shouldExit">Should the Program Exit</param>
-    /// <typeparam name="T">Any type</typeparam>
-    /// <returns>The length of the pretext</returns>
-    public static void WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
-    {
-        if (!Program.Config.Debug && !shouldBypassDebug) return;
-        
-        CurrentTime();
-        WriteOutputType(outputType);
-        if (output is IEnumerable enumerable && !(output is string))
+        switch (Program.Config.Debug)
         {
-            Console.Write(string.Join(", ", enumerable.Cast<object>()));
+            // It should only allow the output of the type that corresponds to the output mode if debug is on and output mode is set to anything but none
+            case true when outputType != OutputType.None:
+            {
+                if (outputType == Program.Config.OutputMode)
+                {
+                    WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+                }
+
+                break;
+            }
+            case true:
+                WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+                break;
         }
-        else
-        {
-            Console.Write(output);
-        }
-        
-        if (exception == null)
-        {
-            Console.WriteLine();
-            return;
-        }
-        ExceptionOccurred = true;
-        ExceptionsList.AddLast(exception);
-        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
-        
-        if (!shouldExit || SuppressProcessExitForTests) return;
-        Thread.Sleep(TimeSpan.FromSeconds(5));
-        Environment.Exit(1);
     }
 
     /// <summary>
@@ -233,5 +157,34 @@ public static class ConsoleExt
         };
 
         Console.Write($"[{label}] ");
+    }
+
+    private static void WriteConsoleOutput<T>(T output, CurrentStep currentStep, OutputType outputType, Exception? exception, bool shouldExit)
+    {
+        CurrentTime();
+        if (currentStep != CurrentStep.Ignore)
+            WriteStep(currentStep);
+        WriteOutputType(outputType);
+        if (output is IEnumerable enumerable && !(output is string))
+        {
+            Console.Write(string.Join(", ", enumerable.Cast<object>()));
+        }
+        else
+        {
+            Console.Write(output);
+        }
+        
+        if (exception == null)
+        {
+            Console.WriteLine();
+            return;
+        }
+        ExceptionOccurred = true;
+        ExceptionsList.AddLast(exception);
+        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
+        
+        if (!shouldExit || SuppressProcessExitForTests) return;
+        Thread.Sleep(TimeSpan.FromSeconds(5));
+        Environment.Exit(1);
     }
 }

@@ -22,7 +22,7 @@ public static class Consolidated
                 Program.GlobalServerInfo = serversList;
                 if (serversList.Count == 0)
                 {
-                    WriteLineWithPretext("No servers found on Pelican.", OutputType.Error);
+                    WriteLine("No servers found on Pelican.", CurrentStep.Ignore, OutputType.Error);
                 }
                 var uuids = serversList.Select(s => s.Uuid).ToList();
                 var embed = await Program.EmbedService.BuildMultiServerEmbed(serversList);
@@ -42,7 +42,7 @@ public static class Consolidated
                         {
                             var msg = await channel.GetMessageAsync((ulong)tracked);
                             if (config.Debug)
-                                WriteLineWithPretext($"Updating message {tracked}");
+                                WriteLine($"Updating message {tracked}");
 
                             if (config is { AllowUserServerStartup: true, IgnoreOfflineServers: false } or {AllowUserServerStopping: true})
                             {
@@ -108,7 +108,7 @@ public static class Consolidated
                                     }
                                 }
 
-                                WriteLineWithPretext("Buttons created: " + buttons.Count);
+                                WriteLine("Buttons created: " + buttons.Count);
                                 await msg.ModifyAsync(mb =>
                                 {
                                     mb.WithEmbed(embed);
@@ -133,7 +133,7 @@ public static class Consolidated
                                 if (config.AllowServerStartup is { Length: > 0 } && !string.Equals(config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal))
                                 {
                                     selectedServerUuids = selectedServerUuids.Where(uuid => config.AllowServerStartup.Contains(uuid)).ToList();
-                                    WriteLineWithPretext($"Selected Servers: {selectedServerUuids.Count}", OutputType.Warning);
+                                    WriteLine($"Selected Servers: {selectedServerUuids.Count}", CurrentStep.Ignore, OutputType.Warning);
                                 }
                                 
                                 if (config.AllowServerStopping is { Length: > 0 } && !string.Equals(config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal))
@@ -190,7 +190,7 @@ public static class Consolidated
                                     }
                                 }
                                 
-                                WriteLineWithPretext("Buttons created: " + buttons.Count);
+                                WriteLine("Buttons created: " + buttons.Count);
                                 DebugDumpComponents(buttons);
                                 var msg = await channel.SendMessageAsync(mb =>
                                 {
@@ -208,7 +208,7 @@ public static class Consolidated
                     }
                 }
                 else if (config.Debug)
-                    WriteLineWithPretext("Message has not changed. Skipping.");
+                    WriteLine("Message has not changed. Skipping.");
             }, config.ServerUpdateInterval + Random.Shared.Next(0, config.ServerUpdateInterval / 2)
         );
     }

@@ -21,7 +21,7 @@ public static class FileManager
         
         foreach (var file in Directory.GetFiles(originDirectory, fileNameWithExtension, SearchOption.AllDirectories)) return file;
         
-        WriteLineWithStepPretext($"Couldn't find {fileNameWithExtension} file in program directory!", CurrentStep.FileReading, OutputType.Error, new FileNotFoundException());
+        WriteLine($"Couldn't find {fileNameWithExtension} file in program directory!", CurrentStep.FileReading, OutputType.Error, new FileNotFoundException());
         return string.Empty;
     }
 
@@ -44,12 +44,12 @@ public static class FileManager
     /// </summary>
     private static async Task CreateSecretsFile()
     {
-        WriteLineWithStepPretext("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
+        WriteLine("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
         await using var secretsFile = File.Create("Secrets.json");
         string defaultSecrets = new string("{\n  \"ClientToken\": \"YOUR_CLIENT_TOKEN\",\n  \"ServerToken\": \"YOUR_SERVER_TOKEN\",\n  \"ServerUrl\": \"YOUR_BASIC_SERVER_URL\",\n  \"BotToken\": \"YOUR_DISCORD_BOT_TOKEN\",\n  \"ChannelIds\": [THE_CHANNEL_ID_YOU_WANT_THE_BOT_TO_POST_IN],\n  \"ExternalServerIp\": \"YOUR_EXTERNAL_SERVER_IP\"\n}");
         await using var writer = new StreamWriter(secretsFile);
         await writer.WriteAsync(defaultSecrets);
-        WriteLineWithStepPretext("Created default Secrets.json. Please fill out the values.", CurrentStep.FileReading, OutputType.Warning);
+        WriteLine("Created default Secrets.json. Please fill out the values.", CurrentStep.FileReading, OutputType.Warning);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public static class FileManager
         
         if (secretsPath == string.Empty)
         {
-            WriteLineWithStepPretext("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
+            WriteLine("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
 
             if (string.IsNullOrEmpty(customDirectoryOrFile))
             {
@@ -106,13 +106,13 @@ public static class FileManager
             }
             else
             {
-                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find Secrets File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
+                WriteLine("Custom File or Directory specified, but unable to find Secrets File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
                 return null;
             }
             
             if (secretsPath == string.Empty)
             {
-                WriteLineWithStepPretext("Unable to Find Secrets.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                WriteLine("Unable to Find Secrets.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
         }
@@ -133,7 +133,7 @@ public static class FileManager
             
             if (secrets == null)
             {
-                WriteLineWithStepPretext("Secrets file is empty or not in the correct format. Please check Secrets.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                WriteLine("Secrets file is empty or not in the correct format. Please check Secrets.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
             
@@ -142,7 +142,7 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            WriteLineWithStepPretext("Failed to load secrets. Check that the Secrets file is filled out and is in the correct format. Check Secrets.json", CurrentStep.FileReading, OutputType.Error, ex, true);
+            WriteLine("Failed to load secrets. Check that the Secrets file is filled out and is in the correct format. Check Secrets.json", CurrentStep.FileReading, OutputType.Error, ex, true);
             return null;
         }
     }
@@ -162,7 +162,7 @@ public static class FileManager
         
         if (configPath == string.Empty)
         {
-            WriteLineWithStepPretext("Config.json not found. Pulling Default from Github!", CurrentStep.FileReading, OutputType.Warning);
+            WriteLine("Config.json not found. Pulling Default from Github!", CurrentStep.FileReading, OutputType.Warning);
 
             if (string.IsNullOrEmpty(customDirectoryOrFile))
             {
@@ -171,13 +171,13 @@ public static class FileManager
             }
             else
             {
-                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find Config File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
+                WriteLine("Custom File or Directory specified, but unable to find Config File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
                 return null;
             }
             
             if (configPath == string.Empty)
             {
-                WriteLineWithStepPretext("Unable to Find Config.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                WriteLine("Unable to Find Config.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
         }
@@ -213,7 +213,7 @@ public static class FileManager
             
             if (config == null)
             {
-                WriteLineWithStepPretext("Config file is empty or not in the correct format. Please check Config.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                WriteLine("Config file is empty or not in the correct format. Please check Config.json", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
             
@@ -222,7 +222,7 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            WriteLineWithStepPretext("Failed to load config. Check if nothing is misspelled and you used the correct options", CurrentStep.FileReading, OutputType.Error, ex, true);
+            WriteLine("Failed to load config. Check if nothing is misspelled and you used the correct options", CurrentStep.FileReading, OutputType.Error, ex, true);
             return null;
         }
     }
@@ -242,7 +242,7 @@ public static class FileManager
         
         if (gameCommPath == string.Empty)
         {
-            WriteLineWithStepPretext("GamesToMonitor.json not found. Pulling from Github Repo!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+            WriteLine("GamesToMonitor.json not found. Pulling from Github Repo!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
             if (string.IsNullOrEmpty(customDirectoryOrFile))
             {
                 await CreateGamesToMonitorFile();
@@ -250,13 +250,13 @@ public static class FileManager
             }
             else
             {
-                WriteLineWithStepPretext("Custom File or Directory specified, but unable to find GamesToMonitor File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
+                WriteLine("Custom File or Directory specified, but unable to find GamesToMonitor File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
                 return null;
             }
             
             if (gameCommPath == string.Empty)
             {
-                WriteLineWithStepPretext("Unable to Find GamesToMonitor.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
+                WriteLine("Unable to Find GamesToMonitor.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
                 return null;
             }
         }
@@ -269,7 +269,7 @@ public static class FileManager
         }
         catch (Exception ex)
         {
-            WriteLineWithStepPretext("Failed to load GamesToMonitor.json. Check if nothing is misspelled and you used the correct options", CurrentStep.FileReading, OutputType.Error, ex);
+            WriteLine("Failed to load GamesToMonitor.json. Check if nothing is misspelled and you used the correct options", CurrentStep.FileReading, OutputType.Error, ex);
             return null;
         }
     }

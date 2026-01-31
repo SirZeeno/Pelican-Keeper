@@ -15,16 +15,16 @@ public class EmbedBuilderService
         
         if (Program.Config.DryRun)
         {
-            ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
-            ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
+            ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
+            ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
         
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" }; //TODO: allow for an expanded format per users choice like this DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")
         
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
         
-        ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
-        ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
+        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
+        ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
         return Task.FromResult(embed.Build());
     }
 
@@ -38,16 +38,16 @@ public class EmbedBuilderService
             embed.AddField(serverInfo.serverName, serverInfo.message, inline: true); //TODO:Allow customization of this but test first if this is worth customizing
 
             if (!Program.Config.DryRun) continue;
-            ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
-            ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
+            ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
+            ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
         
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
         
         if (!Program.Config.Debug) return Task.FromResult(embed.Build());
         
-        ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
-        ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
+        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
+        ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
         return Task.FromResult(embed.Build());
     }
 
@@ -65,16 +65,16 @@ public class EmbedBuilderService
             
             if (Program.Config.DryRun)
             {
-                ConsoleExt.WriteLineWithStepPretext(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
-                ConsoleExt.WriteLineWithStepPretext(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
+                ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
+                ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
             
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
             
             if (Program.Config.Debug)
             {
-                ConsoleExt.WriteLineWithStepPretext("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
-                ConsoleExt.WriteLineWithStepPretext($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
+                ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding);
+                ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding);
             }
             embeds.Add(embed.Build());
         }

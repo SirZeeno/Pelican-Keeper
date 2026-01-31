@@ -18,7 +18,7 @@ public static class PerServer
         Program.GlobalServerInfo = serversList;
         if (serversList.Count == 0)
         {
-            WriteLineWithPretext("No servers found on Pelican.", OutputType.Error);
+            WriteLine("No servers found on Pelican.", CurrentStep.Ignore, OutputType.Error);
             return;
         }
         foreach (var server in serversList)
@@ -46,7 +46,7 @@ public static class PerServer
                             {
                                 var msg = await channel.GetMessageAsync((ulong)tracked);
                                 if (config.Debug)
-                                    WriteLineWithPretext($"Updating message {tracked}");
+                                    WriteLine($"Updating message {tracked}");
                                     
                                 bool allowAll = config.AllowServerStartup == null || config.AllowServerStartup.Length == 0 || string.Equals(config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal);
                                 bool showStart = config is { AllowUserServerStartup: true, IgnoreOfflineServers: false, AllowServerStartup: not null } && (allowAll || config.AllowServerStartup.Contains(uuid[0], StringComparer.OrdinalIgnoreCase));
@@ -87,7 +87,7 @@ public static class PerServer
                     }
                     else if (config.Debug)
                     {
-                        WriteLineWithPretext("Message has not changed. Skipping.");
+                        WriteLine("Message has not changed. Skipping.");
                     }
                 }, config.ServerUpdateInterval + Random.Shared.Next(0, 3) // randomized per-server delay
             );

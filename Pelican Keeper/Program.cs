@@ -18,7 +18,7 @@ using static DiscordInteractions;
 /// Fixed Redundant double checks to the message history cache
 /// Split each message update loop into its own class
 /// Added the Version parameter into the project config and into the Update checker.
-/// Added OuputMode into the config to further narrow down what debug levels should be written into console
+/// Added OutputMode into the config to further narrow down what debug levels should be written into console
 /// Added an option that allows the bypass of the debug config check for console outputs
 /// Changed the Default for Debug mode to false
 /// Added the OutputMode variable to the Egg
@@ -53,7 +53,7 @@ public static class Program
         GetGamesToMonitorFileAsync();
         ServerMarkdown.GetMarkdownFileContentAsync();
         
-        WriteLineWithPretext($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
+        WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
 
         if (Config.AutoUpdate)
         {
@@ -86,21 +86,21 @@ public static class Program
     /// <param name="e">ReadyEventArgs</param>
     private static async Task OnClientReady(DiscordClient sender, ReadyEventArgs e)
     {
-        WriteLineWithPretext("Bot is connected and ready!");
+        WriteLine("Bot is connected and ready!");
         if (Secrets.ChannelIds != null)
         {
             foreach (var targetChannel in Secrets.ChannelIds)
             {
                 var discordChannel = await sender.GetChannelAsync(targetChannel);
                 TargetChannel.Add(discordChannel);
-                WriteLineWithPretext($"Target channel: {discordChannel.Name}");
+                WriteLine($"Target channel: {discordChannel.Name}");
             }
 
             _ = StartStatsUpdater(sender, Secrets.ChannelIds);
         }
         else
         {
-            WriteLineWithPretext("ChannelIds in the Secrets File is empty or not spelled correctly!", OutputType.Error);
+            WriteLine("ChannelIds in the Secrets File is empty or not spelled correctly!", CurrentStep.Ignore, OutputType.Error);
         }
     }
 
@@ -150,8 +150,8 @@ public static class Program
                 }
                 catch (Exception ex)
                 {
-                    WriteLineWithPretext($"Updater error for mode {mode}: {ex.Message}", OutputType.Warning);
-                    WriteLineWithPretext($"Stack trace: {ex.StackTrace}", OutputType.Warning);
+                    WriteLine($"Updater error for mode {mode}: {ex.Message}", CurrentStep.Ignore, OutputType.Warning);
+                    WriteLine($"Stack trace: {ex.StackTrace}", CurrentStep.Ignore, OutputType.Warning);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(delaySeconds));

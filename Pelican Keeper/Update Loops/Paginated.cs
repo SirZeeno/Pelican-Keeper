@@ -23,7 +23,7 @@ public static class Paginated
                 Program.GlobalServerInfo = serversList;
                 if (serversList.Count == 0)
                 {
-                    WriteLineWithPretext("No servers found on Pelican.", OutputType.Error);
+                    WriteLine("No servers found on Pelican.", CurrentStep.Ignore, OutputType.Error);
                 }
                 var uuids = serversList.Select(s => s.Uuid).ToList();
                 var embeds = await Program.EmbedService.BuildPaginatedServerEmbeds(serversList);
@@ -53,11 +53,11 @@ public static class Paginated
                             if (EmbedHasChanged(uuids, updatedEmbed))
                             {
                                 if (config.Debug)
-                                    WriteLineWithPretext($"Updating paginated message {cacheEntry.Value.Key} on page {currentIndex}");
+                                    WriteLine($"Updating paginated message {cacheEntry.Value.Key} on page {currentIndex}");
                                 await msg.ModifyAsync(updatedEmbed);
                             }
                             else if (config.Debug)
-                                WriteLineWithPretext("Message has not changed. Skipping.");
+                                WriteLine("Message has not changed. Skipping.");
                         }
                         else
                         {
@@ -66,14 +66,14 @@ public static class Paginated
                                 bool allowAllStart = config.AllowServerStartup == null || config.AllowServerStartup.Length == 0 || string.Equals(config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal);
                                 bool showStart = config is { AllowUserServerStartup: true, IgnoreOfflineServers: false, AllowServerStartup: not null } && (allowAllStart || config.AllowServerStartup.Contains(uuids[0], StringComparer.OrdinalIgnoreCase));
                                     
-                                WriteLineWithPretext("show all Start: " + allowAllStart);
-                                WriteLineWithPretext("show Start: " + showStart);
+                                WriteLine("show all Start: " + allowAllStart);
+                                WriteLine("show Start: " + showStart);
                                     
                                 bool allowAllStop = config.AllowServerStopping == null || config.AllowServerStopping.Length == 0 || string.Equals(config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal);
                                 bool showStop = config is { AllowUserServerStopping: true, IgnoreOfflineServers: false, AllowServerStopping: not null } && (allowAllStop || config.AllowServerStopping.Contains(uuids[0], StringComparer.OrdinalIgnoreCase));
                                     
-                                WriteLineWithPretext("show all Stop: " + allowAllStop);
-                                WriteLineWithPretext("show Stop: " + showStop);
+                                WriteLine("show all Stop: " + allowAllStop);
+                                WriteLine("show Stop: " + showStop);
                                     
                                 switch (showStart)
                                 {

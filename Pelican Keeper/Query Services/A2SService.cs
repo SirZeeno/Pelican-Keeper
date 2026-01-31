@@ -15,7 +15,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
         _endPoint = new IPEndPoint(IPAddress.Parse(ip), port);
         _udpClient.Client.ReceiveTimeout = 3000;
 
-        ConsoleExt.WriteLineWithStepPretext("Connected to A2S server at " + _endPoint, ConsoleExt.CurrentStep.A2SQuery);
+        ConsoleExt.WriteLine("Connected to A2S server at " + _endPoint, ConsoleExt.CurrentStep.A2SQuery);
         return Task.CompletedTask;
     }
 
@@ -26,18 +26,18 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
         
         var request = BuildA2SInfoPacket();
         await _udpClient.SendAsync(request, request.Length, _endPoint);
-        ConsoleExt.WriteLineWithStepPretext("Sent A2S_INFO request", ConsoleExt.CurrentStep.A2SQuery);
+        ConsoleExt.WriteLine("Sent A2S_INFO request", ConsoleExt.CurrentStep.A2SQuery);
         
         var first = await ReceiveWithTimeoutAsync(_udpClient, timeoutMs: 15000);
         if (first == null)
         {
-            ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("Timed out waiting for server response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
             return HelperClass.ServerPlayerCountDisplayCleanup(string.Empty);
         }
 
         if (Program.Config.Debug)
         {
-            ConsoleExt.WriteLineWithStepPretext("Received response from A2S server (first packet).", ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine("Received response from A2S server (first packet).", ConsoleExt.CurrentStep.A2SQuery);
             DumpBytes(first);
         }
 
@@ -52,22 +52,22 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
                 // bytes 5 to 8 are the challenge
                 int challenge = BitConverter.ToInt32(first, 5);
                 if (Program.Config.Debug)
-                    ConsoleExt.WriteLineWithStepPretext($"Received challenge: 0x{challenge:X8}", ConsoleExt.CurrentStep.A2SQuery);
+                    ConsoleExt.WriteLine($"Received challenge: 0x{challenge:X8}", ConsoleExt.CurrentStep.A2SQuery);
                 
                 var challenged = BuildA2SInfoPacket(challenge);
                 await _udpClient.SendAsync(challenged, challenged.Length, _endPoint);
-                ConsoleExt.WriteLineWithStepPretext("Sent A2S_INFO request with challenge", ConsoleExt.CurrentStep.A2SQuery);
+                ConsoleExt.WriteLine("Sent A2S_INFO request with challenge", ConsoleExt.CurrentStep.A2SQuery);
                 
                 var second = await ReceiveWithTimeoutAsync(_udpClient, timeoutMs: 15000);
                 if (second == null)
                 {
-                    ConsoleExt.WriteLineWithStepPretext("Timed out waiting for challenged info response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
+                    ConsoleExt.WriteLine("Timed out waiting for challenged info response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
                     return HelperClass.ServerPlayerCountDisplayCleanup(string.Empty);
                 }
 
                 if (Program.Config.Debug)
                 {
-                    ConsoleExt.WriteLineWithStepPretext("Received challenged info response.", ConsoleExt.CurrentStep.A2SQuery);
+                    ConsoleExt.WriteLine("Received challenged info response.", ConsoleExt.CurrentStep.A2SQuery);
                     DumpBytes(second);
                 }
 
@@ -81,10 +81,10 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
 
             // Some servers may reply multi-packet (0xFE) or other types, but I will treat them as unsupported for now
             if (Program.Config.Debug)
-                ConsoleExt.WriteLineWithStepPretext($"Unexpected response header: 0x{header:X2}", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Warning);
+                ConsoleExt.WriteLine($"Unexpected response header: 0x{header:X2}", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Warning);
         }
 
-        ConsoleExt.WriteLineWithStepPretext("Invalid or unexpected response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
+        ConsoleExt.WriteLine("Invalid or unexpected response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
         return HelperClass.ServerPlayerCountDisplayCleanup(string.Empty);
     }
 
@@ -101,7 +101,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
         }
         catch (SocketException ex)
         {
-            ConsoleExt.WriteLineWithStepPretext("No response from server.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLine("No response from server.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error, ex);
             return null;
         }
     }
@@ -112,12 +112,12 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
 
         if (string.IsNullOrEmpty(parseResult))
         {
-            ConsoleExt.WriteLineWithStepPretext("Failed to parse response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("Failed to parse response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
 
         if (Program.Config.Debug)
-            ConsoleExt.WriteLineWithStepPretext($"A2S request response: {parseResult}", ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine($"A2S request response: {parseResult}", ConsoleExt.CurrentStep.A2SQuery);
 
         return parseResult;
     }
@@ -155,7 +155,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
         byte header = buffer[index++];
         if (header != 0x49) // 'I'
         {
-            ConsoleExt.WriteLineWithStepPretext($"Invalid response (expected 0x49, got 0x{header:X2}).", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine($"Invalid response (expected 0x49, got 0x{header:X2}).", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
 
@@ -178,16 +178,16 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
 
         if (Program.Config.Debug)
         {
-            ConsoleExt.WriteLineWithStepPretext("A2S Info Response:", ConsoleExt.CurrentStep.A2SQuery);
-            ConsoleExt.WriteLineWithStepPretext($"Protocol: {protocol}", ConsoleExt.CurrentStep.A2SQuery);
-            ConsoleExt.WriteLineWithStepPretext($"App ID: {appId}", ConsoleExt.CurrentStep.A2SQuery);
-            ConsoleExt.WriteLineWithStepPretext($"Folder: {folder}", ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine("A2S Info Response:", ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine($"Protocol: {protocol}", ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine($"App ID: {appId}", ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine($"Folder: {folder}", ConsoleExt.CurrentStep.A2SQuery);
 
-            ConsoleExt.WriteLineWithStepPretext("Server Name: " + name, ConsoleExt.CurrentStep.A2SQuery);
-            ConsoleExt.WriteLineWithStepPretext("Map: " + map, ConsoleExt.CurrentStep.A2SQuery);
-            ConsoleExt.WriteLineWithStepPretext("Game: " + game, ConsoleExt.CurrentStep.A2SQuery);
-            ConsoleExt.WriteLineWithStepPretext($"Players: {players}/{maxPlayers}", ConsoleExt.CurrentStep.A2SQuery);
-            ConsoleExt.WriteLineWithStepPretext("Bots: " + bots, ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine("Server Name: " + name, ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine("Map: " + map, ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine("Game: " + game, ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine($"Players: {players}/{maxPlayers}", ConsoleExt.CurrentStep.A2SQuery);
+            ConsoleExt.WriteLine("Bots: " + bots, ConsoleExt.CurrentStep.A2SQuery);
         }
 
         return $"{players}/{maxPlayers}";

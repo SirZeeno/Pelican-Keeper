@@ -22,7 +22,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         }
         catch (SocketException ex)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLine($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error, ex);
         }
     }
 
@@ -67,12 +67,12 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         }
         catch (OperationCanceledException)
         {
-            ConsoleExt.WriteLineWithStepPretext("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
         catch (Exception ex)
         {
-            ConsoleExt.WriteLineWithStepPretext($"Error: {ex.Message}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine($"Error: {ex.Message}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
             return string.Empty;
         }
     }

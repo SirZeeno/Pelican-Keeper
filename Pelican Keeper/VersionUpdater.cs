@@ -13,13 +13,13 @@ public static class VersionUpdater
     
     public static async Task UpdateProgram()
     {
-        ConsoleExt.WriteLineWithPretext("Checking for updates...");
+        ConsoleExt.WriteLine("Checking for updates...");
         SetupUserAgent();
         
         string? targetPath = await DownloadLatestAssetIfNewerAsync(CurrentVersion); // Downloads the appropriate version of the latest update for your platform if there is one available.
         if (string.IsNullOrEmpty(targetPath))
         {
-            ConsoleExt.WriteLineWithStepPretext("No update to apply.", ConsoleExt.CurrentStep.Updater);
+            ConsoleExt.WriteLine("No update to apply.", ConsoleExt.CurrentStep.Updater);
             if (Directory.Exists(Path.Combine(Environment.CurrentDirectory, "old")))
             {
                 await ReadOldConfigs();
@@ -27,15 +27,15 @@ public static class VersionUpdater
             return;
         }
         
-        ConsoleExt.WriteLineWithStepPretext($"Download Completed! Path: {targetPath}", ConsoleExt.CurrentStep.Updater);
+        ConsoleExt.WriteLine($"Download Completed! Path: {targetPath}", ConsoleExt.CurrentStep.Updater);
         BackupOldConfigs();
-        ConsoleExt.WriteLineWithStepPretext("Configs Backed up!", ConsoleExt.CurrentStep.Updater);
+        ConsoleExt.WriteLine("Configs Backed up!", ConsoleExt.CurrentStep.Updater);
         
         string scriptPath = Path.Combine(Environment.CurrentDirectory, "update.sh");
 
         if (!File.Exists(scriptPath))
         {
-            ConsoleExt.WriteLineWithStepPretext($"Updater script not found at {scriptPath}", ConsoleExt.CurrentStep.Updater);
+            ConsoleExt.WriteLine($"Updater script not found at {scriptPath}", ConsoleExt.CurrentStep.Updater);
             return;
         }
 
@@ -67,7 +67,7 @@ public static class VersionUpdater
             UseShellExecute = false
         };
 
-        ConsoleExt.WriteLineWithStepPretext("Starting bash updater and exiting current process...", ConsoleExt.CurrentStep.Updater);
+        ConsoleExt.WriteLine("Starting bash updater and exiting current process...", ConsoleExt.CurrentStep.Updater);
         Process.Start(psi);
 
         // Exit so the script can overwrite the running binary
@@ -90,7 +90,7 @@ public static class VersionUpdater
         {
             if (!file.Name.EndsWith(".json")) continue;
             file.MoveTo(Path.Combine(oldDirectory,  file.Name), true);
-            ConsoleExt.WriteLineWithStepPretext($"Moving {file.Name} to {Path.Combine(oldDirectory, file.Name)}. If the File already exists in the Directory, it will be overwritten.", ConsoleExt.CurrentStep.Updater);
+            ConsoleExt.WriteLine($"Moving {file.Name} to {Path.Combine(oldDirectory, file.Name)}. If the File already exists in the Directory, it will be overwritten.", ConsoleExt.CurrentStep.Updater);
         }
     }
 
@@ -112,15 +112,15 @@ public static class VersionUpdater
 
         if (!hasUpdate)
         {
-            ConsoleExt.WriteLineWithStepPretext($"No update. Current={currentVersionString}, latest={latestTag}", ConsoleExt.CurrentStep.Updater);
+            ConsoleExt.WriteLine($"No update. Current={currentVersionString}, latest={latestTag}", ConsoleExt.CurrentStep.Updater);
             return null;
         }
         
-        ConsoleExt.WriteLineWithStepPretext($"Update available! Current={currentVersionString}, latest={latestTag}", ConsoleExt.CurrentStep.Updater);
+        ConsoleExt.WriteLine($"Update available! Current={currentVersionString}, latest={latestTag}", ConsoleExt.CurrentStep.Updater);
 
         if (release?.Assets == null || release.Assets.Length == 0)
         {
-            ConsoleExt.WriteLineWithStepPretext("No assets on latest release.", ConsoleExt.CurrentStep.Updater, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("No assets on latest release.", ConsoleExt.CurrentStep.Updater, ConsoleExt.OutputType.Error);
             return null;
         }
 
@@ -129,11 +129,11 @@ public static class VersionUpdater
 
         if (asset == null)
         {
-            ConsoleExt.WriteLineWithStepPretext($"No asset found for RID '{rid}'.", ConsoleExt.CurrentStep.Updater, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine($"No asset found for RID '{rid}'.", ConsoleExt.CurrentStep.Updater, ConsoleExt.OutputType.Error);
             return null;
         }
 
-        ConsoleExt.WriteLineWithStepPretext($"Downloading {asset.Name} from {asset.BrowserDownloadUrl}", ConsoleExt.CurrentStep.Updater);
+        ConsoleExt.WriteLine($"Downloading {asset.Name} from {asset.BrowserDownloadUrl}", ConsoleExt.CurrentStep.Updater);
         
         var targetPath = Path.Combine(Environment.CurrentDirectory, asset.Name);
 

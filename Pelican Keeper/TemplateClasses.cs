@@ -49,16 +49,6 @@ public abstract class TemplateClasses
         Stopping
     }
     
-    //TODO: for the Debug output to regulate what is being show to the user in debug mode and hone in on the issue being looked for.
-    public enum OutputMode
-    {
-        Info,
-        Warning,
-        Error,
-        Debug,
-        None
-    }
-    
     public record Secrets
     (
         string? ClientToken,
@@ -114,7 +104,7 @@ public abstract class TemplateClasses
         public string[]? ServersToDisplay { get; init; }
         
         public bool Debug { get; init; }
-        public OutputMode  OutputMode { get; init; }
+        public ConsoleExt.OutputType  OutputMode { get; init; }
         public bool DryRun { get; init; }
         public bool AutoUpdate { get; init; }
     }
