@@ -43,7 +43,7 @@ public class PlayerCountResponseTesting
                         await rcon.Connect();
                         response = await rcon.SendCommandAsync(_command, null);
                     }
-                    else ConsoleExt.WriteLine($"Password or Command is null. Password: {_password}, Command: {_command}", ConsoleExt.CurrentStep.Ignore, ConsoleExt.OutputType.Info, null, true);
+                    else ConsoleExt.WriteLine($"Password or Command is null. Password: {_password}, Command: {_command}", ConsoleExt.CurrentStep.None, ConsoleExt.OutputType.Info, null, true);
                     break;
                 }
                 case CommandExecutionMethod.MinecraftJava:
@@ -75,16 +75,16 @@ public class PlayerCountResponseTesting
             var playerMaxPlayer = Regex.Match(cleanResponse, @"^(\d+)\/\d+$");
             if (playerMaxPlayer.Success)
             {
-                ConsoleExt.WriteLine("Success! The Response Conforms to the output Standard!", ConsoleExt.CurrentStep.Ignore, ConsoleExt.OutputType.Info, null, true);
-                ConsoleExt.WriteLine($"Response: {response}", ConsoleExt.CurrentStep.Ignore, ConsoleExt.OutputType.Info, null, true);
-                ConsoleExt.WriteLine($"Clean Response: {cleanResponse}", ConsoleExt.CurrentStep.Ignore, ConsoleExt.OutputType.Info, null, true);
+                ConsoleExt.WriteLine("Success! The Response Conforms to the output Standard!", ConsoleExt.CurrentStep.None, ConsoleExt.OutputType.Info, null, true);
+                ConsoleExt.WriteLine($"Response: {response}", ConsoleExt.CurrentStep.None, ConsoleExt.OutputType.Info, null, true);
+                ConsoleExt.WriteLine($"Clean Response: {cleanResponse}", ConsoleExt.CurrentStep.None, ConsoleExt.OutputType.Info, null, true);
                 Assert.Pass($"{response}, {cleanResponse}\n");
             }
             else
             {
-                ConsoleExt.WriteLine("Failed! The Response does not Conform to the output Standard!", ConsoleExt.CurrentStep.Ignore, ConsoleExt.OutputType.Info, null, true);
-                ConsoleExt.WriteLine($"Response: {response}", ConsoleExt.CurrentStep.Ignore, ConsoleExt.OutputType.Info, null, true);
-                ConsoleExt.WriteLine($"Clean Response: {cleanResponse}", ConsoleExt.CurrentStep.Ignore, ConsoleExt.OutputType.Info, null, true);
+                ConsoleExt.WriteLine("Failed! The Response does not Conform to the output Standard!", ConsoleExt.CurrentStep.None, ConsoleExt.OutputType.Info, null, true);
+                ConsoleExt.WriteLine($"Response: {response}", ConsoleExt.CurrentStep.None, ConsoleExt.OutputType.Info, null, true);
+                ConsoleExt.WriteLine($"Clean Response: {cleanResponse}", ConsoleExt.CurrentStep.None, ConsoleExt.OutputType.Info, null, true);
                 Assert.Fail($"{response}, {cleanResponse}\n");
             }
         }

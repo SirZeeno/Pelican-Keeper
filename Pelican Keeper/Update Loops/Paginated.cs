@@ -23,7 +23,7 @@ public static class Paginated
                 Program.GlobalServerInfo = serversList;
                 if (serversList.Count == 0)
                 {
-                    WriteLine("No servers found on Pelican.", CurrentStep.Ignore, OutputType.Error);
+                    WriteLine("No servers found on Pelican.", CurrentStep.None, OutputType.Error);
                 }
                 var uuids = serversList.Select(s => s.Uuid).ToList();
                 var embeds = await Program.EmbedService.BuildPaginatedServerEmbeds(serversList);

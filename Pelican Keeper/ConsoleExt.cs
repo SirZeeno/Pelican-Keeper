@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Reflection.Metadata.Ecma335;
+using System.Text.RegularExpressions;
 
 namespace Pelican_Keeper;
 
@@ -48,7 +49,6 @@ public static class ConsoleExt
         EmbedBuilding,
         FileReading,
         Initialization,
-        Ignore,
         None
     }
 
@@ -63,7 +63,7 @@ public static class ConsoleExt
     /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLine<T>(T output, CurrentStep currentStep = CurrentStep.Ignore, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
+    public static void WriteLine<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
     {
         // It shouldn't write it the output is not info or error and the debug is off
         if (outputType != OutputType.Error && outputType != OutputType.Info && !Program.Config.Debug && !shouldBypassDebug) return;
@@ -134,27 +134,12 @@ public static class ConsoleExt
     private static void WriteStep(CurrentStep step)
     {
         if (step == CurrentStep.None) return;
-
-        var label = step switch
-        {
-            CurrentStep.FileChecks => "FileChecks",
-            CurrentStep.FileReading => "File Reading",
-            CurrentStep.MessageHistory => "Message History",
-            CurrentStep.PelicanApi => "Pelican API",
-            CurrentStep.A2SQuery => "A2S Query",
-            CurrentStep.RconQuery => "RCON Query",
-            CurrentStep.MinecraftJavaQuery => "MC Java Query",
-            CurrentStep.MinecraftBedrockQuery => "MC Bedrock Query",
-            CurrentStep.DiscordMessage => "Discord Message",
-            CurrentStep.DiscordInteraction => "Discord Interaction",
-            CurrentStep.Updater => "Updater",
-            CurrentStep.Markdown => "Markdown",
-            CurrentStep.Helper => "Helper",
-            CurrentStep.GameMonitoring => "Game Monitoring",
-            CurrentStep.EmbedBuilding => "Embed Building",
-            CurrentStep.Initialization => "Initialization",
-            _ => step.ToString()
-        };
+        
+        var label = Regex.Replace(
+            step.ToString(),
+            @"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])",
+            " "
+        );
 
         Console.Write($"[{label}] ");
     }
@@ -162,8 +147,7 @@ public static class ConsoleExt
     private static void WriteConsoleOutput<T>(T output, CurrentStep currentStep, OutputType outputType, Exception? exception, bool shouldExit)
     {
         CurrentTime();
-        if (currentStep != CurrentStep.Ignore)
-            WriteStep(currentStep);
+        WriteStep(currentStep);
         WriteOutputType(outputType);
         if (output is IEnumerable enumerable && !(output is string))
         {

@@ -22,6 +22,7 @@ using static DiscordInteractions;
 /// Added an option that allows the bypass of the debug config check for console outputs
 /// Changed the Default for Debug mode to false
 /// Added the OutputMode variable to the Egg
+/// Simplified the WriteStep function to automatically turn any step if written in camel into a proper string
 /// 
 /// </summary>
 
@@ -100,7 +101,7 @@ public static class Program
         }
         else
         {
-            WriteLine("ChannelIds in the Secrets File is empty or not spelled correctly!", CurrentStep.Ignore, OutputType.Error);
+            WriteLine("ChannelIds in the Secrets File is empty or not spelled correctly!", CurrentStep.None, OutputType.Error);
         }
     }
 
@@ -150,8 +151,8 @@ public static class Program
                 }
                 catch (Exception ex)
                 {
-                    WriteLine($"Updater error for mode {mode}: {ex.Message}", CurrentStep.Ignore, OutputType.Warning);
-                    WriteLine($"Stack trace: {ex.StackTrace}", CurrentStep.Ignore, OutputType.Warning);
+                    WriteLine($"Updater error for mode {mode}: {ex.Message}", CurrentStep.None, OutputType.Warning);
+                    WriteLine($"Stack trace: {ex.StackTrace}", CurrentStep.None, OutputType.Warning);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(delaySeconds));

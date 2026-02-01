@@ -18,7 +18,7 @@ public static class PerServer
         Program.GlobalServerInfo = serversList;
         if (serversList.Count == 0)
         {
-            WriteLine("No servers found on Pelican.", CurrentStep.Ignore, OutputType.Error);
+            WriteLine("No servers found on Pelican.", CurrentStep.None, OutputType.Error);
             return;
         }
         foreach (var server in serversList)

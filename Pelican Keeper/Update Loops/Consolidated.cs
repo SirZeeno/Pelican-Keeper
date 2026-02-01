@@ -22,7 +22,7 @@ public static class Consolidated
                 Program.GlobalServerInfo = serversList;
                 if (serversList.Count == 0)
                 {
-                    WriteLine("No servers found on Pelican.", CurrentStep.Ignore, OutputType.Error);
+                    WriteLine("No servers found on Pelican.", CurrentStep.None, OutputType.Error);
                 }
                 var uuids = serversList.Select(s => s.Uuid).ToList();
                 var embed = await Program.EmbedService.BuildMultiServerEmbed(serversList);
@@ -133,7 +133,7 @@ public static class Consolidated
                                 if (config.AllowServerStartup is { Length: > 0 } && !string.Equals(config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal))
                                 {
                                     selectedServerUuids = selectedServerUuids.Where(uuid => config.AllowServerStartup.Contains(uuid)).ToList();
-                                    WriteLine($"Selected Servers: {selectedServerUuids.Count}", CurrentStep.Ignore, OutputType.Warning);
+                                    WriteLine($"Selected Servers: {selectedServerUuids.Count}", CurrentStep.None, OutputType.Warning);
                                 }
                                 
                                 if (config.AllowServerStopping is { Length: > 0 } && !string.Equals(config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal))
