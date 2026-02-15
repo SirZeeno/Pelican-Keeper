@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": null
     },
-    "exported_at": "2026-02-15T05:44:07+00:00",
+    "exported_at": "2026-02-15T05:50:19+00:00",
     "name": "Pelican Keeper",
     "author": "Leon@logocomp.com",
     "uuid": "b9f6a260-8be9-4de0-90bb-4251ef5f9524",
@@ -17,7 +17,7 @@
     },
     "file_denylist": [],
     "startup_commands": {
-        "Default": "bash \"./Update Scripts/Pelican/update.sh\""
+        "Default": "bash \"./Update Scripts/Pelican/startup.sh\""
     },
     "config": {
         "files": "{\n  \"Config.json\": {\n    \"parser\": \"json\",\n    \"find\": {\n      \"InternalIpStructure\": \"{{server.environment.INTERNAL_IP_STRUCTURE}}\",\n      \"MessageFormat\": \"{{server.environment.MESSAGE_FORMAT}}\",\n      \"MessageSorting\": \"{{server.environment.MESSAGE_SORTING}}\",\n      \"MessageSortingDirection\": \"{{server.environment.MESSAGE_SORTING_DIRECTION}}\",\n\n      \"IgnoreOfflineServers\": \"{{server.environment.IGNORE_OFFLINE_SERVERS}}\",\n      \"IgnoreInternalServers\": \"{{server.environment.IGNORE_INTERNAL_SERVERS}}\",\n      \"IgnoreServersWithoutAllocations\": \"{{server.environment.IGNORE_SERVERS_WITHOUT_ALLOCATIONS}}\",\n\n      \"JoinableIpDisplay\": \"{{server.environment.JOINABLE_IP_DISPLAY}}\",\n      \"PlayerCountDisplay\": \"{{server.environment.PLAYER_COUNT_DISPLAY}}\",\n\n      \"AutomaticShutdown\": \"{{server.environment.AUTOMATIC_SHUTDOWN}}\",\n      \"EmptyServerTimeout\": \"{{server.environment.EMPTY_SERVER_TIMEOUT}}\",\n\n      \"AllowUserServerStartup\": \"{{server.environment.ALLOW_USER_SERVER_STARTUP}}\",\n      \"AllowUserServerStopping\": \"{{server.environment.ALLOW_USER_SERVER_STOPPING}}\",\n\n      \"ContinuesMarkdownRead\": \"{{server.environment.CONTINUES_MARKDOWN_READ}}\",\n      \"ContinuesGamesToMonitorRead\": \"{{server.environment.CONTINUES_GAMES_TO_MONITOR_READ}}\",\n\n      \"MarkdownUpdateInterval\": \"{{server.environment.MARKDOWN_UPDATE_INTERVAL}}\",\n      \"ServerUpdateInterval\": \"{{server.environment.SERVER_UPDATE_INTERVAL}}\",\n\n      \"LimitServerCount\": \"{{server.environment.LIMIT_SERVER_COUNT}}\",\n      \"MaxServerCount\": \"{{server.environment.MAX_SERVER_COUNT}}\",\n\n      \"Debug\": \"{{server.environment.DEBUG}}\",\n      \"OutputMode\": \"{{server.environment.OUTPUT_MODE}}\",\n      \"DryRun\": \"{{server.environment.DRY_RUN}}\",\n      \"AutoUpdate\": \"{{server.environment.AUTO_UPDATE}}\"\n    }\n  }\n}",

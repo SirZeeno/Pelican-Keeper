@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+﻿#!/bin/bash\r
 set -euo pipefail
 
 if [[ "${AutoUpdate:-0}" == "1" ]]; then

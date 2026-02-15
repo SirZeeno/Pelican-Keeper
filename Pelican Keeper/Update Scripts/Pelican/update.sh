@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+﻿#!/bin/bash\r
 set -euo pipefail
 
 REPO="SirZeeno/Pelican-Keeper"

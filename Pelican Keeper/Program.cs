@@ -78,8 +78,9 @@ using static DiscordInteractions;
 /// Fixed Some issues concerning the Pelican Startup and Update script
 /// Updated The Egg Startup script to use bash
 ///
-/// V3.0.4
-/// 
+/// V3.0.5
+/// Fixed a small bash error that would pop up in Pelican
+/// Updated the Startup Command to now use the startup.sh script like intended
 /// 
 /// </summary>
 
