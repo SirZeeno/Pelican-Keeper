@@ -1,7 +1,12 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper;
+
+using static EmbedBuilderHelper;
+using static ConversionHelpers;
+
 
 public static class ServerMarkdown
 {
@@ -67,19 +72,19 @@ public static class ServerMarkdown
             Uuid = serverResponse.Uuid,
             ServerName = serverResponse.Name,
             Status = serverResponse.Resources.CurrentState,
-            StatusIcon = EmbedBuilderHelper.GetStatusIcon(serverResponse.Resources.CurrentState),
+            StatusIcon = GetStatusIcon(serverResponse.Resources.CurrentState),
             Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
-            MaxCpu = $"{HelperClass.DynamicallyAddPercentSign(HelperClass.IfZeroThenInfinite(serverResponse.Resources.CpuMaximum.ToString(CultureInfo.InvariantCulture)))}",
-            Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes),
-            MaxMemory = HelperClass.IfZeroThenInfinite(serverResponse.Resources.MemoryMaximum.ToString(CultureInfo.InvariantCulture)),
-            Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes),
-            MaxDisk = HelperClass.IfZeroThenInfinite(serverResponse.Resources.DiskMaximum.ToString(CultureInfo.InvariantCulture)),
-            NetworkRx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkRxBytes),
-            NetworkTx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkTxBytes),
-            Uptime = EmbedBuilderHelper.FormatUptime(serverResponse.Resources.Uptime)
+            MaxCpu = $"{DynamicallyAddPercentSign(IfZeroThenInfinite(serverResponse.Resources.CpuMaximum.ToString(CultureInfo.InvariantCulture)))}",
+            Memory = FormatBytes(serverResponse.Resources.MemoryBytes),
+            MaxMemory = IfZeroThenInfinite(serverResponse.Resources.MemoryMaximum.ToString(CultureInfo.InvariantCulture)),
+            Disk = FormatBytes(serverResponse.Resources.DiskBytes),
+            MaxDisk = IfZeroThenInfinite(serverResponse.Resources.DiskMaximum.ToString(CultureInfo.InvariantCulture)),
+            NetworkRx = FormatBytes(serverResponse.Resources.NetworkRxBytes),
+            NetworkTx = FormatBytes(serverResponse.Resources.NetworkTxBytes),
+            Uptime = FormatUptime(serverResponse.Resources.Uptime)
         };
 
-        if (Program.Config.JoinableIpDisplay) viewModel.IpAndPort = HelperClass.GetReadableConnectableAddress(serverResponse);
+        if (Program.Config.JoinableIpDisplay) viewModel.IpAndPort = ExtractorHelpers.GetReadableConnectableAddress(serverResponse);
         
         if (Program.Config.PlayerCountDisplay) viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText) ? "N/A" : serverResponse.PlayerCountText;
 

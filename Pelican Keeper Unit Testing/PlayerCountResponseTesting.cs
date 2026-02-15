@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Pelican_Keeper;
+using Pelican_Keeper.Helper_Classes;
 using Pelican_Keeper.Query_Services;
 
 namespace Pelican_Keeper_Unit_Testing;
@@ -71,7 +72,7 @@ public class PlayerCountResponseTesting
         
         if (!string.IsNullOrEmpty(response))
         {
-            var cleanResponse = HelperClass.ServerPlayerCountDisplayCleanup(response, 30);
+            var cleanResponse = ConversionHelpers.ServerPlayerCountDisplayCleanup(response, 30);
             var playerMaxPlayer = Regex.Match(cleanResponse, @"^(\d+)\/\d+$");
             if (playerMaxPlayer.Success)
             {

@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
+using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper.Update_Loop_Structures;
 
@@ -7,6 +8,7 @@ using static ConsoleExt;
 using static TemplateClasses;
 using static HelperClass; 
 using static PelicanInterface;
+using static DiscordHelpers;
 
 public static class Paginated
 {

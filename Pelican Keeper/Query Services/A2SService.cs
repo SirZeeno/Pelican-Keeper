@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Pelican_Keeper.Helper_Classes;
 using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
@@ -33,7 +34,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
         if (first == null)
         {
             ConsoleExt.WriteLine("Timed out waiting for server response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
-            return HelperClass.ServerPlayerCountDisplayCleanup(string.Empty);
+            return ConversionHelpers.ServerPlayerCountDisplayCleanup(string.Empty);
         }
 
         ConsoleExt.WriteLine("Received response from A2S server (first packet).", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Debug);
@@ -59,7 +60,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
                 if (second == null)
                 {
                     ConsoleExt.WriteLine("Timed out waiting for challenged info response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
-                    return HelperClass.ServerPlayerCountDisplayCleanup(string.Empty);
+                    return ConversionHelpers.ServerPlayerCountDisplayCleanup(string.Empty);
                 }
 
                 ConsoleExt.WriteLine("Received challenged info response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Debug);
@@ -78,7 +79,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
         }
 
         ConsoleExt.WriteLine("Invalid or unexpected response.", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Error);
-        return HelperClass.ServerPlayerCountDisplayCleanup(string.Empty);
+        return ConversionHelpers.ServerPlayerCountDisplayCleanup(string.Empty);
     }
 
     private static async Task<byte[]?> ReceiveWithTimeoutAsync(UdpClient udp, int timeoutMs)

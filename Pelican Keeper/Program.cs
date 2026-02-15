@@ -81,6 +81,11 @@ using static DiscordInteractions;
 /// V3.0.5
 /// Fixed a small bash error that would pop up in Pelican
 /// Updated the Startup Command to now use the startup.sh script like intended
+///
+/// V3.0.6
+/// Added Flexible Boolean Conversion to account for issues with the Pelican Panel's Boolean Tag (fixed in testing branch of Pelican Panel)
+/// Split some of the Helper functions into their own class to clean up the Helper Class
+/// Moved the Helper Classes into their own folder
 /// 
 /// </summary>
 

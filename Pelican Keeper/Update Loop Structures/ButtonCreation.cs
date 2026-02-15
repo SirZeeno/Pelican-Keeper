@@ -1,11 +1,13 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
+using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper.Update_Loop_Structures;
 
 using static TemplateClasses;
 using static ConsoleExt;
 using static HelperClass;
+using static DebugHelpers;
 
 public static class ButtonCreation
 {

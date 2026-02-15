@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Pelican_Keeper.Helper_Classes;
 using Pelican_Keeper.Query_Services;
 using RestSharp;
 
@@ -8,6 +9,8 @@ namespace Pelican_Keeper;
 
 using static TemplateClasses;
 using static HelperClass;
+using static ExtractorHelpers;
+using static ConversionHelpers;
 
 public static class PelicanInterface
 {

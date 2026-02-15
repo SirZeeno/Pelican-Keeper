@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper;
 
@@ -66,26 +67,36 @@ public abstract class TemplateClasses
         public MessageFormat MessageFormat { get; set; } = MessageFormat.None;
         public MessageSorting MessageSorting { get; init; } = MessageSorting.None;
         public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool IgnoreOfflineServers { get; init; }
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool IgnoreInternalServers { get; set; }
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool IgnoreServersWithoutAllocations { get; init; }
         public string[]? ServersToIgnore { get; set; }
         
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool JoinableIpDisplay { get; init; }
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool PlayerCountDisplay { get; init; }
         public string[]? ServersToMonitor { get; init; }
         
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool AutomaticShutdown { get; init; }
         public string[]? ServersToAutoShutdown { get; init; }
         public string? EmptyServerTimeout { get; init; }
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool AllowUserServerStartup { get; init; }
         public string[]? AllowServerStartup { get; init; }
         public string[]? UsersAllowedToStartServers { get; init; }
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool AllowUserServerStopping { get; init; }
         public string[]? AllowServerStopping { get; init; }
         public string[]? UsersAllowedToStopServers { get; init; }
 
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool ContinuesMarkdownRead { get; init; }
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool ContinuesGamesToMonitorRead { get; init; }
         private readonly int _markdownUpdateInterval;
         public int MarkdownUpdateInterval 
@@ -100,13 +111,17 @@ public abstract class TemplateClasses
             init => _serverUpdateInterval = Math.Max(value, 10);
         }
         
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool LimitServerCount { get; set; }
         public int MaxServerCount { get; set; }
         public string[]? ServersToDisplay { get; init; }
         
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool Debug { get; set; }
         public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool DryRun { get; init; }
+        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool AutoUpdate { get; init; }
     }
     

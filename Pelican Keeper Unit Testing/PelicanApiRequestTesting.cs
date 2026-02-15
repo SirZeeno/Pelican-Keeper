@@ -1,6 +1,7 @@
 ﻿using Pelican_Keeper;
 using RestSharp;
 using System.Text.Json;
+using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper_Unit_Testing;
 

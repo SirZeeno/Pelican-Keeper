@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using Pelican_Keeper.Helper_Classes;
 using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
@@ -46,7 +47,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
 
         var response = await ReadResponseAsync();
         ConsoleExt.WriteLine($"RCON command response: {response.body.Trim()}", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
-        return HelperClass.ExtractPlayerCount(response.body.Trim(), regexPattern).ToString();
+        return ExtractorHelpers.ExtractPlayerCount(response.body.Trim(), regexPattern).ToString();
     }
 
     public void Dispose()

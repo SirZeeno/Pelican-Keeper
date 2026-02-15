@@ -172,7 +172,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
 
     public void Dispose()
     {
-        _tcpClient.Close();
+        _tcpClient?.Close();
         _tcpClient = null;
         _stream = null;
     }
