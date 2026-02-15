@@ -13,6 +13,12 @@ public static class VersionUpdater
     
     public static async Task UpdateProgram()
     {
+        if (Environment.GetEnvironmentVariable("PK_DISABLE_SELF_UPDATE") == "1")
+        {
+            ConsoleExt.WriteLine("Self-update disabled (container mode).", ConsoleExt.CurrentStep.Updater);
+            return;
+        }
+        
         ConsoleExt.WriteLine("Checking for updates...");
         SetupUserAgent();
         
@@ -31,7 +37,7 @@ public static class VersionUpdater
         BackupOldConfigs();
         ConsoleExt.WriteLine("Configs Backed up!", ConsoleExt.CurrentStep.Updater);
         
-        string scriptPath = Path.Combine(Environment.CurrentDirectory, "update.sh");
+        string scriptPath = Path.Combine(Environment.CurrentDirectory,"Update Scripts", "Bare Metal", "update.sh");
 
         if (!File.Exists(scriptPath))
         {

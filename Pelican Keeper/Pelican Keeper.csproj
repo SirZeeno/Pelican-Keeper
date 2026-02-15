@@ -39,7 +39,19 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="update.sh">
+        <None Update="Update Scripts\Bare Metal\Install.sh">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="Update Scripts\Bare Metal\startup.sh">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="Update Scripts\Pelican\update.sh">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="Update Scripts\Pelican\startup.sh">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>

@@ -61,6 +61,10 @@ using static DiscordInteractions;
 /// Added more error handling when flipping pages, to handle more edge cases
 /// Added recursive search as a fallback to the JSON Element extraction
 /// Cleaned up the code for getting the server list and all its information together to transform it into more of a 1 function 1 purpose
+///
+/// V3.0.1
+/// Added a special Update script for Pelican and Docker container that runs before the bot and not after the bot is started
+/// Added a disable environment variable for the updater class if inside container
 /// 
 /// 
 /// </summary>
