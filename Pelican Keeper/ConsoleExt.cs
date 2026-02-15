@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using System.Reflection.Metadata.Ecma335;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Pelican_Keeper;
@@ -21,6 +21,7 @@ public static class ConsoleExt
     // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
     public static bool SuppressProcessExitForTests { get; set; }
     
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum OutputType
     {
         Info,
@@ -49,6 +50,8 @@ public static class ConsoleExt
         EmbedBuilding,
         FileReading,
         Initialization,
+        ResponseHandling,
+        JsonProcessing,
         None
     }
 
@@ -65,33 +68,33 @@ public static class ConsoleExt
     /// <returns>The length of the pretext</returns>
     public static void WriteLine<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
     {
-        // It shouldn't write it the output is not info or error and the debug is off
+        // It shouldn't write it if the output is not info or error and the debug is off and no bypass is set
         if (outputType != OutputType.Error && outputType != OutputType.Info && !Program.Config.Debug && !shouldBypassDebug) return;
 
         // It needs to write if the bypass is true
-        if (shouldBypassDebug && outputType != OutputType.Info && outputType != OutputType.Error)
+        if (shouldBypassDebug)
         {
             WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+            return;
         }
         
         // It needs to write if the output is info or an error
-        if (outputType is OutputType.Error or OutputType.Info)
+        if (outputType is OutputType.Error or OutputType.Info && Program.Config.OutputMode == OutputType.None)
         {
             WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+            return;
         }
 
         switch (Program.Config.Debug)
         {
             // It should only allow the output of the type that corresponds to the output mode if debug is on and output mode is set to anything but none
-            case true when outputType != OutputType.None:
+            case true when Program.Config.OutputMode != OutputType.None:
             {
-                if (outputType == Program.Config.OutputMode)
-                {
-                    WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
-                }
-
-                break;
+                if (outputType != Program.Config.OutputMode) return;
+                WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+                return;
             }
+            // Catch All if debug is turned on but none of the conditions before matched
             case true:
                 WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
                 break;

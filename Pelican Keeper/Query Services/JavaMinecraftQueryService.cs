@@ -2,10 +2,10 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
 
-//TODO: make sure the queries in general only get done when the server is online, otherwise there is nothing to query or check
 public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDisposable
 {
     private TcpClient? _tcpClient;

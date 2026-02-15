@@ -36,7 +36,8 @@ public abstract class TemplateClasses
         MinecraftJava,
         MinecraftBedrock,
         Rcon,
-        A2S
+        A2S,
+        Terraria //TODO: Still need to implement this
     }
 
     //TODO: for Server status in the template class, so i dont have to compare the literal string but instead use a enum which is more predicatable
@@ -62,13 +63,13 @@ public abstract class TemplateClasses
     public class Config
     {
         public string? InternalIpStructure { get; init; }
-        public MessageFormat MessageFormat { get; init; } = MessageFormat.None;
+        public MessageFormat MessageFormat { get; set; } = MessageFormat.None;
         public MessageSorting MessageSorting { get; init; } = MessageSorting.None;
         public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
         public bool IgnoreOfflineServers { get; init; }
-        public bool IgnoreInternalServers { get; init; }
+        public bool IgnoreInternalServers { get; set; }
         public bool IgnoreServersWithoutAllocations { get; init; }
-        public string[]? ServersToIgnore { get; init; }
+        public string[]? ServersToIgnore { get; set; }
         
         public bool JoinableIpDisplay { get; init; }
         public bool PlayerCountDisplay { get; init; }
@@ -92,19 +93,19 @@ public abstract class TemplateClasses
             get => _markdownUpdateInterval;
             init => _markdownUpdateInterval = Math.Max(value, 10);
         }
-        private int _serverUpdateInterval;
+        private readonly int _serverUpdateInterval;
         public int ServerUpdateInterval
         {
             get => _serverUpdateInterval;
-            set => _serverUpdateInterval = Math.Max(value, 10);
+            init => _serverUpdateInterval = Math.Max(value, 10);
         }
         
-        public bool LimitServerCount { get; init; }
-        public int MaxServerCount { get; init; }
+        public bool LimitServerCount { get; set; }
+        public int MaxServerCount { get; set; }
         public string[]? ServersToDisplay { get; init; }
         
-        public bool Debug { get; init; }
-        public ConsoleExt.OutputType  OutputMode { get; init; }
+        public bool Debug { get; set; }
+        public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;
         public bool DryRun { get; init; }
         public bool AutoUpdate { get; init; }
     }
@@ -120,12 +121,15 @@ public abstract class TemplateClasses
         public string? PlayerCountText { get; set; }
     }
 
-    public class ServerResources
+    public record ServerResources
     {
         public string CurrentState { get; init; } = null!;
         public long MemoryBytes { get; init; }
+        public long MemoryMaximum { get;  init; }
         public double CpuAbsolute { get; init; }
+        public double CpuMaximum { get; init; }
         public long DiskBytes { get; init; }
+        public long DiskMaximum { get; init; }
         public long NetworkRxBytes { get; init; }
         public long NetworkTxBytes { get; init; }
         public long Uptime { get; init; }
@@ -154,8 +158,11 @@ public abstract class TemplateClasses
         public string Status { get; set; } = null!;
         public string StatusIcon { get; set; } = null!;
         public string Cpu { get; set; } = null!;
+        public string MaxCpu { get; set; } = null!;
         public string Memory { get; set; } = null!;
+        public string MaxMemory { get; set; } = null!;
         public string Disk { get; set; } = null!;
+        public string MaxDisk { get; set; } = null!;
         public string NetworkRx { get; set; } = null!;
         public string NetworkTx { get; set; } = null!;
         public string Uptime { get; set; } = null!;

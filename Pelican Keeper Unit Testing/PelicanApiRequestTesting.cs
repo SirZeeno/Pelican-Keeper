@@ -37,14 +37,6 @@ public class PelicanApiRequestTesting
     }
     
     [Test, Order(3)]
-    public void GetEggList()
-    {
-        PelicanInterface.GetEggList();
-        if (PelicanInterface.GetLocalEggList() != null && PelicanInterface.GetLocalEggList() is { Count: > 0 }) Assert.Pass();
-        else Assert.Fail("Failed to get pelican egg list");
-    }
-    
-    [Test, Order(4)]
     public void GetServerResources()
     {
         if (_serverInfos == null) Assert.Fail("Server info list is null");
@@ -54,7 +46,7 @@ public class PelicanApiRequestTesting
         else Assert.Fail("Server resources are null");
     }
     
-    [Test, Order(5)]
+    [Test, Order(4)]
     public async Task GetServerResourcesList()
     {
         if (_serverInfos == null) Assert.Fail("Server info list is null");
@@ -64,7 +56,7 @@ public class PelicanApiRequestTesting
         else Assert.Fail("Server resources are null");
     }
     
-    [Test, Order(6)]
+    [Test, Order(5)]
     public void GetAllocationsList()
     {
         if (_serverInfos == null) Assert.Fail("Server info list is null");

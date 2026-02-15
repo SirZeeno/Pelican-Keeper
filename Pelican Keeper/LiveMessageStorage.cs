@@ -1,82 +1,20 @@
-﻿using System.Security.Principal;
-using System.Text.Json;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 
 namespace Pelican_Keeper;
 
 using static TemplateClasses;
 using static ConsoleExt;
 
-//TODO: Create a check to see if there are already authored messages and update that message instead of creating a new one.
 public static class LiveMessageStorage
 {
-    private static string _historyFilePath = "MessageHistory.json";
-
-    internal static readonly LiveMessageJsonStorage? Cache;
+    internal static readonly LiveMessageJsonStorage Cache;
 
     /// <summary>
     /// Entry point and initializer for the class.
     /// </summary>
     static LiveMessageStorage()
     {
-        Cache = LoadAll();
-        
-        if (Cache is { LiveStore: null })
-            WriteLine("Failed to read MessageHistory.json!", CurrentStep.MessageHistory, OutputType.Error, new FileLoadException(), true);
-
-        if (Cache is { LiveStore: not null })
-        {
-            foreach (var liveStore in Cache.LiveStore)
-                WriteLine($"Cache contents: {liveStore}", CurrentStep.MessageHistory);
-        }
-
-        _ = ValidateCache();
-    }
-
-    /// <summary>
-    /// Loads the cache from the file.
-    /// </summary>
-    public static LiveMessageJsonStorage? LoadAll(string? customDirectoryOrFile = null)
-    {
-        string historyFilePath = FileManager.GetCustomFilePath("MessageHistory.json", customDirectoryOrFile);
-
-
-        if (historyFilePath == string.Empty)
-        {
-            WriteLine("MessageHistory.json not found. Creating default one.", CurrentStep.MessageHistory, OutputType.Warning);
-
-            if (string.IsNullOrEmpty(customDirectoryOrFile))
-            {
-                using var file = File.Create("MessageHistory.json");
-                using var writer = new StreamWriter(file);
-                writer.Write(JsonSerializer.Serialize(new LiveMessageJsonStorage()));
-                historyFilePath = FileManager.GetFilePath("MessageHistory.json");
-            }
-            else
-            {
-                WriteLine("Custom File or Directory specified, but unable to find MessageHistory File there!",  CurrentStep.FileReading, OutputType.Error,  new FileLoadException(), true);
-                return null;
-            }
-
-            if (historyFilePath == string.Empty)
-            {
-                WriteLine("Unable to Find MessageHistory.json!", CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-                return null;
-            }
-        }
-
-        try
-        {
-            var json = File.ReadAllText(historyFilePath);
-            _historyFilePath = historyFilePath;
-            WriteLine($"Loaded MessageHistory.json from location: {historyFilePath}", CurrentStep.MessageHistory);
-            return JsonSerializer.Deserialize<LiveMessageJsonStorage>(json) ?? new LiveMessageJsonStorage();
-        }
-        catch (Exception ex)
-        {
-            WriteLine($"Error loading live message cache! It may be corrupt or not in the right format. Simple solution is to delete the MessageHistory.json file and letting the bot recreate it. Message History File Path: {historyFilePath}", CurrentStep.MessageHistory, OutputType.Error, ex);
-            return new LiveMessageJsonStorage();
-        }
+        Cache = new LiveMessageJsonStorage();
     }
 
     /// <summary>
@@ -87,8 +25,7 @@ public static class LiveMessageStorage
     {
         if (Get(messageId) != null) return;
         
-        Cache?.LiveStore?.Add(messageId);
-        File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
+        Cache.LiveStore?.Add(messageId);
     }
     
     /// <summary>
@@ -104,59 +41,17 @@ public static class LiveMessageStorage
             Cache.PaginatedLiveStore[messageId] = currentPageIndex;
         }
         else
-            Cache?.PaginatedLiveStore?.Add(messageId, currentPageIndex);
-        
-        File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
+            Cache.PaginatedLiveStore?.Add(messageId, currentPageIndex);
     }
     
     public static void Remove(ulong? messageId)
     {
-        if (Cache != null && messageId != null && Cache.LiveStore != null && Cache.LiveStore.Remove((ulong)messageId))
-            File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
+        if (messageId != null && Cache.LiveStore != null && Cache.LiveStore.Remove((ulong)messageId))
+            WriteLine($"Message {messageId} removed from History", CurrentStep.MessageHistory, OutputType.Debug);
         
-        if (Cache != null && messageId != null && Cache.PaginatedLiveStore != null && Cache.PaginatedLiveStore.Remove((ulong)messageId))
-            File.WriteAllText(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
+        if (messageId != null && Cache.PaginatedLiveStore != null && Cache.PaginatedLiveStore.Remove((ulong)messageId))
+            WriteLine($"Message {messageId} removed from History", CurrentStep.MessageHistory, OutputType.Debug);
     }
-    
-    /// <summary>
-    /// Validates the cache and removes any messages that no longer exist in the configured channels.
-    /// </summary>
-    private static async Task ValidateCache()
-    {
-        var channels = Program.TargetChannel;
-        bool haveChannels = channels is { Count: > 0 };
-
-        if (Cache is { LiveStore: not null })
-        {
-            var filtered = await Cache.LiveStore.ToAsyncEnumerable().WhereAwait(async id => haveChannels && await MessageExistsAsync(channels!, id)).ToHashSetAsync();
-            Cache.LiveStore = filtered;
-            if (Cache.LiveStore.Count == 0)
-            {
-                foreach (var channel in channels)
-                {
-                    ulong? messageId = await GetPreviousMessage(channel);
-                    if (messageId != null) Cache.LiveStore.Add(messageId.Value);
-                }
-            }
-        }
-
-        if (Cache is { PaginatedLiveStore: not null })
-        {
-            var filtered = await Cache.PaginatedLiveStore.ToAsyncEnumerable().WhereAwait(async kvp => haveChannels && await MessageExistsAsync(channels!, kvp.Key)).ToDictionaryAsync(kvp => kvp.Key, kvp => kvp.Value);
-            Cache.PaginatedLiveStore = filtered;
-            if (Cache.PaginatedLiveStore.Count == 0)
-            {
-                foreach (var channel in channels)
-                {
-                    ulong? messageId = await GetPreviousMessage(channel);
-                    if (messageId != null) Cache.PaginatedLiveStore.Add(messageId.Value, 0);
-                }
-            }
-        }
-
-        await File.WriteAllTextAsync(_historyFilePath, JsonSerializer.Serialize(Cache, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
 
     /// <summary>
     /// Checks if a message exists in a channel.
@@ -164,7 +59,7 @@ public static class LiveMessageStorage
     /// <param name="channels">list of target channels</param>
     /// <param name="messageId">discord message ID</param>
     /// <returns>bool whether the message exists</returns>
-    public static async Task<bool> MessageExistsAsync(List<DiscordChannel> channels, ulong messageId)
+    private static async Task<bool> MessageExistsAsync(List<DiscordChannel> channels, ulong messageId)
     {
         if (channels is not { Count: > 0 }) return true;
 
@@ -177,25 +72,21 @@ public static class LiveMessageStorage
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
-                if (Program.Config.Debug)
-                    WriteLine($"Message {messageId} not found in #{channel.Name}", CurrentStep.MessageHistory, OutputType.Warning);
+                WriteLine($"Message {messageId} not found in #{channel.Name}", CurrentStep.MessageHistory, OutputType.Warning);
             }
             catch (DSharpPlus.Exceptions.UnauthorizedException)
             {
-                if (Program.Config.Debug)
-                    WriteLine($"No permission to read #{channel.Name}", CurrentStep.MessageHistory, OutputType.Warning);
+                WriteLine($"No permission to read #{channel.Name}", CurrentStep.MessageHistory, OutputType.Warning);
             }
             catch (DSharpPlus.Exceptions.BadRequestException ex)
             {
-                if (Program.Config.Debug)
-                    WriteLine($"Bad request on #{channel.Name}: {ex.Message}", CurrentStep.MessageHistory, OutputType.Warning);
+                WriteLine($"Bad request on #{channel.Name}: {ex.Message}", CurrentStep.MessageHistory, OutputType.Warning);
             }
         }
 
         if (channels.Count == 1) return false; // I am searching only one channel, so I don't need to log.
         
-        if (Program.Config.Debug)
-            WriteLine($"Message {messageId} not found in any channel", CurrentStep.MessageHistory, OutputType.Error);
+        WriteLine($"Message {messageId} not found in any channel", CurrentStep.MessageHistory, OutputType.Debug);
         return false;
     }
     
@@ -206,7 +97,7 @@ public static class LiveMessageStorage
     /// <returns>discord message ID</returns>
     public static ulong? Get(ulong? messageId)
     {
-        if (Cache?.LiveStore == null || Cache.LiveStore.Count == 0 || messageId == null) return null;
+        if (Cache.LiveStore == null || Cache.LiveStore.Count == 0 || messageId == null) return null;
         return Cache.LiveStore?.FirstOrDefault(x => x == messageId);
     }
     
@@ -217,7 +108,12 @@ public static class LiveMessageStorage
     /// <returns>discord message ID</returns>
     public static ulong? TryGetLast(DiscordChannel channel)
     {
-        return Cache?.LiveStore?.LastOrDefault(x => MessageExistsAsync([channel], x).Result); //TODO: try to also use a fallback by using the GetPreviousMessage function.
+        ulong? lastMessageId = Cache.LiveStore?.LastOrDefault(x => MessageExistsAsync([channel], x).Result);
+        if (lastMessageId != 0) return lastMessageId;
+        lastMessageId = TryGetPreviousMessage(channel).GetAwaiter().GetResult();
+        if (lastMessageId != 0) return lastMessageId;
+
+        return null;
     }
     
     /// <summary>
@@ -227,7 +123,7 @@ public static class LiveMessageStorage
     /// <returns>page index</returns>
     public static int? GetPaginated(ulong? messageId)
     {
-        if (Cache?.PaginatedLiveStore == null || Cache.PaginatedLiveStore.Count == 0 || messageId == null) return null;
+        if (Cache.PaginatedLiveStore == null || Cache.PaginatedLiveStore.Count == 0 || messageId == null) return null;
         return Cache.PaginatedLiveStore?.First(x => x.Key == messageId).Value;
     }
 
@@ -238,15 +134,22 @@ public static class LiveMessageStorage
     /// <returns>discord message ID</returns>
     public static KeyValuePair<ulong, int>? TryGetLastPaginated(DiscordChannel channel)
     {
-        return Cache?.PaginatedLiveStore?.LastOrDefault(x => MessageExistsAsync([channel], x.Key).Result); //TODO: try to also use a fallback by using the GetPreviousMessage function.
+        KeyValuePair<ulong, int>? lastPaginated = Cache.PaginatedLiveStore?.LastOrDefault(x => MessageExistsAsync([channel], x.Key).Result);
+
+        if (lastPaginated!.Value.Key != 0) return lastPaginated;
+        ulong? lastMessageId = TryGetPreviousMessage(channel).GetAwaiter().GetResult();
+        if (lastMessageId != 0)
+            return new KeyValuePair<ulong, int>(TryGetPreviousMessage(channel).GetAwaiter().GetResult(), 0);
+
+        return null;
     }
     
     /// <summary>
     /// Gets the previous message if any authored by the bot
     /// </summary>
     /// <param name="channel">Discord Channel to check</param>
-    /// <returns></returns>
-    private static async Task<ulong?> GetPreviousMessage(DiscordChannel channel)
+    /// <returns>Message ID if found or 0 if nothing was found</returns>
+    private static async Task<ulong> TryGetPreviousMessage(DiscordChannel channel)
     {
         IReadOnlyList<DiscordMessage> messages = await channel.GetMessagesAsync();
 
@@ -254,10 +157,22 @@ public static class LiveMessageStorage
         {
             if (message.Author.Id == Program.BotId)
             {
+                WriteLine($"Previous message: {message.Id}", CurrentStep.MessageHistory, OutputType.Debug);
+                if (Program.Config.MessageFormat != MessageFormat.Paginated)
+                {
+                    Cache.LiveStore ??= new HashSet<ulong>();
+                    Save(message.Id);
+                    WriteLine($"Message {message.Id} added to History", CurrentStep.MessageHistory, OutputType.Debug);
+                }
+                else
+                {
+                    Cache.PaginatedLiveStore ??= new Dictionary<ulong, int>();
+                    Save(message.Id, 0);
+                }
                 return message.Id;
             }
         }
         
-        return null;
+        return 0;
     }
 }

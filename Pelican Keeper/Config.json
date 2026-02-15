@@ -17,10 +17,10 @@
   "EmptyServerTimeout": "00:01:00",
   "AllowUserServerStartup": true,
   "AllowServerStartup": ["UUIDS HERE"],
-  "UsersAllowedToStartServers": ["USERID HERE"],
+  "UsersAllowedToStartServers": ["USERIDS HERE"],
   "AllowUserServerStopping": true,
   "AllowServerStopping": ["UUIDS HERE"],
-  "UsersAllowedToStopServers": ["USERID HERE"],
+  "UsersAllowedToStopServers": ["USERIDS HERE"],
   
   "ContinuesMarkdownRead": false,
   "ContinuesGamesToMonitorRead": false,

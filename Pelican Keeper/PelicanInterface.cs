@@ -9,35 +9,38 @@ namespace Pelican_Keeper;
 using static TemplateClasses;
 using static HelperClass;
 
-
-//TODO: Add a new function for when I want to have multiple functions execute in same succession like in the GetServerList function to keep them on one task and clean up the code.
-//Might need to make certain api requests at one specific time before executing those multiple functions to get allocations and check the player count. Just so I keep it to one API request instead of one per function.
-//Might also not be a bad idea to create a function to execute those requests and keep those out of the individual functions for cleaner code and segmentation. Which should allow me to also use those responses in other functions if stored global in the class
 public static class PelicanInterface
 {
     private static List<GamesToMonitor>? _gamesToMonitor = FileManager.ReadGamesToMonitorFile().GetAwaiter().GetResult();
-    private static List<EggInfo>? _eggsList;
     private static readonly List<RconService> RconServices = new();
     private static readonly Dictionary<string, DateTime> ShutdownTracker = new();
-
-    public static List<EggInfo>? GetLocalEggList()
-    {
-        return _eggsList;
-    }
+    
+    private static readonly RestResponse LocalServerListResponse = GetServerList();
+    private static readonly List<ServerInfo> ServerListResponse = GetPelicanServerList();
 
     /// <summary>
     /// Gets the entire List of Eggs from the Pelican API
     /// </summary>
-    public static void GetEggList()
+    private static void GetEggList(this  List<ServerInfo> servers)
     {
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/application/eggs");
         var response = CreateRequest(client, Program.Secrets.ClientToken);
+
+        if (!response.IsSuccessStatusCode)
+            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, response.ErrorException, true, true);
         
         try
         {
             if (!string.IsNullOrWhiteSpace(response.Content))
             {
-                _eggsList = JsonHandler.ExtractEggInfo(response.Content);
+                var eggsList = JsonHandler.ExtractEggInfo(response.Content);
+                foreach (var serverInfo in servers)
+                {
+                    var foundEgg = eggsList?.Find(x => x.Id == serverInfo.Egg.Id);
+                    if (foundEgg == null) continue;
+                    serverInfo.Egg.Name = foundEgg.Name;
+                    ConsoleExt.WriteLine($"Egg Name found: {serverInfo.Egg.Name}", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
+                }
                 return;
             }
             
@@ -66,12 +69,27 @@ public static class PelicanInterface
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/servers/" + serverInfo.Uuid + "/resources");
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
+        if (!response.IsSuccessStatusCode)
+            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, response.ErrorException, true, true);
+        
         try
         {
             if (!string.IsNullOrWhiteSpace(response.Content))
             {
                 var stats = JsonHandler.ExtractServerResources(response.Content);
-                serverInfo.Resources = stats;
+                if (serverInfo.Resources != null)
+                    serverInfo.Resources = serverInfo.Resources with
+                    {
+                        CurrentState = stats.CurrentState,
+                        MemoryBytes = stats.MemoryBytes,
+                        CpuAbsolute = stats.CpuAbsolute,
+                        DiskBytes = stats.DiskBytes,
+                        NetworkRxBytes = stats.NetworkRxBytes,
+                        NetworkTxBytes = stats.NetworkTxBytes,
+                        Uptime = stats.Uptime
+                    };
+                else
+                    serverInfo.Resources = stats;
                 return;
             }
             
@@ -84,97 +102,35 @@ public static class PelicanInterface
         }
     }
 
-    //TODO: split the server monitoring away from this function to bring it back to 1 function with 1 purpose
-    /// <summary>
-    /// Gets the Client Server List from the Pelican API, and gets the Network Allocations, and tracks the server for player count and automatic shutdown.
-    /// </summary>
-    /// <param name="serverInfos">List of ServerInfo</param>
-    public static void GetServerAllocations(List<ServerInfo> serverInfos)
+    //TODO: possible addition of filtering out servers that dont belong to the user doing the request
+    private static RestResponse GetServerList()
     {
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/?type=admin-all");
         var response = CreateRequest(client, Program.Secrets.ClientToken);
         
+        if (!response.IsSuccessStatusCode)
+            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, response.ErrorException, true, true);
+
+        if (!string.IsNullOrEmpty(response.Content)) return response;
+        ConsoleExt.WriteLine($"Server List Response is null or empty. Response Content: {response.Content}", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, response.ErrorException, true, true);
+        throw new Exception("Server List Response is null or empty.");
+    }
+    
+    /// <summary>
+    /// Gets the Client Server List from the Pelican API, and gets  the Network Allocations, and tracks the server for player count and automatic shutdown.
+    /// </summary>
+    /// <param name="serverInfos">List of ServerInfo</param>
+    public static void GetServerAllocations(List<ServerInfo> serverInfos)
+    {
+        var response = LocalServerListResponse;
+        
         try
         {
-            if (!string.IsNullOrWhiteSpace(response.Content))
+            var allocations = JsonHandler.ExtractNetworkAllocations(response.Content!);
+            foreach (var serverInfo in serverInfos)
             {
-                var allocations = JsonHandler.ExtractNetworkAllocations(response.Content);
-                foreach (var serverInfo in serverInfos)
-                {
-                    serverInfo.Allocations = allocations.Where(s => s.Uuid == serverInfo.Uuid).ToList();
-                }
-                if (!Program.Config.PlayerCountDisplay) return;
-                
-                // Only process servers that have allocations (skip bots/services without ports)
-                var serversToProcess = Program.Config.IgnoreServersWithoutAllocations
-                    ? serverInfos.Where(s => s.Allocations != null && s.Allocations.Count > 0)
-                    : serverInfos;
-                
-                foreach (var serverInfo in serversToProcess)
-                {
-                    bool isTracked = ShutdownTracker.Any(x => x.Key == serverInfo.Uuid);
-                    string? serverState = serverInfo.Resources?.CurrentState.ToLower();
-                    if (serverState != "offline" && serverState != "stopping" && serverState != "starting" && serverState != "missing")
-                    {
-                        if (!isTracked)
-                        {
-                            ShutdownTracker[serverInfo.Uuid] = DateTime.Now;
-                            ConsoleExt.WriteLine($"{serverInfo.Name} is tracked for shutdown: {isTracked}", ConsoleExt.CurrentStep.PelicanApi);
-                        }
-                        MonitorServers(serverInfo, response.Content);
-                        
-                        if (Program.Config.AutomaticShutdown)
-                        {
-                            if (serverInfo.PlayerCountText != "N/A" && !string.IsNullOrEmpty(serverInfo.PlayerCountText))
-                            {
-                                if (Program.Config.ServersToAutoShutdown != null && Program.Config.ServersToAutoShutdown[0] != "UUIDS HERE" && !Program.Config.ServersToAutoShutdown.Contains(serverInfo.Uuid))
-                                {
-                                    if (Program.Config.Debug)
-                                        ConsoleExt.WriteLine($"Server {serverInfo.Name} is not in the auto-shutdown list. Skipping shutdown check.", ConsoleExt.CurrentStep.PelicanApi);
-                                    continue;
-                                }
-                                
-                                if (_gamesToMonitor == null || _gamesToMonitor.Count == 0)
-                                {
-                                    if (Program.Config.Debug)
-                                        ConsoleExt.WriteLine("No game communication configuration found. Skipping shutdown check.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Warning);
-                                    continue;
-                                }
-                                int playerCount = ExtractPlayerCount(serverInfo.PlayerCountText);
-                                if (Program.Config.Debug)
-                                    ConsoleExt.WriteLine($"Player count: {playerCount} for server: {serverInfo.Name}", ConsoleExt.CurrentStep.PelicanApi);
-                                if (playerCount > 0)
-                                {
-                                    ShutdownTracker[serverInfo.Uuid] = DateTime.Now;
-                                }
-                                else
-                                {
-                                    TimeSpan.TryParseExact(Program.Config.EmptyServerTimeout, @"d\:hh\:mm", CultureInfo.InvariantCulture, out var timeTillShutdown);
-                                    if (timeTillShutdown == TimeSpan.Zero)
-                                        timeTillShutdown = TimeSpan.FromHours(1);
-                                    if (DateTime.Now - ShutdownTracker[serverInfo.Uuid] >= timeTillShutdown)
-                                    {
-                                        SendPowerCommand(serverInfo.Uuid, "stop");
-                                        ConsoleExt.WriteLine($"Server {serverInfo.Name} has been empty for over an hour. Sending shutdown command.", ConsoleExt.CurrentStep.PelicanApi);
-                                        ShutdownTracker.Remove(serverInfo.Uuid);
-                                        if (Program.Config.Debug)
-                                            ConsoleExt.WriteLine($"Server {serverInfo.Name} is stopping and removed from shutdown tracker.", ConsoleExt.CurrentStep.PelicanApi);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (isTracked)
-                    {
-                        ShutdownTracker.Remove(serverInfo.Uuid);
-                        if (Program.Config.Debug)
-                            ConsoleExt.WriteLine($"Server {serverInfo.Name} is offline or stopping. Removed from shutdown tracker.", ConsoleExt.CurrentStep.PelicanApi);
-                    }
-                }
-                return;
+                serverInfo.Allocations = allocations.Where(s => s.Uuid == serverInfo.Uuid).ToList();
             }
-
-            ConsoleExt.WriteLine("Empty Allocations response content.", ConsoleExt.CurrentStep.PelicanApi);
         }
         catch (JsonException ex)
         {
@@ -183,66 +139,155 @@ public static class PelicanInterface
         }
     }
 
-    //TODO: remove GetEggList and GetServerResourcesList from this list to remove dependencies for those functions
+    private static void MonitorServers(List<ServerInfo> serverInfos)
+    {
+        var response = LocalServerListResponse;
+        
+        if (!Program.Config.PlayerCountDisplay) return;
+        if (serverInfos.Count == 0)
+        {
+            ConsoleExt.WriteLine("Servers list is empty.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error);
+        }
+                
+        // Only process servers that have allocations (skip bots/services without ports)
+        var serversToProcess = Program.Config.IgnoreServersWithoutAllocations
+            ? serverInfos.Where(s => s.Allocations is { Count: > 0 })
+            : serverInfos;
+                
+        foreach (var serverInfo in serversToProcess)
+        {
+            bool isTracked = ShutdownTracker.Any(x => x.Key == serverInfo.Uuid);
+            string? serverState = serverInfo.Resources?.CurrentState.ToLower();
+            if (serverState != "offline" && serverState != "stopping" && serverState != "starting" && serverState != "missing")
+            {
+                if (!isTracked)
+                {
+                    ShutdownTracker[serverInfo.Uuid] = DateTime.Now;
+                    ConsoleExt.WriteLine($"{serverInfo.Name} is tracked for shutdown: {isTracked}", ConsoleExt.CurrentStep.PelicanApi);
+                }
+                RequestToMonitoringServers(serverInfo, response.Content!);
+                        
+                if (Program.Config.AutomaticShutdown)
+                {
+                    if (serverInfo.PlayerCountText != "N/A" && !string.IsNullOrEmpty(serverInfo.PlayerCountText))
+                    {
+                        if (Program.Config.ServersToAutoShutdown != null && Program.Config.ServersToAutoShutdown[0] != "UUIDS HERE" && !Program.Config.ServersToAutoShutdown.Contains(serverInfo.Uuid))
+                        {
+                            ConsoleExt.WriteLine($"Server {serverInfo.Name} is not in the auto-shutdown list. Skipping shutdown check.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
+                            continue;
+                        }
+                                
+                        if (_gamesToMonitor == null || _gamesToMonitor.Count == 0)
+                        {
+                            ConsoleExt.WriteLine("No game communication configuration found. Skipping shutdown check.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Warning);
+                            continue;
+                        }
+                        int playerCount = ExtractPlayerCount(serverInfo.PlayerCountText);
+                        ConsoleExt.WriteLine($"Player count: {playerCount} for server: {serverInfo.Name}", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
+                        if (playerCount > 0)
+                        {
+                            ShutdownTracker[serverInfo.Uuid] = DateTime.Now;
+                        }
+                        else
+                        {
+                            TimeSpan.TryParseExact(Program.Config.EmptyServerTimeout, @"d\:hh\:mm", CultureInfo.InvariantCulture, out var timeTillShutdown);
+                            if (timeTillShutdown == TimeSpan.Zero)
+                                timeTillShutdown = TimeSpan.FromHours(1);
+                            if (DateTime.Now - ShutdownTracker[serverInfo.Uuid] >= timeTillShutdown)
+                            {
+                                SendPowerCommand(serverInfo.Uuid, "stop");
+                                ConsoleExt.WriteLine($"Server {serverInfo.Name} has been empty for over an hour. Sending shutdown command.", ConsoleExt.CurrentStep.PelicanApi);
+                                ShutdownTracker.Remove(serverInfo.Uuid);
+                                ConsoleExt.WriteLine($"Server {serverInfo.Name} is stopping and removed from shutdown tracker.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (isTracked)
+            {
+                ShutdownTracker.Remove(serverInfo.Uuid);
+                ConsoleExt.WriteLine($"Server {serverInfo.Name} is offline or stopping. Removed from shutdown tracker.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
+            }
+        }
+    }
+
     /// <summary>
     /// Gets the list of servers from the Pelican API
+    /// </summary>
+    /// <returns>Server Info list</returns>
+    private static List<ServerInfo> GetPelicanServerList()
+    {
+        var client = new RestClient(Program.Secrets.ServerUrl + "/api/application/servers");
+        var response = CreateRequest(client, Program.Secrets.ServerToken);
+        
+        if (!response.IsSuccessStatusCode)
+            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, response.ErrorException, true, true);
+
+        if (!string.IsNullOrEmpty(response.Content) && !string.IsNullOrWhiteSpace(response.Content))
+        {
+            try
+            {
+                return JsonHandler.ExtractServerListInfo(response.Content);
+            }
+            catch (JsonException ex)
+            {
+                ConsoleExt.WriteLine("JSON deserialization or fetching Error: " + ex.Message, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, ex);
+                ConsoleExt.WriteLine("JSON: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
+            }
+        }
+
+        return [];
+    }
+
+    /// <summary>
+    /// Processed the Server list with the settings defined in the config
+    /// </summary>
+    /// <param name="servers">Server Info list</param>
+    private static List<ServerInfo> ProcessServerList(List<ServerInfo> servers)
+    {
+        string[]? serversToIgnore = Program.Config.ServersToIgnore;
+        if (serversToIgnore is { Length: > 0 } && serversToIgnore[0] != "UUIDS HERE") 
+            servers = servers.Where(s => !serversToIgnore.Contains(s.Uuid)).ToList();
+
+        if (Program.Config.IgnoreOfflineServers) 
+            servers = servers.Where(s => s.Resources?.CurrentState.ToLower() != "offline" && s.Resources?.CurrentState.ToLower() != "missing").ToList();
+                
+        servers = SortServers(servers, Program.Config.MessageSorting, Program.Config.MessageSortingDirection);
+        _ = GetServerResourcesList(servers);
+                
+        if (Program.Config.IgnoreInternalServers && Program.Config.InternalIpStructure != null)
+        {
+            string internalIpPattern = "^" + Regex.Escape(Program.Config.InternalIpStructure).Replace("\\*", "\\d+") + "$";
+            servers = servers.Where(s => !(s.Allocations?.Any(a => Regex.IsMatch(a.Ip, internalIpPattern)) ?? false)).ToList();
+        }
+                
+        if (Program.Config.LimitServerCount && Program.Config.MaxServerCount > 0)
+        {
+            if (Program.Config.ServersToDisplay != null && Program.Config.ServersToDisplay.Length > 0 && Program.Config.ServersToDisplay[0] != "UUIDS HERE")
+                servers = servers.Where(s => Program.Config.ServersToDisplay.Contains(s.Uuid)).ToList();
+            else
+                servers = servers.Take(Program.Config.MaxServerCount).ToList();
+        }
+        
+        return servers;
+    }
+    
+    /// <summary>
+    /// Returns a ServerInfo List which has been processed and been filled with all its information
     /// </summary>
     /// <returns>Server list response</returns>
     public static List<ServerInfo> GetServersList()
     {
-        var client = new RestClient(Program.Secrets.ServerUrl + "/api/application/servers");
-        var response = CreateRequest(client, Program.Secrets.ServerToken);
-
-        try
-        {
-            if (response.Content != null)
-            {
-                var servers = JsonHandler.ExtractServerListInfo(response.Content);
-                GetEggList();
-                foreach (var serverInfo in servers)
-                {
-                    var foundEgg = _eggsList?.Find(x => x.Id == serverInfo.Egg.Id);
-                    if (foundEgg == null) continue;
-                    serverInfo.Egg.Name = foundEgg.Name;
-                    if (Program.Config.Debug)
-                        ConsoleExt.WriteLine($"Egg Name found: {serverInfo.Egg.Name}", ConsoleExt.CurrentStep.PelicanApi);
-                }
-
-                string[]? serversToIgnor = Program.Config.ServersToIgnore;
-                if (serversToIgnor is { Length: > 0 } && serversToIgnor[0] != "UUIDS HERE") 
-                    servers = servers.Where(s => !serversToIgnor.Contains(s.Uuid)).ToList();
-
-                if (Program.Config.IgnoreOfflineServers) 
-                    servers = servers.Where(s => s.Resources?.CurrentState.ToLower() != "offline" && s.Resources?.CurrentState.ToLower() != "missing").ToList();
-                
-                if (Program.Config.IgnoreInternalServers && Program.Config.InternalIpStructure != null)
-                {
-                    string internalIpPattern = "^" + Regex.Escape(Program.Config.InternalIpStructure).Replace("\\*", "\\d+") + "$";
-                    servers = servers.Where(s => s.Allocations != null && s.Allocations.Any(a => !Regex.IsMatch(a.Ip, internalIpPattern))).ToList();
-                }
-                
-                if (Program.Config.LimitServerCount && Program.Config.MaxServerCount > 0)
-                {
-                    if (Program.Config.ServersToDisplay != null && Program.Config.ServersToDisplay.Length > 0 && Program.Config.ServersToDisplay[0] != "UUIDS HERE")
-                        servers = servers.Where(s => Program.Config.ServersToDisplay.Contains(s.Uuid)).ToList();
-                    else
-                        servers = servers.Take(Program.Config.MaxServerCount).ToList();
-                }
-                servers = SortServers(servers, Program.Config.MessageSorting, Program.Config.MessageSortingDirection);
-                _ = GetServerResourcesList(servers);
-                return servers;
-            }
-            ConsoleExt.WriteLine("Empty Server List response content.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error);
-        }
-        catch (JsonException ex)
-        {
-            ConsoleExt.WriteLine("JSON deserialization or fetching Error: " + ex.Message, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, ex);
-            ConsoleExt.WriteLine("JSON: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
-        }
-        return [];
+        List<ServerInfo> serverInfos = GetPelicanServerList();
+        GetEggList(serverInfos);
+        serverInfos = ProcessServerList(serverInfos);
+        _ = GetServerResourcesList(ServerListResponse);
+        GetServerAllocations(serverInfos);
+        MonitorServers(serverInfos);
+        return serverInfos;
     }
-
-    //TODO: take the execution of getting the allocations out of this function to reduce dependencies on that function
+    
     /// <summary>
     /// Gets alist of server resources from the Pelican API
     /// </summary>
@@ -258,8 +303,7 @@ public static class PelicanInterface
             await sem.WaitAsync();
             try
             {
-                if (Program.Config.Debug)
-                    ConsoleExt.WriteLine("Fetched stats for server: " + server.Name, ConsoleExt.CurrentStep.PelicanApi);
+                ConsoleExt.WriteLine("Fetched stats for server: " + server.Name, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
                 GetServerResources(server);
             }
             finally { sem.Release(); }
@@ -267,8 +311,6 @@ public static class PelicanInterface
         
         // Run them all
         await Task.WhenAll(statsTasks);
-        
-        GetServerAllocations(servers);
     }
 
     /// <summary>
@@ -300,8 +342,8 @@ public static class PelicanInterface
         request.AddStringBody(JsonSerializer.Serialize(body), ContentType.Json);
 
         var response = client.Execute(request);
-        if (Program.Config.Debug)
-            ConsoleExt.WriteLine(response.Content, ConsoleExt.CurrentStep.PelicanApi);
+        if (string.IsNullOrEmpty(response.Content))
+            ConsoleExt.WriteLine(response.Content, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
     }
 
     /// <summary>
@@ -320,13 +362,11 @@ public static class PelicanInterface
         if (RconServices.Any(x => x.Ip == ip && x.Port == port))
         {
             rcon = RconServices.First(x => x.Ip == ip && x.Port == port);
-            if (Program.Config.Debug)
-                ConsoleExt.WriteLine("Reusing existing RCON connection to " + ip + ":" + port, ConsoleExt.CurrentStep.RconQuery);
+            ConsoleExt.WriteLine("Reusing existing RCON connection to " + ip + ":" + port, ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
         }
         else
         {
-            if (Program.Config.Debug)
-                ConsoleExt.WriteLine("Creating new RCON connection to " + ip + ":" + port, ConsoleExt.CurrentStep.RconQuery);
+            ConsoleExt.WriteLine("Creating new RCON connection to " + ip + ":" + port, ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
         }
 
         await rcon.Connect();
@@ -393,15 +433,14 @@ public static class PelicanInterface
     /// </summary>
     /// <param name="serverInfo">The ServerInfo of the specific server</param>
     /// <param name="json">Input JSON</param>
-    private static void MonitorServers(ServerInfo serverInfo, string json)
+    private static void RequestToMonitoringServers(ServerInfo serverInfo, string json)
     {
         if (_gamesToMonitor == null || _gamesToMonitor.Count == 0) return;
         
         var serverToMonitor = _gamesToMonitor.FirstOrDefault(s => s.Game == serverInfo.Egg.Name);
         if (serverToMonitor == null)
         {
-            if (Program.Config.Debug)
-                ConsoleExt.WriteLine("No monitoring configuration found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.GameMonitoring, ConsoleExt.OutputType.Warning);
+            ConsoleExt.WriteLine("No monitoring configuration found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.GameMonitoring, ConsoleExt.OutputType.Warning);
             return;
         }
         ConsoleExt.WriteLine($"Found Game to Monitor {serverToMonitor.Game}", ConsoleExt.CurrentStep.GameMonitoring);
@@ -412,7 +451,7 @@ public static class PelicanInterface
         {
             case CommandExecutionMethod.A2S:
             {
-                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
+                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable, serverInfo.Allocations);
 
                 ConsoleExt.WriteLine("Query port for server " + serverInfo.Name + ": " + queryPort, ConsoleExt.CurrentStep.A2SQuery);
                 if (queryPort == 0)
@@ -430,7 +469,7 @@ public static class PelicanInterface
             }
             case CommandExecutionMethod.Rcon:
             {
-                int rconPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable);
+                int rconPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable, serverInfo.Allocations);
                 var rconPassword = serverToMonitor.RconPassword ?? JsonHandler.ExtractRconPassword(json, serverInfo.Uuid, serverToMonitor.RconPasswordVariable);
                 
                 if (rconPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
@@ -449,44 +488,36 @@ public static class PelicanInterface
             }
             case CommandExecutionMethod.MinecraftJava:
             {
-                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
+                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable, serverInfo.Allocations);
                 
                 if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
                 {
                     var minecraftResponse = SendJavaMinecraftRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
-                    if (Program.Config.Debug)
-                    {
-                        ConsoleExt.WriteLine($"Sent Java Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftJavaQuery);
-                        ConsoleExt.WriteLine($"Java Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftJavaQuery);
-                    }
+                    ConsoleExt.WriteLine($"Sent Java Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Debug);
+                    ConsoleExt.WriteLine($"Java Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Debug);
                     serverInfo.PlayerCountText = minecraftResponse;
                 }
                 else
                 {
-                    if (Program.Config.Debug)
-                        ConsoleExt.WriteLine("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
+                    ConsoleExt.WriteLine("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
                 }
                 
                 break;
             }
             case CommandExecutionMethod.MinecraftBedrock:
             {
-                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable);
+                int queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable, serverInfo.Allocations);
                 
                 if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
                 {
                     var minecraftResponse = SendBedrockMinecraftRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
-                    if (Program.Config.Debug)
-                    {
-                        ConsoleExt.WriteLine($"Sent Bedrock Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftBedrockQuery);
-                        ConsoleExt.WriteLine($"Bedrock Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftBedrockQuery);
-                    }
+                    ConsoleExt.WriteLine($"Sent Bedrock Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Debug);
+                    ConsoleExt.WriteLine($"Bedrock Minecraft Response: {minecraftResponse}", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Debug);
                     serverInfo.PlayerCountText = minecraftResponse;
                 }
                 else
                 {
-                    if (Program.Config.Debug)
-                        ConsoleExt.WriteLine("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
+                    ConsoleExt.WriteLine("ExternalServerIp or Query Port is null or empty", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
                 }
                 
                 break;

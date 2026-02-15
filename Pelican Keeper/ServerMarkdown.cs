@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Pelican_Keeper;
 
@@ -67,9 +68,12 @@ public static class ServerMarkdown
             ServerName = serverResponse.Name,
             Status = serverResponse.Resources.CurrentState,
             StatusIcon = EmbedBuilderHelper.GetStatusIcon(serverResponse.Resources.CurrentState),
-            Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%", //TODO: Allow the ability to see the max cpu and current usage
-            Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes), //TODO: Allow the ability to see the max memory and current usage
-            Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes), //TODO: Allow the ability to see the max disk and current usage
+            Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
+            MaxCpu = $"{HelperClass.DynamicallyAddPercentSign(HelperClass.IfZeroThenInfinite(serverResponse.Resources.CpuMaximum.ToString(CultureInfo.InvariantCulture)))}",
+            Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes),
+            MaxMemory = HelperClass.IfZeroThenInfinite(serverResponse.Resources.MemoryMaximum.ToString(CultureInfo.InvariantCulture)),
+            Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes),
+            MaxDisk = HelperClass.IfZeroThenInfinite(serverResponse.Resources.DiskMaximum.ToString(CultureInfo.InvariantCulture)),
             NetworkRx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkRxBytes),
             NetworkTx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkTxBytes),
             Uptime = EmbedBuilderHelper.FormatUptime(serverResponse.Resources.Uptime)
@@ -83,8 +87,7 @@ public static class ServerMarkdown
         var serverName = result.Tags.GetValueOrDefault("Title", "Default Title");
         var message = ReplacePlaceholders(result.Body, viewModel);
 
-        if (Program.Config.Debug)
-            ConsoleExt.WriteLine($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}", ConsoleExt.CurrentStep.Markdown);
+        ConsoleExt.WriteLine($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}", ConsoleExt.CurrentStep.Markdown, ConsoleExt.OutputType.Debug);
 
         return (message, serverName);
     }

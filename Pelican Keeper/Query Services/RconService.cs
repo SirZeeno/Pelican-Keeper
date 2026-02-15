@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
 
@@ -19,8 +20,8 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         _stream = _tcpClient.GetStream();
         
         bool authenticated = await AuthenticateAsync();
-        if (authenticated && Program.Config.Debug)
-            ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery);
+        if (authenticated)
+            ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
         else
             ConsoleExt.WriteLine("RCON authentication failed.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
     }
@@ -44,8 +45,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         await _stream.WriteAsync(packet);
 
         var response = await ReadResponseAsync();
-        if (Program.Config.Debug)
-            ConsoleExt.WriteLine($"RCON command response: {response.body.Trim()}", ConsoleExt.CurrentStep.RconQuery);
+        ConsoleExt.WriteLine($"RCON command response: {response.body.Trim()}", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
         return HelperClass.ExtractPlayerCount(response.body.Trim(), regexPattern).ToString();
     }
 

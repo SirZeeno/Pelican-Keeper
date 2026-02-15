@@ -17,62 +17,72 @@ public static class JsonHandler
         var root = doc.RootElement;
         
         List<EggInfo> eggs = new List<EggInfo>();
-        var eggArray = root.GetProperty("data").EnumerateArray();
+        var eggArray = root.GetPropertySafe("data").EnumerateArray();
+        ConsoleExt.WriteLine($"Egg List: {string.Join(", ", eggArray.Select(x => x.GetPropertySafe("name").GetString()))}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
         
         foreach (var egg in eggArray)
         {
-            var attr = egg.GetProperty("attributes");
-            string name = attr.GetProperty("name").GetString() ?? string.Empty;
-            int id = attr.GetProperty("id").GetInt32();
+            var attr = egg.GetPropertySafe("attributes");
+            string name = attr.GetPropertySafe("name").GetString() ?? string.Empty;
+            int id = attr.GetPropertySafe("id").GetInt32();
+            ConsoleExt.WriteLine($"Egg Name: {name}, Egg ID: {id}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
 
             eggs.Add(new EggInfo { Id = id, Name = name });
         }
 
         return eggs;
     }
-    
+
     /// <summary>
     /// Extracts the RCON Port from the Input JSON
     /// </summary>
     /// <param name="json">Input JSON</param>
     /// <param name="uuid">UUID of the Server</param>
     /// <param name="variableName">Variable Name of the RCON Port in the Pelican Panel</param>
+    /// <param name="serverAllocations">List of Allocations of the Server</param>
     /// <returns>The RCON port if found or 0 if not found</returns>
-    internal static int ExtractRconPort(string json, string uuid, string? variableName)
+    internal static int ExtractRconPort(string json, string uuid, string? variableName, List<ServerAllocation>? serverAllocations)
     {
+        int rconPort = 0;
         if (variableName != null)
         {
             var match = Regex.Match(variableName, @"SERVER_PORT\s*\+\s*(\d+)");
             if (match.Success)
             {
                 int addition = Convert.ToInt32(match.Groups[1].Value);
-
-                var allocations = ExtractNetworkAllocations(json, uuid);
-                return allocations.Find(x => x.IsDefault)!.Port + addition;
+                
+                rconPort = serverAllocations != null ? serverAllocations.Find(x => x.IsDefault)!.Port + addition : 0;
+                ConsoleExt.WriteLine($"[ExtractRconPort] Regex Extracted Rcon Port: {rconPort}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                return rconPort;
             }
         }
         if (variableName is "SERVER_PORT")
         {
-            var allocations = ExtractNetworkAllocations(json, uuid);
-            return allocations.Find(x => x.IsDefault)!.Port;
+            rconPort = serverAllocations != null ? serverAllocations.Find(x => x.IsDefault)!.Port : 0;
+            ConsoleExt.WriteLine($"[ExtractRconPort] Server Port Extracted Rcon Port: {rconPort}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            return rconPort;
         }
         if (variableName == null || variableName.Trim() == string.Empty) variableName = "RCON_PORT";
         
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
-
-        int rconPort = 0;
-        var serversArray = root.GetProperty("data").EnumerateArray();
+        
+        var serversArray = root.GetPropertySafe("data").EnumerateArray();
         foreach (var data in serversArray)
         {
-            var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
+            var serverUuid = data.GetPropertySafe("attributes").GetPropertySafe("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
+            ConsoleExt.WriteLine($"[ExtractRconPort] Server UUID: {serverUuid}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            var variablesArray = data.GetPropertySafe("attributes").GetPropertySafe("relationships").GetPropertySafe("variables").GetPropertySafe("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
-                var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out rconPort)){}
+                var attr = alloc.GetPropertySafe("attributes");
+                if (attr.GetPropertySafe("env_variable").GetString() == variableName &&
+                    int.TryParse(attr.GetPropertySafe("server_value").GetString(), out rconPort))
+                {
+                    ConsoleExt.WriteLine($"[ExtractRconPort] Extracted Rcon Port: {rconPort}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                }
             }
         }
 
@@ -94,32 +104,41 @@ public static class JsonHandler
         var root = doc.RootElement;
 
         string rconPassword = string.Empty;
-        var serversArray = root.GetProperty("data").EnumerateArray();
+        var serversArray = root.GetPropertySafe("data").EnumerateArray();
         foreach (var data in serversArray)
         {
-            var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
+            var serverUuid = data.GetPropertySafe("attributes").GetPropertySafe("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
+            ConsoleExt.WriteLine($"[ExtractRconPassword] Server UUID: {serverUuid}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            var variablesArray = data.GetPropertySafe("attributes").GetPropertySafe("relationships").GetPropertySafe("variables").GetPropertySafe("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
-                var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName) rconPassword = attr.GetProperty("server_value").GetString() ?? string.Empty;
+                var attr = alloc.GetPropertySafe("attributes");
+                if (attr.GetPropertySafe("env_variable").GetString() == variableName) rconPassword = attr.GetPropertySafe("server_value").GetString() ?? string.Empty;
+                ConsoleExt.WriteLine(
+                    string.IsNullOrEmpty(rconPassword)
+                        ? "[ExtractRconPassword] Rcon Password is Null or Empty"
+                        : $"[ExtractRconPassword] Rcon Password Lenght: {rconPassword.Length}",
+                    ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
             }
         }
 
         return rconPassword;
     }
-    
+
     /// <summary>
     /// Extracts the Query Port from the Input JSON
     /// </summary>
     /// <param name="json">Input JSON</param>
     /// <param name="uuid">UUID of the Server</param>
     /// <param name="variableName">Variable Name of the Query Port in the Pelican Panel</param>
+    /// <param name="serverAllocations">List of Allocations of the Server</param>
     /// <returns>The Query port if found or 0 if not found</returns>
-    internal static int ExtractQueryPort(string json, string uuid, string? variableName)
+    internal static int ExtractQueryPort(string json, string uuid, string? variableName, List<ServerAllocation>? serverAllocations)
     {
+        int queryPort = 0;
+        
         if (variableName != null)
         {
             var match = Regex.Match(variableName, @"SERVER_PORT\s*\+\s*(\d+)");
@@ -127,32 +146,38 @@ public static class JsonHandler
             {
                 int addition = Convert.ToInt32(match.Groups[1].Value);
 
-                var allocations = ExtractNetworkAllocations(json, uuid);
-                return allocations.Find(x => x.IsDefault)!.Port + addition;
+                queryPort = serverAllocations != null ? serverAllocations.Find(x => x.IsDefault)!.Port + addition : 0;
+                ConsoleExt.WriteLine($"[ExtractQueryPort] Regex Extracted Query Port: {queryPort}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                return queryPort;
             }
         }
         if (variableName is "SERVER_PORT")
         {
-            var allocations = ExtractNetworkAllocations(json, uuid);
-            return allocations.Find(x => x.IsDefault)!.Port;
+            queryPort = serverAllocations != null ? serverAllocations.Find(x => x.IsDefault)!.Port : 0;
+            ConsoleExt.WriteLine($"[ExtractQueryPort] Server Port Extracted Query Port: {queryPort}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            return queryPort;
         }
         if (variableName == null || variableName.Trim() == string.Empty) variableName = "QUERY_PORT";
         
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
         
-        int queryPort = 0;
-        var serversArray = root.GetProperty("data").EnumerateArray();
+        var serversArray = root.GetPropertySafe("data").EnumerateArray();
         foreach (var data in serversArray)
         {
-            var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
+            var serverUuid = data.GetPropertySafe("attributes").GetPropertySafe("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
+            ConsoleExt.WriteLine($"[ExtractQueryPort] Server UUID: {serverUuid}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            var variablesArray = data.GetPropertySafe("attributes").GetPropertySafe("relationships").GetPropertySafe("variables").GetPropertySafe("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
-                var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out queryPort)){}
+                var attr = alloc.GetPropertySafe("attributes");
+                if (attr.GetPropertySafe("env_variable").GetString() == variableName &&
+                    int.TryParse(attr.GetPropertySafe("server_value").GetString(), out queryPort))
+                {
+                    ConsoleExt.WriteLine($"[ExtractQueryPort] Extracted Quert Port: {queryPort}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                }
             }
         }
 
@@ -169,7 +194,12 @@ public static class JsonHandler
     /// <returns>The Max Player Count if found or 0 if not found</returns>
     public static int ExtractMaxPlayerCount(string json, string uuid, string? variableName, string? maxPlayer)
     {
-        if (!string.IsNullOrEmpty(maxPlayer)) if (int.TryParse(maxPlayer, out int intMaxPlayers)) return intMaxPlayers;
+        if (!string.IsNullOrEmpty(maxPlayer))
+            if (int.TryParse(maxPlayer, out int intMaxPlayers))
+            {
+                ConsoleExt.WriteLine($"[ExtractMaxPlayerCount] Max Player Count: {intMaxPlayers}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                return intMaxPlayers;
+            }
         
         if (variableName == null || variableName.Trim() == string.Empty) variableName = "MAX_PLAYERS";
         
@@ -177,17 +207,22 @@ public static class JsonHandler
         var root = doc.RootElement;
 
         int maxPlayers = 0;
-        var serversArray = root.GetProperty("data").EnumerateArray();
+        var serversArray = root.GetPropertySafe("data").EnumerateArray();
         foreach (var data in serversArray)
         {
-            var serverUuid = data.GetProperty("attributes").GetProperty("uuid").ToString();
+            var serverUuid = data.GetPropertySafe("attributes").GetPropertySafe("uuid").ToString();
             if (serverUuid != uuid) continue;
-            var variablesArray = data.GetProperty("attributes").GetProperty("relationships").GetProperty("variables").GetProperty("data");
+            ConsoleExt.WriteLine($"[ExtractMaxPlayerCount] Server UUID: {serverUuid}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            var variablesArray = data.GetPropertySafe("attributes").GetPropertySafe("relationships").GetPropertySafe("variables").GetPropertySafe("data");
         
             foreach (var alloc in variablesArray.EnumerateArray())
             {
-                var attr = alloc.GetProperty("attributes");
-                if (attr.GetProperty("env_variable").GetString() == variableName && int.TryParse(attr.GetProperty("server_value").GetString(), out maxPlayers)){}
+                var attr = alloc.GetPropertySafe("attributes");
+                if (attr.GetPropertySafe("env_variable").GetString() == variableName &&
+                    int.TryParse(attr.GetPropertySafe("server_value").GetString(), out maxPlayers))
+                {
+                    ConsoleExt.WriteLine($"[ExtractMaxPlayerCount] Extracted Max Player Count: {maxPlayers}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                }
             }
         }
         
@@ -199,7 +234,7 @@ public static class JsonHandler
     /// </summary>
     /// <param name="json">Input JSON</param>
     /// <param name="serverUuid">Optional! UUID of the server you want to extract the Network allocations from</param>
-    /// <returns>List of ServerAlocation</returns>
+    /// <returns>List of ServerAllocation</returns>
     internal static List<ServerAllocation> ExtractNetworkAllocations(string json, string? serverUuid = null)
     {
         using var doc = JsonDocument.Parse(json);
@@ -207,29 +242,34 @@ public static class JsonHandler
 
         // Extract allocations
         var allocations = new List<ServerAllocation>();
-        var serversArray = root.GetProperty("data").EnumerateArray();
+        var serversArray = root.GetPropertySafe("data").EnumerateArray();
 
         foreach (var data in serversArray)
         {
-            var attr = data.GetProperty("attributes");
-            var uuid = attr.GetProperty("uuid").GetString() ?? string.Empty;
+            var attr = data.GetPropertySafe("attributes");
+            var uuid = attr.GetPropertySafe("uuid").GetString() ?? string.Empty;
             
-            if ((serverUuid == null || uuid != serverUuid) && serverUuid != null) continue;
+            if (uuid != serverUuid && serverUuid != null) continue;
+            ConsoleExt.WriteLine($"[ExtractMaxPlayerCount] Server UUID: {uuid}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
             
-            var allocationsArray = attr.GetProperty("relationships").GetProperty("allocations").GetProperty("data").EnumerateArray();
+            var allocationsArray = attr.GetPropertySafe("relationships").GetPropertySafe("allocations").GetPropertySafe("data").EnumerateArray();
             foreach (var alloc in allocationsArray)
             {
-                var attrib = alloc.GetProperty("attributes");
-                var ip = attrib.GetProperty("ip").GetString() ?? string.Empty;
-                var port = attrib.GetProperty("port").GetInt32();
-                var isDefault = attrib.GetProperty("is_default").GetBoolean();
+                var attrib = alloc.GetPropertySafe("attributes");
+                var ip = attrib.GetPropertySafe("ip").GetString() ?? string.Empty;
+                var port = attrib.GetPropertySafe("port").GetInt32();
+                var isDefault = attrib.GetPropertySafe("is_default").GetBoolean();
 
-                allocations.Add(new ServerAllocation {
+                ServerAllocation allocation = new ServerAllocation
+                {
                     Uuid = uuid,
                     Ip = ip,
                     Port = port,
                     IsDefault = isDefault
-                });
+                };
+                
+                allocations.Add(allocation);
+                ConsoleExt.WriteLine($"[ExtractNetworkAllocations] Network Allocation Added UUID: {allocation.Uuid}, IP: {allocation.Ip}, Port: {allocation.Port},  IsDefault: {allocation.IsDefault}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
             }
         }
         
@@ -247,20 +287,31 @@ public static class JsonHandler
         var root = doc.RootElement;
 
         var serverInfo = new List<ServerInfo>();
-        var serversArray = root.GetProperty("data").EnumerateArray();
+        var serversArray = root.GetPropertySafe("data").EnumerateArray();
         foreach (var server in serversArray)
         {
-            var id = server.GetProperty("attributes").GetProperty("id").GetInt32();
-            var uuid = server.GetProperty("attributes").GetProperty("uuid").GetString() ?? string.Empty;
-            var name = server.GetProperty("attributes").GetProperty("name").GetString() ?? string.Empty;
-            var egg = server.GetProperty("attributes").GetProperty("egg").GetInt32();
+            var id = server.GetPropertySafe("attributes").GetPropertySafe("id").GetInt32();
+            var uuid = server.GetPropertySafe("attributes").GetPropertySafe("uuid").GetString() ?? string.Empty;
+            var name = server.GetPropertySafe("attributes").GetPropertySafe("name").GetString() ?? string.Empty;
+            var egg = server.GetPropertySafe("attributes").GetPropertySafe("egg").GetInt32();
+            
+            var maxMemory = server.GetPropertySafe("attributes").GetPropertySafe("limits").GetPropertySafe("memory").GetInt32();
+            var maxCpu = server.GetPropertySafe("attributes").GetPropertySafe("limits").GetPropertySafe("cpu").GetInt32();
+            var maxDisk = server.GetPropertySafe("attributes").GetPropertySafe("limits").GetPropertySafe("disk").GetInt32();
             
             serverInfo.Add(new ServerInfo {
                 Id = id,
                 Uuid = uuid,
                 Name = name,
-                Egg = new EggInfo { Id = egg }
+                Egg = new EggInfo { Id = egg },
+                Resources = new ServerResources {
+                    MemoryMaximum = maxMemory,
+                    DiskMaximum = maxDisk,
+                    CpuMaximum = maxCpu
+                }
             });
+            
+            ConsoleExt.WriteLine($"[ExtractServerListInfo] Server Info Added ID: {id}, UUID: {uuid}, Server Name: {name}, Egg ID: {egg}, Max Memory: {maxMemory}, Max CPU: {maxCpu}, Max Disk: {maxDisk}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
         }
 
         return serverInfo;
@@ -276,17 +327,17 @@ public static class JsonHandler
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
         
-        var attributes = root.GetProperty("attributes");
-        var resources = attributes.GetProperty("resources");
-        
-        var currentState = attributes.GetProperty("current_state").GetString() ?? string.Empty;
-        
-        var memory = resources.GetProperty("memory_bytes").GetInt64();
-        var cpu = resources.GetProperty("cpu_absolute").GetDouble();
-        var disk = resources.GetProperty("disk_bytes").GetInt64();
-        var networkRx = resources.GetProperty("network_rx_bytes").GetInt64();
-        var networkTx = resources.GetProperty("network_tx_bytes").GetInt64();
-        var uptime = resources.GetProperty("uptime").GetInt64();
+        JsonElement attributes = root.GetPropertySafe("attributes");
+        JsonElement resources = attributes.GetPropertySafe("resources");
+
+        string currentState = attributes.GetPropertySafe("current_state").GetString() ?? string.Empty;
+            
+        long memory = resources.GetPropertySafe("memory_bytes").GetInt64();
+        double cpu = resources.GetPropertySafe("cpu_absolute").GetDouble();
+        long disk = resources.GetPropertySafe("disk_bytes").GetInt64();
+        long networkRx = resources.GetPropertySafe("network_rx_bytes").GetInt64();
+        long networkTx = resources.GetPropertySafe("network_tx_bytes").GetInt64();
+        long uptime = resources.GetPropertySafe("uptime").GetInt64();
             
         var resourcesInfo = new ServerResources {
             CurrentState = currentState,
@@ -297,7 +348,61 @@ public static class JsonHandler
             NetworkTxBytes = networkTx,
             Uptime = uptime
         };
+        
+        ConsoleExt.WriteLine($"[ExtractServerResources] Server Resources Extracted Current State: {currentState}, Memory Bytes: {memory}, CPU Abolute: {cpu}, Disk Bytes: {disk}, Network Rx Bytes {networkRx}, Network Tx Bytes: {networkTx}, Uptime: {uptime}", ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
 
         return resourcesInfo;
+    }
+    
+    /// <summary>
+    /// Tries to find the Property by name in a JSON by recursively looking through it's Elements
+    /// </summary>
+    /// <param name="element">JSON Element to start searching</param>
+    /// <param name="propertyName">Name of the Property it's trying to find</param>
+    /// <returns>The JSON Element if found or null if not</returns>
+    private static JsonElement? FindProperty(this JsonElement element, string propertyName)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in element.EnumerateObject())
+            {
+                if (property.NameEquals(propertyName))
+                    return property.Value;
+
+                var found = FindProperty(property.Value, propertyName);
+                if (found.HasValue)
+                    return found;
+            }
+        }
+        else if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in element.EnumerateArray())
+            {
+                var found = FindProperty(item, propertyName);
+                if (found.HasValue)
+                    return found;
+            }
+        }
+
+        return null;
+    }
+    
+    /// <summary>
+    /// Tries to get the Property in a JSON Element by name using the TryGetProperty function and falls back to FindProperty if nothing was found on the first try
+    /// </summary>
+    /// <param name="element">JSON Element to search through</param>
+    /// <param name="propertyName">Name of the Property</param>
+    /// <returns>The found JSON Element</returns>
+    /// <exception cref="Exception">Property wasn't found</exception>
+    private static JsonElement GetPropertySafe(this JsonElement element, string propertyName)
+    {
+        if (element.TryGetProperty(propertyName, out var value))
+            return value;
+
+        var fallback = element.FindProperty(propertyName);
+        if (fallback.HasValue)
+            return fallback.Value;
+
+        throw new Exception($"Property '{propertyName}' not found in JSON.");
     }
 }

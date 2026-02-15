@@ -3,9 +3,9 @@
 {{IpAndPort}}
 {{StatusIcon}} **Status:** {{Status}}
 👥 **Players:** {{PlayerCount}}
-🖥️ **CPU:** {{Cpu}}
-🧠 **Memory:** {{Memory}}
-💽 **Disk:** {{Disk}}
+🖥️ **CPU:** {{MaxCpu}}/{{Cpu}}
+🧠 **Memory:** {{MaxMemory}}/{{Memory}}
+💽 **Disk:** {{MaxDisk}}/{{Disk}}
 📥 **NetworkRX:** {{NetworkRx}}
 📤 **NetworkTX:** {{NetworkTx}}
 ⏳ **Uptime:** {{Uptime}}

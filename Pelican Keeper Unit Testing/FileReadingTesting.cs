@@ -63,14 +63,6 @@ public class FileReadingTesting
     }
     
     [Test]
-    public void ReadingMessageHistory()
-    {
-        TemplateClasses.LiveMessageJsonStorage? liveMessageJsonStorage = LiveMessageStorage.LoadAll(_messageHistoryFilePath);
-        if (liveMessageJsonStorage == null || ConsoleExt.ExceptionOccurred) Assert.Fail("LiveMessageJsonStorage file failed to read.\n");
-        else Assert.Pass("LiveMessageJsonStorage file read successfully.\n");
-    }
-    
-    [Test]
     public async Task ReadingGamesToMonitor()
     {
         List<TemplateClasses.GamesToMonitor>? gamesToMonitor = await FileManager.ReadGamesToMonitorFile(_gamesToMonitorFilePath);
