@@ -65,6 +65,15 @@ using static DiscordInteractions;
 /// V3.0.1
 /// Added a special Update script for Pelican and Docker container that runs before the bot and not after the bot is started
 /// Added a disable environment variable for the updater class if inside container
+///
+/// V3.0.2
+/// Added Terraria as a case in the Server request execution methods
+///
+/// V3.0.3
+/// Updated Pelican Egg to use the new Startup script
+/// Updated the Path to the Update Scrip in the Startup Script
+///
+/// V3.0.4
 /// 
 /// 
 /// </summary>

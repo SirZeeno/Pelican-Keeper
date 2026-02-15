@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": null
     },
-    "exported_at": "2026-01-23T23:21:12+00:00",
+    "exported_at": "2026-02-15T04:39:25+00:00",
     "name": "Pelican Keeper",
     "author": "Leon@logocomp.com",
     "uuid": "b9f6a260-8be9-4de0-90bb-4251ef5f9524",
@@ -17,7 +17,7 @@
     },
     "file_denylist": [],
     "startup_commands": {
-        "Default": "./\"Pelican Keeper\";"
+        "Default": "./\"Update Scripts\"/Pelican/update.sh;"
     },
     "config": {
         "files": "{\n    \"Config.json\": {\n        \"parser\": \"json\",\n        \"find\": {\n            \"InternalIpStructure\": \"{{server.environment.InternalIpStructure}}\",\n            \"MessageFormat\": \"{{server.environment.MessageFormat}}\",\n            \"MessageSorting\": \"{{server.environment.MessageSorting}}\",\n            \"MessageSortingDirection\": \"{{server.environment.MessageSortingDirection}}\",\n            \"IgnoreOfflineServers\": \"{{server.environment.IgnoreOfflineServers}}\",\n            \"IgnoreInternalServers\": \"{{server.environment.IgnoreInternalServers}}\",\n\t\t\t\"IgnoreServersWithoutAllocations\": \"{{server.environment.IgnoreInternalServers}}\",\n\t\t\t\"ServersToIgnore\": \"{{server.environment.ServersToIgnore}}\",\n\t\t\t\"JoinableIpDisplay\": \"{{server.environment.JoinableIpDisplay}}\",\n\t\t\t\"PlayerCountDisplay\": \"{{server.environment.PlayerCountDisplay}}\",\n\t\t\t\"ServersToMonitor\": \"{{server.environment.ServersToMonitor}}\",\n\t\t\t\"AutomaticShutdown\": \"{{server.environment.AutomaticShutdown}}\",\n\t\t\t\"ServersToAutoShutdown\": \"{{server.environment.ServersToAutoShutdown}}\",\n\t\t\t\"EmptyServerTimeout\": \"{{server.environment.EmptyServerTimeout}}\",\n\t\t\t\"AllowUserServerStartup\": \"{{server.environment.AllowUserServerStartup}}\",\n\t\t\t\"AllowServerStartup\": \"{{server.environment.AllowServerStartup}}\",\n\t\t\t\"UsersAllowedToStartServers\": \"{{server.environment.UsersAllowedToStartServers}}\",\n\t\t\t\"AllowUserServerStopping\": \"{{server.environment.AllowUserServerStopping}}\",\n\t\t\t\"AllowServerStopping\": \"{{server.environment.AllowServerStopping}}\",\n\t\t\t\"UsersAllowedToStopServers\": \"{{server.environment.UsersAllowedToStopServers}}\",\n\t\t\t\"ContinuesMarkdownRead\": \"{{server.environment.ContinuesMarkdownRead}}\",\n\t\t    \"ContinuesGamesToMonitorRead\": \"{{server.environment.ContinuesGamesToMonitorRead}}\",\n\t\t\t\"MarkdownUpdateInterval\": \"{{server.environment.MarkdownUpdateInterval}}\",\n\t\t\t\"ServerUpdateInterval\": \"{{server.environment.ServerUpdateInterval}}\",\n\t\t\t\"LimitServerCount\": \"{{server.environment.LimitServerCount}}\",\n\t\t\t\"MaxServerCount\": \"{{server.environment.MaxServerCount}}\",\n\t\t\t\"ServersToDisplay\": \"{{server.environment.ServersToDisplay}}\",\n\t\t\t\"Debug\": \"{{server.environment.Debug}}\",\n            \"OutputMode\": \"{{server.environment.OutputMode}}\",\n\t\t\t\"DryRun\": \"{{server.environment.DryRun}}\",\n\t\t\t\"AutoUpdate\": \"{{server.environment.AutoUpdate}}\"\n        }\n    }\n}",
