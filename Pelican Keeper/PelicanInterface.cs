@@ -522,6 +522,11 @@ public static class PelicanInterface
                 
                 break;
             }
+            case CommandExecutionMethod.Terraria:
+            {
+                // Not Implemented
+                break;
+            }
         }
     }
     
