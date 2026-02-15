@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using DSharpPlus.Entities;
 using RestSharp;
 
@@ -16,7 +17,7 @@ public static class HelperClass
     /// <param name="client">RestClient</param>
     /// <param name="token">Pelican API token</param>
     /// <returns>The RestResponse</returns>
-    internal static RestResponse CreateRequest(RestClient client, string? token)
+    public static RestResponse CreateRequest(RestClient client, string? token)
     {
         var request = new RestRequest("");
         request.AddHeader("Accept", "application/json");
@@ -48,10 +49,10 @@ public static class HelperClass
     /// </summary>
     /// <param name="serverInfo">ServerInfo of the server</param>
     /// <returns>The allocation that's marked as the default</returns>
-    private static ServerAllocation? GetConnectableAllocation(ServerInfo serverInfo) //TODO: I need more logic here to determine the best allocation to use and to determine the right port if the main port is not he joining port, for example in ark se its the query port
+    private static ServerAllocation? GetConnectableAllocation(ServerInfo serverInfo) //TODO: I need more logic here to determine the best allocation to use and to determine the right port if the main port is not the joining port, for example in ark se its the query port
     {
         if (serverInfo.Allocations == null || serverInfo.Allocations.Count == 0)
-            ConsoleExt.WriteLineWithPretext("Empty allocations for server: " + serverInfo.Name, ConsoleExt.OutputType.Warning);
+            ConsoleExt.WriteLine("Empty allocations for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Warning);
         return serverInfo.Allocations?.FirstOrDefault(allocation => allocation.IsDefault) ?? serverInfo.Allocations?.FirstOrDefault();
     }
  
@@ -65,7 +66,7 @@ public static class HelperClass
         var allocation = GetConnectableAllocation(serverInfo);
         if (allocation == null)
         {
-            ConsoleExt.WriteLineWithPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("[GetCorrectIp] No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return "No Connectable Address";
         }
         
@@ -86,12 +87,12 @@ public static class HelperClass
     /// </summary>
     /// <param name="serverInfo">ServerInfo of the server</param>
     /// <returns>No Connectable Address if nothing is found, and Ip:Port if a match is found</returns>
-    public static string GetReadableConnectableAddress(ServerInfo serverInfo)
+    public static string GetReadableConnectableAddress(ServerInfo serverInfo) //TODO: mat-pandaz was having issues here when it came to his servers not displaying the connectable IP
     {
         var allocation = GetConnectableAllocation(serverInfo);
         if (allocation == null)
         {
-            ConsoleExt.WriteLineWithPretext("No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("[GetReadableConnectableAddress] No connectable allocation found for server: " + serverInfo.Name, ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return "No Connectable Address";
         }
         
@@ -129,7 +130,7 @@ public static class HelperClass
     {
         if (string.IsNullOrEmpty(serverResponse))
         {
-            ConsoleExt.WriteLineWithPretext("The Response of the Server was Empty or Null!", ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("The Response of the Server was Empty or Null!", ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error);
             return 0;
         }
 
@@ -141,28 +142,28 @@ public static class HelperClass
         var playerMaxPlayer = Regex.Match(serverResponse, @"^(\d+)\/\d+$");
         if (playerMaxPlayer.Success && int.TryParse(playerMaxPlayer.Groups[1].Value, out var playerCount))
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using standard format: {playerCount}");
+            ConsoleExt.WriteLine($"Player count extracted using standard format: {playerCount}", ConsoleExt.CurrentStep.Helper);
             return playerCount;
         }
         
-        var arkRconPlayerList = Regex.Match(serverResponse, @"(\d+)\.\s*([^,]+),\s*(.+)$", RegexOptions.Multiline);
-        if (arkRconPlayerList.Success)
+        var arkRconPlayerList = Regex.Matches(serverResponse, @"(\d+)\.\s*([^,]+),\s*(.+)$", RegexOptions.Multiline);
+        if (arkRconPlayerList.Count > 0)
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using Ark format: {arkRconPlayerList.Length}");
-            return arkRconPlayerList.Length;
+            ConsoleExt.WriteLine($"Player count extracted using Ark format: {arkRconPlayerList.Count}", ConsoleExt.CurrentStep.Helper);
+            return arkRconPlayerList.Count;
         }
 
         var palworldPlayerList = Regex.Match(serverResponse, @"^(?!name,).+$", RegexOptions.Multiline);
         if (palworldPlayerList.Success && serverResponse.Contains("name,playeruid,steamid"))
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using Palworld format: {palworldPlayerList.Length}");
+            ConsoleExt.WriteLine($"Player count extracted using Palworld format: {palworldPlayerList.Length}", ConsoleExt.CurrentStep.Helper);
             return palworldPlayerList.Length;
         }
         
         var factorioPlayerList = Regex.Match(serverResponse, @"Online players \((\d+)\):");
         if (factorioPlayerList.Success && int.TryParse(factorioPlayerList.Groups[1].Value, out var factorioPlayerCount))
         {
-            ConsoleExt.WriteLineWithPretext($"Player count extracted using Factorio format: {factorioPlayerCount}");
+            ConsoleExt.WriteLine($"Player count extracted using Factorio format: {factorioPlayerCount}", ConsoleExt.CurrentStep.Helper);
             return factorioPlayerCount;
         }
         
@@ -173,13 +174,12 @@ public static class HelperClass
             if (customMatch.Success)
             {
                 if (!Int32.TryParse(customMatch.Value, out var count)) return count;
-                if (Program.Config.Debug)
-                    ConsoleExt.WriteLineWithPretext($"Player count returned by Custom Regex: {count}");
+                ConsoleExt.WriteLine($"Player count returned by Custom Regex: {count}", ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Debug);
                 return count;
             }
         }
         
-        ConsoleExt.WriteLineWithPretext("The Bot was unable to determine the Player Count of the Server!", ConsoleExt.OutputType.Error, new Exception(serverResponse));
+        ConsoleExt.WriteLine("The Bot was unable to determine the Player Count of the Server!", ConsoleExt.CurrentStep.Helper, ConsoleExt.OutputType.Error, new Exception(serverResponse));
         return 0;
     }
 
@@ -224,11 +224,9 @@ public static class HelperClass
         foreach (var item in source)
         {
             list.Add(item);
-            if (list.Count == size)
-            {
-                yield return list;
-                list.Clear();
-            }
+            if (list.Count != size) continue;
+            yield return list;
+            list.Clear();
         }
         if (list.Count > 0) yield return list;
     }
@@ -354,5 +352,101 @@ public static class HelperClass
     {
         using var http = new HttpClient();
         return await http.GetStringAsync(url);
+    }
+
+    /// <summary>
+    /// Takes an input string number and checks if its zero, null or empty
+    /// </summary>
+    /// <param name="value">input string number</param>
+    /// <returns>null if null of empty, or Infinite if 0, otherwise its Original value</returns>
+    public static string IfZeroThenInfinite(string value)
+    {
+        return String.IsNullOrEmpty(value) ? "null" : value == "0" ? "∞" : value;
+    }
+
+    /// <summary>
+    /// Adds a % at the end if it's a number
+    /// </summary>
+    /// <param name="value">Input String</param>
+    /// <returns>Original Value if ∞ or the word null, or number with % at the end if a number</returns>
+    public static string DynamicallyAddPercentSign(string value)
+    { 
+        return value is "∞" or "null"
+            ? value
+            : double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out _)
+                ? $"{value}%"
+                : value;
+    }
+
+    /// <summary>
+    /// Checks the size of each individual component of the embed and compares it to its max size for each component.
+    /// </summary>
+    /// <param name="embed">Discord Embed</param>
+    /// <returns>True if Size Passes and false if it doesn't</returns>
+    public static bool EmbedLengthCheck(DiscordEmbed embed)
+    {
+        // Per-embed limits in characters
+        // Title: 256
+        // Description: 4096
+        // Field name: 256
+        // Field value: 1024
+        // Footer text: 2048
+        // Author name: 256
+        // Total embed characters: 6000
+        
+        bool sizePasses = true;
+        int fullSize = 0;
+
+        if (embed.Title is { Length: > 256 })
+        {
+            sizePasses = false;
+            fullSize += embed.Title.Length;
+            ConsoleExt.WriteLine($"Title length: {embed.Title.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+        }
+        
+        if (embed.Description is { Length: > 4096 })
+        {
+            sizePasses = false;
+            fullSize += embed.Description.Length;
+            ConsoleExt.WriteLine($"Description length: {embed.Description.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+        }
+        
+        foreach (var field in embed.Fields)
+        {
+            if (field.Name is { Length: > 256 })
+            {
+                sizePasses = false;
+                fullSize += field.Name.Length;
+                ConsoleExt.WriteLine($"Field's {field.Name} Name length: {field.Name.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            }
+            if  (field.Value is { Length: > 1024 })
+            {
+                sizePasses = false;
+                fullSize += field.Value.Length;
+                ConsoleExt.WriteLine($"Field's {field.Name} Value length: {field.Value.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            }
+        }
+
+        if (embed.Footer?.Text is { Length: > 2048 })
+        {
+            sizePasses = false;
+            fullSize += embed.Footer.Text.Length;
+            ConsoleExt.WriteLine($"Footer Text length: {embed.Footer.Text.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+        }
+
+        if (embed.Author?.Name is { Length: > 256 })
+        {
+            sizePasses = false;
+            fullSize += embed.Author.Name.Length;
+            ConsoleExt.WriteLine($"Author Name length: {embed.Author.Name.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+        }
+
+        if (fullSize > 6000)
+        {
+            sizePasses = false;
+            ConsoleExt.WriteLine($"Full Size Embed length: {fullSize}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+        }
+        
+        return sizePasses;
     }
 }

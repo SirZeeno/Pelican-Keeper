@@ -1,150 +1,177 @@
 ﻿using System.Collections;
-using System.Text;
-
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Pelican_Keeper;
 
+/// <summary>
+/// TODOs
+///
+/// Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per message
+/// Move the config debug mode check into here so i only have to call the write line function and not also check if debug is on, before the call
+/// Add the OutputMode enum into here to allow for granular control of what type of output is being displayed
+/// Re-Organize the output types of all the console write calls to better reflect the new Debug Output type
+/// </summary>
 public static class ConsoleExt
 {
     public static bool ExceptionOccurred;
-    public static IReadOnlyCollection<Exception> Exceptions => _exceptions;
-    // ReSharper disable once InconsistentNaming
-    private static readonly LinkedList<Exception> _exceptions = new();
+    public static IReadOnlyCollection<Exception> Exceptions => ExceptionsList;
+    private static readonly LinkedList<Exception> ExceptionsList = new();
     
+    // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
+    public static bool SuppressProcessExitForTests { get; set; }
+    
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum OutputType
     {
-        Error,
         Info,
         Warning,
-        Question
+        Error,
+        Debug,
+        None
+    }
+    
+    // This is changeable to be whatever necessary
+    public enum CurrentStep
+    {
+        FileChecks,
+        MessageHistory,
+        PelicanApi,
+        A2SQuery,
+        RconQuery,
+        MinecraftJavaQuery,
+        MinecraftBedrockQuery,
+        DiscordMessage,
+        DiscordInteraction,
+        Updater,
+        Markdown,
+        Helper,
+        GameMonitoring,
+        EmbedBuilding,
+        FileReading,
+        Initialization,
+        ResponseHandling,
+        JsonProcessing,
+        None
     }
 
     /// <summary>
     /// Writes a line to the console with a pretext based on the output type.
     /// </summary>
     /// <param name="output">Output</param>
-    /// <param name="outputType">Output type default is info</param>
-    /// <param name="exception">Exception default is null</param>
+    /// <param name="currentStep">Current step, default is Ignore</param>
+    /// <param name="outputType">Output type, default is info</param>
+    /// <param name="exception">Exception, default is null</param>
+    /// <param name="shouldBypassDebug">Should the console Log Bypass Debug Mode</param>
+    /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static int WriteLineWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null)
+    public static void WriteLine<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
     {
-        var length1 = CurrentTime();
-        var length2 = DetermineOutputType(outputType);
-        switch (output)
+        // It shouldn't write it if the output is not info or error and the debug is off and no bypass is set
+        if (outputType != OutputType.Error && outputType != OutputType.Info && !Program.Config.Debug && !shouldBypassDebug) return;
+
+        // It needs to write if the bypass is true
+        if (shouldBypassDebug)
         {
-            case string str:
-                Console.WriteLine(str.Normalize(NormalizationForm.FormKD));
-                break;
-            case IEnumerable enumerable when !(output is string):
-                Console.WriteLine(string.Join(", ", enumerable.Cast<object>()));
-                break;
-            default:
-                Console.WriteLine(output);
-                break;
+            WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+            return;
+        }
+        
+        // It needs to write if the output is info or an error
+        if (outputType is OutputType.Error or OutputType.Info && Program.Config.OutputMode == OutputType.None)
+        {
+            WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+            return;
         }
 
-        if (exception == null) return length1 + length2;
-        ExceptionOccurred = true;
-        _exceptions.AddLast(exception);
-        Console.WriteLine($"Exception: {exception.Message}");
-        Console.WriteLine($"Stack Trace: {exception.StackTrace}");
-        return length1 + length2;
+        switch (Program.Config.Debug)
+        {
+            // It should only allow the output of the type that corresponds to the output mode if debug is on and output mode is set to anything but none
+            case true when Program.Config.OutputMode != OutputType.None:
+            {
+                if (outputType != Program.Config.OutputMode) return;
+                WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+                return;
+            }
+            // Catch All if debug is turned on but none of the conditions before matched
+            case true:
+                WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
+                break;
+        }
     }
 
     /// <summary>
-    /// Writes a single line to the console with a pretext based on the output type.
-    /// </summary>
-    /// <param name="output">Output</param>
-    /// <param name="outputType">Output type default is info</param>
-    /// <param name="exception">Exception default is null</param>
-    /// <typeparam name="T">Any type</typeparam>
-    /// <returns>The length of the pretext</returns>
-    public static int WriteWithPretext<T>(T output, OutputType outputType = OutputType.Info, Exception? exception = null)
-    {
-        var length1 = CurrentTime();
-        var length2 = DetermineOutputType(outputType);
-        switch (output)
-        {
-            case string str:
-                Console.WriteLine(str.Normalize(NormalizationForm.FormKD));
-                break;
-            case IEnumerable enumerable when !(output is string):
-                Console.WriteLine(string.Join(", ", enumerable.Cast<object>()));
-                break;
-            default:
-                Console.WriteLine(output);
-                break;
-        }
-
-        if (exception == null) return length1 + length2;
-        ExceptionOccurred = true;
-        _exceptions.AddLast(exception);
-        Console.WriteLine($"Exception: {exception.Message}");
-        Console.WriteLine($"Stack Trace: {exception.StackTrace}");
-        return length1 + length2;
-    }
-
-    /// <summary>
-    /// Determines the output type and returns the length of the pretext.
+    /// Determines the output type and writes it in the appropriate color.
     /// </summary>
     /// <param name="outputType">Output type</param>
     /// <returns>The length of the pretext</returns>
-    private static int DetermineOutputType(OutputType outputType)
+    private static void WriteOutputType(OutputType outputType)
     {
-        return outputType switch
+        var (color, label) = outputType switch
         {
-            OutputType.Error => ErrorType(),
-            OutputType.Info => InfoType(),
-            OutputType.Warning => WarningType(),
-            OutputType.Question => QuestionType(),
-            _ => 0
+            OutputType.Error => (ConsoleColor.DarkRed, "Error"),
+            OutputType.Warning => (ConsoleColor.DarkYellow, "Warning"),
+            OutputType.Debug => (ConsoleColor.DarkMagenta, "Debug"),
+            _ => (ConsoleColor.Green, "Info")
         };
+        
+        Console.ForegroundColor = color;
+        Console.Write($"[{label}] ");
+        Console.ResetColor();
     }
 
-    private static int CurrentTime()
+    private static void CurrentTime()
     {
         var dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
-        var oldColor = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.White;
         Console.Write($"[{dateTime}] ");
-        Console.ForegroundColor = oldColor;
-        return dateTime.Length + 3;
+        Console.ResetColor();
     }
 
-    private static int InfoType()
+    /// <summary>
+    /// Determines the current step and returns the length of the pretext.
+    /// </summary>
+    /// <param name="step">Current step</param>
+    /// <returns>The length of the pretext</returns>
+    private static void WriteStep(CurrentStep step)
     {
-        var oldColor = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write("[Info] ");
-        Console.ForegroundColor = oldColor;
-        return 7;
+        if (step == CurrentStep.None) return;
+        
+        var label = Regex.Replace(
+            step.ToString(),
+            @"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])",
+            " "
+        );
+
+        Console.Write($"[{label}] ");
     }
 
-    private static int ErrorType()
+    private static void WriteConsoleOutput<T>(T output, CurrentStep currentStep, OutputType outputType, Exception? exception, bool shouldExit)
     {
-        var oldColor = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.DarkRed;
-        Console.Write("[Error] ");
-        Console.ForegroundColor = oldColor;
-        return 8;
-    }
-
-    private static int WarningType()
-    {
-        var oldColor = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.DarkYellow;
-        Console.Write("[Warning] ");
-        Console.ForegroundColor = oldColor;
-        return 10;
-    }
-
-    private static int QuestionType()
-    {
-        var oldColor = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.DarkGreen;
-        Console.Write("[Question] ");
-        Console.ForegroundColor = oldColor;
-        return 11;
+        CurrentTime();
+        WriteStep(currentStep);
+        WriteOutputType(outputType);
+        if (output is IEnumerable enumerable && !(output is string))
+        {
+            Console.Write(string.Join(", ", enumerable.Cast<object>()));
+        }
+        else
+        {
+            Console.Write(output);
+        }
+        
+        if (exception == null)
+        {
+            Console.WriteLine();
+            return;
+        }
+        ExceptionOccurred = true;
+        ExceptionsList.AddLast(exception);
+        Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
+        
+        if (!shouldExit || SuppressProcessExitForTests) return;
+        Thread.Sleep(TimeSpan.FromSeconds(5));
+        Environment.Exit(1);
     }
 }

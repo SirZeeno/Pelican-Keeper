@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
 
@@ -21,7 +22,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         }
         catch (SocketException ex)
         {
-            ConsoleExt.WriteLineWithPretext($"Could not connect to server. {ip}:{port}", ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLine($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error, ex);
         }
     }
 
@@ -66,11 +67,13 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         }
         catch (OperationCanceledException)
         {
-            return "Timed out waiting for server response.";
+            ConsoleExt.WriteLine("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
+            return string.Empty;
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            ConsoleExt.WriteLine($"Error: {ex.Message}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
+            return string.Empty;
         }
     }
 

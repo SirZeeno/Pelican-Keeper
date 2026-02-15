@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Pelican_Keeper;
 
@@ -59,10 +60,7 @@ public static class ServerMarkdown
     /// <returns>A tuple containing the final message and server title</returns>
     public static (string message, string serverName) ParseTemplate(TemplateClasses.ServerInfo serverResponse)
     {
-        if (serverResponse.Resources == null)
-        {
-            throw new ArgumentException("Server Resource response cannot be null.");
-        }
+        if (serverResponse.Resources == null) throw new ArgumentException("Server Resource response cannot be null.");
         
         var viewModel = new TemplateClasses.ServerViewModel
         {
@@ -71,29 +69,25 @@ public static class ServerMarkdown
             Status = serverResponse.Resources.CurrentState,
             StatusIcon = EmbedBuilderHelper.GetStatusIcon(serverResponse.Resources.CurrentState),
             Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
+            MaxCpu = $"{HelperClass.DynamicallyAddPercentSign(HelperClass.IfZeroThenInfinite(serverResponse.Resources.CpuMaximum.ToString(CultureInfo.InvariantCulture)))}",
             Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes),
+            MaxMemory = HelperClass.IfZeroThenInfinite(serverResponse.Resources.MemoryMaximum.ToString(CultureInfo.InvariantCulture)),
             Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes),
+            MaxDisk = HelperClass.IfZeroThenInfinite(serverResponse.Resources.DiskMaximum.ToString(CultureInfo.InvariantCulture)),
             NetworkRx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkRxBytes),
             NetworkTx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkTxBytes),
             Uptime = EmbedBuilderHelper.FormatUptime(serverResponse.Resources.Uptime)
         };
 
-        if (Program.Config.JoinableIpDisplay)
-        {
-            viewModel.IpAndPort = HelperClass.GetReadableConnectableAddress(serverResponse);
-        }
+        if (Program.Config.JoinableIpDisplay) viewModel.IpAndPort = HelperClass.GetReadableConnectableAddress(serverResponse);
         
-        if (Program.Config.PlayerCountDisplay)
-        {
-            viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText) ? "N/A" : serverResponse.PlayerCountText;
-        }
+        if (Program.Config.PlayerCountDisplay) viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText) ? "N/A" : serverResponse.PlayerCountText;
 
         var result = PreprocessTemplateTags(viewModel);
         var serverName = result.Tags.GetValueOrDefault("Title", "Default Title");
         var message = ReplacePlaceholders(result.Body, viewModel);
 
-        if (Program.Config.Debug)
-            ConsoleExt.WriteLineWithPretext($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}");
+        ConsoleExt.WriteLine($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}", ConsoleExt.CurrentStep.Markdown, ConsoleExt.OutputType.Debug);
 
         return (message, serverName);
     }

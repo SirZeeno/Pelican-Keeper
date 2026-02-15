@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
 
@@ -19,10 +20,10 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         _stream = _tcpClient.GetStream();
         
         bool authenticated = await AuthenticateAsync();
-        if (authenticated && Program.Config.Debug)
-            ConsoleExt.WriteLineWithPretext("RCON connection established successfully.");
+        if (authenticated)
+            ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
         else
-            ConsoleExt.WriteLineWithPretext("RCON authentication failed.", ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
+            ConsoleExt.WriteLine("RCON authentication failed.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
     }
 
     private async Task<bool> AuthenticateAsync()
@@ -44,8 +45,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         await _stream.WriteAsync(packet);
 
         var response = await ReadResponseAsync();
-        if (Program.Config.Debug)
-            ConsoleExt.WriteLineWithPretext($"RCON command response: {response.body.Trim()}");
+        ConsoleExt.WriteLine($"RCON command response: {response.body.Trim()}", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
         return HelperClass.ExtractPlayerCount(response.body.Trim(), regexPattern).ToString();
     }
 
@@ -91,7 +91,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         while (offset < length)
         {
             int read = await _stream!.ReadAsync(buffer, offset, length - offset);
-            if (read == 0) ConsoleExt.WriteLineWithPretext("Connection closed unexpectedly.", ConsoleExt.OutputType.Error, new IOException("Connection closed by remote host"));
+            if (read == 0) ConsoleExt.WriteLine("Connection closed unexpectedly.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error, new IOException("Connection closed by remote host"));
             offset += read;
         }
         return buffer;

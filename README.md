@@ -9,12 +9,7 @@
 # Pelican Keeper
 A Discord bot that will display the status of your Pelican Game Servers in a Discord Channel
 
-> [!CAUTION]
-> The Secrets File has been changed to accommodate multichannel messaging, Look at the JSON structure below where you'll see the new structure!
-
-This Discord bot is a basic compile-and-run bot built in .NET 8.0.
-> [!TIP]
-> This bot can be installed and run on the generic C# Egg on Pelican.
+This Discord bot is a basic compile-and-run or Egg install through Pelican bot built in .NET 8.0
 
 | Feature                 | Description                                                                 | Supported   |
 |-------------------------|-----------------------------------------------------------------------------|-------------|
@@ -27,15 +22,30 @@ This Discord bot is a basic compile-and-run bot built in .NET 8.0.
 | Consolidation           | Consolidates All Servers into one message (limited to 25 in a single embed) | ✅           |
 | Pagination              | Flip through multiple servers in one paginated message                      | ✅           |
 | Custom Templates        | Markdown style message embed system for customizable structure              | ✅           |
-| Button navigation       | Navigate Paginated messages using buttons                                   | ✅           |
 | Auto Updates            | Messages update automatically every X seconds                               | ✅           |
 | Player Count            | Show live player count from server (if supported)                           | ✅ |
 | Server Joinable IP:Port | Show server joinable IP:Port                                                | ✅ |
 | Pelican Egg             | Installable Egg where you can run and configure the bot in the panel        | ❌ (Planned) |
 
 
+## Setup using Pelican Keeper Egg
 
-## Setup in Pelican
+### Download Egg
+
+Download the egg from this GitHub and import it into your Panel
+
+### Configure Egg
+
+After creating a server using the egg, you now have all the settings from the config at your disposal, which will update the config in real time. 
+You will still need to restart the Bot for the changes to take effect. <br>
+Before you can use the bot, you need to start the bot once to allow it to create any necessary files. One of which you will need to edit manually.
+
+### Edit Secrets file
+
+In the file Tab after starting the bot once, you will find a new Secrets.json file having been created. Edit that file and fill out all the information. <br>
+The wiki for what each field requests can be found [here](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Secrets)
+
+## Setup in using Generic C# Egg
 
 ### Setup Egg
 

@@ -5,24 +5,25 @@
   "MessageSortingDirection": "Ascending",
   "IgnoreOfflineServers": false,
   "IgnoreInternalServers": false,
+  "IgnoreServersWithoutAllocations": true,
   "ServersToIgnore": ["UUIDS HERE"],
   
   "JoinableIpDisplay": true,
   "PlayerCountDisplay": true,
   "ServersToMonitor": ["UUIDS HERE"],
   
-  "AutomaticShutdown": true,
+  "AutomaticShutdown": false,
   "ServersToAutoShutdown": ["UUIDS HERE"],
   "EmptyServerTimeout": "00:01:00",
   "AllowUserServerStartup": true,
   "AllowServerStartup": ["UUIDS HERE"],
-  "UsersAllowedToStartServers": ["USERID HERE"],
+  "UsersAllowedToStartServers": ["USERIDS HERE"],
   "AllowUserServerStopping": true,
   "AllowServerStopping": ["UUIDS HERE"],
-  "UsersAllowedToStopServers": ["USERID HERE"],
+  "UsersAllowedToStopServers": ["USERIDS HERE"],
   
-  "ContinuesMarkdownRead": true,
-  "ContinuesGamesToMonitorRead": true,
+  "ContinuesMarkdownRead": false,
+  "ContinuesGamesToMonitorRead": false,
   "MarkdownUpdateInterval": 30,
   "ServerUpdateInterval": 10,
   
@@ -30,6 +31,8 @@
   "MaxServerCount": 10,
   "ServersToDisplay": ["UUIDS HERE"],
   
-  "Debug": true,
-  "DryRun": false
+  "Debug": false,
+  "OutputMode": "None",
+  "DryRun": false,
+  "AutoUpdate": false
 }

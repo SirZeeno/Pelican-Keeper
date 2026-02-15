@@ -1,4 +1,4 @@
-﻿namespace Pelican_Keeper;
+﻿namespace Pelican_Keeper.Interfaces;
 
 public interface ISendCommand
 {

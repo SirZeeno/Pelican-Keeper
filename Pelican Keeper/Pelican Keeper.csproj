@@ -12,6 +12,7 @@
         <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
         <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
         <RuntimeIdentifiers>win-x86;win-x64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+        <Version>2.0.4</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,10 +27,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="MessageHistory.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </None>
         <None Update="Config.json">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -39,6 +36,22 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="GamesToMonitor.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="Update Scripts\Bare Metal\Install.sh">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="Update Scripts\Bare Metal\startup.sh">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="Update Scripts\Pelican\update.sh">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Update="Update Scripts\Pelican\startup.sh">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
