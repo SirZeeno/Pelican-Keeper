@@ -1,10 +1,9 @@
 ﻿#!/bin/bash
 set -euo pipefail
-cd /mnt/server
 
 REPO="SirZeeno/Pelican-Keeper"
 ASSET_SUFFIX="linux-x64.zip"   # matches your asset name ending
-STATE_FILE="/mnt/server/.pk_installed_tag"
+STATE_FILE="./.pk_installed_tag"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -62,15 +61,29 @@ fi
 # Copy files into place.
 # NOTE: this overwrites app files, but avoids touching common persistent files if you exclude them.
 # If you have config/db folders, keep them in /mnt/server/data or similar so they won't collide.
-rsync -a --delete \
-  --exclude ".pk_installed_tag" \
-  --exclude "config.json" \
-  --exclude "secrets.json" \
-  --exclude "data/" \
-  --exclude "logs/" \
-  "$stage_dir"/ /mnt/server/
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --delete \
+    --exclude ".pk_installed_tag" \
+    --exclude "config.json" \
+    --exclude "secrets.json" \
+    --exclude "data/" \
+    --exclude "logs/" \
+    "$stage_dir"/ "./"/
+else
+  echo "rsync not found; using cp fallback"
 
-chmod +x /mnt/server/"Pelican Keeper" || true
+  shopt -s dotglob nullglob
+  for item in "$stage_dir"/*; do
+    name="$(basename "$item")"
+    case "$name" in
+      ".pk_installed_tag"|"config.json"|"secrets.json"|"data"|"logs") continue ;;
+    esac
+    rm -rf "./$name"
+    cp -a "$item" "./$name"
+  done
+fi
+
+chmod +x ./"Pelican Keeper" || true
 
 # Mark installed tag AFTER successful install
 echo "$latest_tag" > "$STATE_FILE"

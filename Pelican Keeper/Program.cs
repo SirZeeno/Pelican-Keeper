@@ -74,6 +74,11 @@ using static DiscordInteractions;
 /// Updated the Path to the Update Scrip in the Startup Script
 ///
 /// V3.0.4
+/// Fixed Discord Dropdown buttons Debug output to still be displayed when outside of debug mode
+/// Fixed Some issues concerning the Pelican Startup and Update script
+/// Updated The Egg Startup script to use bash
+///
+/// V3.0.4
 /// 
 /// 
 /// </summary>
