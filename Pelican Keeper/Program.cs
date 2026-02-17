@@ -92,6 +92,10 @@ using static DiscordInteractions;
 /// Updated the Bot environment version number
 /// Fixed Capitalization of Secrets and Config in the Pelican update script
 /// Added a update_config.sh script that takes the Pelican Panel settings and writes them into the config
+///
+/// V3.0.8
+/// Updated Egg to exclude the configuration files configuration and new Image options (Images not yet tested)
+/// Added update_config.sh to the export and preserve list
 /// 
 /// 
 /// </summary>
