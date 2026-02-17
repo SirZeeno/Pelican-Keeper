@@ -64,8 +64,8 @@ fi
 if command -v rsync >/dev/null 2>&1; then
   rsync -a --delete \
     --exclude ".pk_installed_tag" \
-    --exclude "config.json" \
-    --exclude "secrets.json" \
+    --exclude "Config.json" \
+    --exclude "Secrets.json" \
     --exclude "data/" \
     --exclude "logs/" \
     "$stage_dir"/ "./"/
@@ -76,7 +76,7 @@ else
   for item in "$stage_dir"/*; do
     name="$(basename "$item")"
     case "$name" in
-      ".pk_installed_tag"|"config.json"|"secrets.json"|"data"|"logs") continue ;;
+      ".pk_installed_tag"|"Config.json"|"Secrets.json"|"data"|"logs") continue ;;
     esac
     rm -rf "./$name"
     cp -a "$item" "./$name"

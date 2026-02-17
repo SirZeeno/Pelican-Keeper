@@ -86,6 +86,13 @@ using static DiscordInteractions;
 /// Added Flexible Boolean Conversion to account for issues with the Pelican Panel's Boolean Tag (fixed in testing branch of Pelican Panel)
 /// Split some of the Helper functions into their own class to clean up the Helper Class
 /// Moved the Helper Classes into their own folder
+///
+/// V3.0.7
+/// Updated the Variable for auto update in the pelican startup script
+/// Updated the Bot environment version number
+/// Fixed Capitalization of Secrets and Config in the Pelican update script
+/// Added a update_config.sh script that takes the Pelican Panel settings and writes them into the config
+/// 
 /// 
 /// </summary>
 
