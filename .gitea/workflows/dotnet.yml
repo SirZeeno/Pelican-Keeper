@@ -1,0 +1,131 @@
+name: .NET Multi-RID Publish
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.check_version.outputs.valid }}
+      version: ${{ steps.get_commit.outputs.title }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get last commit message
+        id: get_commit
+        run: |
+          TITLE=$(git log -1 --pretty=%s)
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+
+      - name: Check if commit is version tag (X.Y.Z)
+        id: check_version
+        run: |
+          if [[ "${{ steps.get_commit.outputs.title }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  create-release:
+    needs: check-version
+    if: needs.check-version.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create.outputs.release_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Gitea release (API)
+        id: create
+        env:
+          # Prefer a PAT secret. If you *know* your auto-token has enough rights, you can use secrets.GITHUB_TOKEN on Gitea.
+          TOKEN: ${{ secrets.GITEA_TOKEN }}
+          VERSION: ${{ needs.check-version.outputs.version }}
+          REPO: ${{ github.repository }}
+          API_BASE: ${{ github.server_url }}/api/v1
+        run: |
+          set -euo pipefail
+
+          # Create the release
+          payload=$(jq -n \
+            --arg tag "v$VERSION" \
+            --arg name "v$VERSION" \
+            '{tag_name:$tag, name:$name, draft:false, prerelease:false}')
+
+          resp=$(curl -fsS -X POST \
+            -H "Authorization: token $TOKEN" \
+            -H "Content-Type: application/json" \
+            "$API_BASE/repos/$REPO/releases" \
+            -d "$payload")
+
+          rid=$(echo "$resp" | jq -r '.id')
+          if [[ -z "$rid" || "$rid" == "null" ]]; then
+            echo "Failed to parse release id. Response:"
+            echo "$resp"
+            exit 1
+          fi
+
+          echo "release_id=$rid" >> "$GITHUB_OUTPUT"
+
+  publish-and-upload:
+    needs: [check-version, create-release]
+    if: needs.check-version.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x86, win-x64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
+    env:
+      PROJECT_PATH: "Pelican Keeper/Pelican Keeper.csproj"
+      APP_NAME: "Pelican-Keeper"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Restore (per RID)
+        run: dotnet restore "$PROJECT_PATH" -r ${{ matrix.rid }}
+
+      - name: Publish (${{ matrix.rid }})
+        run: |
+          OUTDIR="dist/${{ matrix.rid }}"
+          mkdir -p "$OUTDIR"
+          dotnet publish "$PROJECT_PATH" \
+            -c Release -r ${{ matrix.rid }} --no-restore --nologo \
+            -p:PublishSingleFile=true -p:SelfContained=true -p:EnableCompressionInSingleFile=true \
+            -o "$OUTDIR"
+          echo "OUTDIR=$OUTDIR" >> "$GITHUB_ENV"
+
+      - name: Zip publish output (${{ matrix.rid }})
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          NAME="${{ env.APP_NAME }}-v${VERSION}-${{ matrix.rid }}.zip"
+          cd "$OUTDIR"
+          zip -r "../$NAME" .
+          echo "ZIP=dist/$NAME" >> "$GITHUB_ENV"
+          echo "ASSET_NAME=$NAME" >> "$GITHUB_ENV"
+
+      - name: Upload asset to Gitea release (API)
+        env:
+          TOKEN: ${{ secrets.GITEA_TOKEN }}
+          REPO: ${{ github.repository }}
+          API_BASE: ${{ github.server_url }}/api/v1
+          RELEASE_ID: ${{ needs.create-release.outputs.release_id }}
+        run: |
+          set -euo pipefail
+
+          # Gitea release assets endpoint (multipart/form-data)
+          curl -fsS -X POST \
+            -H "Authorization: token $TOKEN" \
+            -F "attachment=@${{ env.ZIP }}" \
+            "$API_BASE/repos/$REPO/releases/$RELEASE_ID/assets?name=${{ env.ASSET_NAME }}"

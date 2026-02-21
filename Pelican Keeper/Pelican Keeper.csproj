@@ -12,7 +12,8 @@
         <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
         <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
         <RuntimeIdentifiers>win-x86;win-x64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
-        <Version>3.0.7</Version>
+        <Version>3.0.9</Version>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -62,6 +63,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
       <Content Include="..\.github\workflows\dotnet.yml">
         <Link>dotnet.yml</Link>
       </Content>

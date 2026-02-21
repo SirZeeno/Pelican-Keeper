@@ -83,40 +83,6 @@ public static class EmbedBuilderHelper
     {
         builder.AddField(name, string.IsNullOrEmpty(value) ? "N/A" : value, inline);
     }
-
-    internal static string FormatBytes(long bytes)
-    {
-        const long kb = 1024;
-        const long mb = kb * 1024;
-        const long gb = mb * 1024;
-        const long tb = gb * 1024;
-
-        return bytes switch
-        {
-            >= tb => $"{bytes / (double)tb:F2} TiB",
-            >= gb => $"{bytes / (double)gb:F2} GiB",
-            >= mb => $"{bytes / (double)mb:F2} MiB",
-            >= kb => $"{bytes / (double)kb:F2} KiB",
-            _ => $"{bytes} B"
-        };
-    }
-
-    internal static string FormatUptime(long uptimeMs)
-    {
-        var uptime = TimeSpan.FromMilliseconds(uptimeMs);
-        return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m";
-    }
-
-    public static string GetStatusIcon(string status)
-    {
-        return status.ToLower() switch
-        {
-            "offline" => "🔴",
-            "missing" => "🟡",
-            "running" => "🟢",
-            _ => "⚪"
-        };
-    }
     
     internal static int GetEmbedCharacterCount(DiscordEmbedBuilder embed)
     {

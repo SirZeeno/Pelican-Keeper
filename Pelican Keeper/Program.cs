@@ -96,6 +96,13 @@ using static DiscordInteractions;
 /// V3.0.8
 /// Updated Egg to exclude the configuration files configuration and new Image options (Images not yet tested)
 /// Added update_config.sh to the export and preserve list
+///
+///V3.0.9
+/// Added Byte conversions into the maximum disk and memory counters
+/// Added Decimal format conversion for maximum cpu usage.
+/// Version Bump in Bot Project (keep forgetting to do so)
+/// Added Docker File to allow Building a docker container with the source code (Official Docker Container Coming soon)
+/// Added a specific GitHub actions file for Gitea actions
 /// 
 /// 
 /// </summary>

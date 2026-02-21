@@ -1,10 +1,10 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using DSharpPlus.Entities;
 using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper;
 
-using static EmbedBuilderHelper;
 using static ConversionHelpers;
 
 
@@ -74,11 +74,11 @@ public static class ServerMarkdown
             Status = serverResponse.Resources.CurrentState,
             StatusIcon = GetStatusIcon(serverResponse.Resources.CurrentState),
             Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
-            MaxCpu = $"{DynamicallyAddPercentSign(IfZeroThenInfinite(serverResponse.Resources.CpuMaximum.ToString(CultureInfo.InvariantCulture)))}",
+            MaxCpu = DynamicallyAddPercentSign(IfZeroThenInfinite($"{serverResponse.Resources.CpuMaximum:0.00}")),
             Memory = FormatBytes(serverResponse.Resources.MemoryBytes),
-            MaxMemory = IfZeroThenInfinite(serverResponse.Resources.MemoryMaximum.ToString(CultureInfo.InvariantCulture)),
+            MaxMemory = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.MemoryMaximum).ToString(CultureInfo.InvariantCulture)),
             Disk = FormatBytes(serverResponse.Resources.DiskBytes),
-            MaxDisk = IfZeroThenInfinite(serverResponse.Resources.DiskMaximum.ToString(CultureInfo.InvariantCulture)),
+            MaxDisk = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.DiskMaximum).ToString(CultureInfo.InvariantCulture)),
             NetworkRx = FormatBytes(serverResponse.Resources.NetworkRxBytes),
             NetworkTx = FormatBytes(serverResponse.Resources.NetworkTxBytes),
             Uptime = FormatUptime(serverResponse.Resources.Uptime)
@@ -107,5 +107,39 @@ public static class ServerMarkdown
                 await Task.Delay(TimeSpan.FromSeconds(Program.Config.MarkdownUpdateInterval));
             }
         });
+    }
+    
+    internal static string FormatBytes(long bytes)
+    {
+        const long kb = 1024;
+        const long mb = kb * 1024;
+        const long gb = mb * 1024;
+        const long tb = gb * 1024;
+
+        return bytes switch
+        {
+            >= tb => $"{bytes / (double)tb:F2} TiB",
+            >= gb => $"{bytes / (double)gb:F2} GiB",
+            >= mb => $"{bytes / (double)mb:F2} MiB",
+            >= kb => $"{bytes / (double)kb:F2} KiB",
+            _ => $"{bytes} B"
+        };
+    }
+    
+    internal static string FormatUptime(long uptimeMs)
+    {
+        var uptime = TimeSpan.FromMilliseconds(uptimeMs);
+        return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m";
+    }
+
+    public static string GetStatusIcon(string status)
+    {
+        return status.ToLower() switch
+        {
+            "offline" => "🔴",
+            "missing" => "🟡",
+            "running" => "🟢",
+            _ => "⚪"
+        };
     }
 }

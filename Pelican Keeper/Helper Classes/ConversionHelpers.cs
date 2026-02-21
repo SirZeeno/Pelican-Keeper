@@ -11,7 +11,7 @@ public static class ConversionHelpers
     /// <returns>null if null of empty, or Infinite if 0, otherwise its Original value</returns>
     public static string IfZeroThenInfinite(string value)
     {
-        return String.IsNullOrEmpty(value) ? "null" : value == "0" ? "∞" : value;
+        return String.IsNullOrEmpty(value) ? "null" : value is "0" or "0.00" ? "∞" : value;
     }
 
     /// <summary>
