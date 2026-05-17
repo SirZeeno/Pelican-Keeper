@@ -133,7 +133,7 @@ public static class Program
             Config.LimitServerCount = true;
             Config.MaxServerCount = 20;
             Config.IgnoreInternalServers = true;
-            Config.ServersToIgnore = ["c76c19e3-85f4-41b1-9cd4-0699dfcc78e9"];
+            Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1"];
         #endif
 
         if (FileManager.GetFilePath("MessageMarkdown.txt") == string.Empty)

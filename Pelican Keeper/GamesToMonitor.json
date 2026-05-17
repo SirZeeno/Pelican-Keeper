@@ -329,7 +329,8 @@
     "Game": "Factorio",
     "Protocol": "RCON",
     "RconPortVariable": "SERVER_PORT+1",
-    "RconPasswordVariable": "SERVER_TOKEN",
+    "ConfigLocation": "",
+    "RconPasswordVariable": "rcon_password",
     "MaxPlayerVariable": "MAX_SLOTS",
     "Command": "/players online count"
   },
@@ -337,7 +338,8 @@
     "Game": "Factorio ARM64",
     "Protocol": "RCON",
     "RconPortVariable": "SERVER_PORT+1",
-    "RconPasswordVariable": "SERVER_TOKEN",
+    "ConfigLocation": "",
+    "RconPasswordVariable": "rcon_password",
     "MaxPlayerVariable": "MAX_SLOTS",
     "Command": "/players online count"
   },
@@ -345,7 +347,8 @@
     "Game": "Factorio-ModUpdate",
     "Protocol": "RCON",
     "RconPortVariable": "SERVER_PORT+1",
-    "RconPasswordVariable": "SERVER_TOKEN",
+    "ConfigLocation": "",
+    "RconPasswordVariable": "rcon_password",
     "MaxPlayerVariable": "MAX_SLOTS",
     "Command": "/players online count"
   },
@@ -353,7 +356,8 @@
     "Game": "Clusterio",
     "Protocol": "RCON",
     "RconPortVariable": "SERVER_PORT+1",
-    "RconPasswordVariable": "SERVER_TOKEN",
+    "ConfigLocation": "",
+    "RconPasswordVariable": "rcon_password",
     "MaxPlayerVariable": "MAX_SLOTS",
     "Command": "/players online count"
   },

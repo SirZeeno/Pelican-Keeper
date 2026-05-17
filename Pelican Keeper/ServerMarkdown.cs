@@ -71,7 +71,7 @@ public static class ServerMarkdown
             Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
             MaxCpu = $"{HelperClass.DynamicallyAddPercentSign(HelperClass.IfZeroThenInfinite(serverResponse.Resources.CpuMaximum.ToString(CultureInfo.InvariantCulture)))}",
             Memory = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.MemoryBytes),
-            MaxMemory = HelperClass.IfZeroThenInfinite(serverResponse.Resources.MemoryMaximum.ToString(CultureInfo.InvariantCulture)),
+            MaxMemory = HelperClass.IfZeroThenInfinite(serverResponse.Resources.MemoryMaximum.ToString(CultureInfo.InvariantCulture)), //TODO: add the format bytes function to this so i properly displays the max amount as well
             Disk = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.DiskBytes),
             MaxDisk = HelperClass.IfZeroThenInfinite(serverResponse.Resources.DiskMaximum.ToString(CultureInfo.InvariantCulture)),
             NetworkRx = EmbedBuilderHelper.FormatBytes(serverResponse.Resources.NetworkRxBytes),

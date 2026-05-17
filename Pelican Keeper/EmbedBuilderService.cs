@@ -3,7 +3,7 @@
 namespace Pelican_Keeper;
 using static TemplateClasses;
 
-public class EmbedBuilderService
+public class EmbedBuilderService //TODO: allow of sending multiple messages if the current message is too long to allow fitting in more servers
 {
     public Task<DiscordEmbed> BuildSingleServerEmbed(ServerInfo server)
     {

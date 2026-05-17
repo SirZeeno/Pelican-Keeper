@@ -250,11 +250,11 @@ public static class PelicanInterface
         if (serversToIgnore is { Length: > 0 } && serversToIgnore[0] != "UUIDS HERE") 
             servers = servers.Where(s => !serversToIgnore.Contains(s.Uuid)).ToList();
 
+        _ = GetServerResourcesList(servers);
         if (Program.Config.IgnoreOfflineServers) 
             servers = servers.Where(s => s.Resources?.CurrentState.ToLower() != "offline" && s.Resources?.CurrentState.ToLower() != "missing").ToList();
                 
         servers = SortServers(servers, Program.Config.MessageSorting, Program.Config.MessageSortingDirection);
-        _ = GetServerResourcesList(servers);
                 
         if (Program.Config.IgnoreInternalServers && Program.Config.InternalIpStructure != null)
         {
