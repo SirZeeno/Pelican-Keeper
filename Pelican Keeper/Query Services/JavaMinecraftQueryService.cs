@@ -16,7 +16,15 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         try
         {
             _tcpClient = new TcpClient();
-            await _tcpClient.ConnectAsync(ip, port);
+            try
+            {
+                await _tcpClient.ConnectAsync(ip, port); //TODO: This is a Temp Catch All, I am going to refine this when I got the chance to
+            }
+            catch (Exception e)
+            {
+                ConsoleExt.WriteLine(e, ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+                return;
+            }
             _tcpClient.Client.ReceiveTimeout = 5000;
             _stream = _tcpClient.GetStream();
         }
@@ -29,7 +37,10 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
     public async Task<string> SendCommandAsync(string? command = null, string? regexPattern = null)
     {
         if (_tcpClient == null || _stream == null)
-            throw new InvalidOperationException("Call Connect() before sending commands.");
+        {
+            ConsoleExt.WriteLine(new InvalidOperationException("Call Connect() before sending commands."),  ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+            return string.Empty;
+        }
         var protocolVersion = 760;
         using var cts = new CancellationTokenSource(_tcpClient.Client.ReceiveTimeout);
         try

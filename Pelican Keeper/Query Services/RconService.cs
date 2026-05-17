@@ -16,7 +16,15 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
     public async Task Connect()
     {
         _tcpClient = new TcpClient();
-        await _tcpClient.ConnectAsync(Ip, Port);
+        try
+        {
+            await _tcpClient.ConnectAsync(Ip, Port);
+        }
+        catch (Exception e)
+        {
+            ConsoleExt.WriteLine(e, ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+            return;
+        }
         _stream = _tcpClient.GetStream();
         
         bool authenticated = await AuthenticateAsync();
@@ -39,7 +47,10 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
     public async Task<string> SendCommandAsync(string command, string? regexPattern)
     {
         if (_tcpClient == null || _stream == null)
-            throw new InvalidOperationException("Call Connect() before sending commands.");
+        {
+            ConsoleExt.WriteLine(new InvalidOperationException("Call Connect() before sending commands."),  ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+            return HelperClass.ExtractPlayerCount(null, regexPattern).ToString();
+        }
         _requestId++;
         byte[] packet = CreatePacket(_requestId, 2, command);
         await _stream.WriteAsync(packet);

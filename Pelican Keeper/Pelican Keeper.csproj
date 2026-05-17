@@ -12,7 +12,8 @@
         <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
         <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
         <RuntimeIdentifiers>win-x86;win-x64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
-        <Version>2.0.4</Version>
+        <Version>3.0.10</Version>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -55,9 +56,16 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
+        <None Update="Update Scripts\Pelican\update_config.sh">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
       <Content Include="..\.github\workflows\dotnet.yml">
         <Link>dotnet.yml</Link>
       </Content>

@@ -65,6 +65,46 @@ using static DiscordInteractions;
 /// V3.0.1
 /// Added a special Update script for Pelican and Docker container that runs before the bot and not after the bot is started
 /// Added a disable environment variable for the updater class if inside container
+///
+/// V3.0.2
+/// Added Terraria as a case in the Server request execution methods
+///
+/// V3.0.3
+/// Updated Pelican Egg to use the new Startup script
+/// Updated the Path to the Update Scrip in the Startup Script
+///
+/// V3.0.4
+/// Fixed Discord Dropdown buttons Debug output to still be displayed when outside of debug mode
+/// Fixed Some issues concerning the Pelican Startup and Update script
+/// Updated The Egg Startup script to use bash
+///
+/// V3.0.5
+/// Fixed a small bash error that would pop up in Pelican
+/// Updated the Startup Command to now use the startup.sh script like intended
+///
+/// V3.0.6
+/// Added Flexible Boolean Conversion to account for issues with the Pelican Panel's Boolean Tag (fixed in testing branch of Pelican Panel)
+/// Split some of the Helper functions into their own class to clean up the Helper Class
+/// Moved the Helper Classes into their own folder
+///
+/// V3.0.7
+/// Updated the Variable for auto update in the pelican startup script
+/// Updated the Bot environment version number
+/// Fixed Capitalization of Secrets and Config in the Pelican update script
+/// Added a update_config.sh script that takes the Pelican Panel settings and writes them into the config
+///
+/// V3.0.8
+/// Updated Egg to exclude the configuration files configuration and new Image options (Images not yet tested)
+/// Added update_config.sh to the export and preserve list
+///
+///V3.0.9
+/// Added Byte conversions into the maximum disk and memory counters
+/// Added Decimal format conversion for maximum cpu usage.
+/// Version Bump in Bot Project (keep forgetting to do so)
+/// Added Docker File to allow Building a docker container with the source code (Official Docker Container Coming soon)
+/// Added a specific GitHub actions file for Gitea actions
+///
+/// V3.0.10
 /// 
 /// 
 /// </summary>
