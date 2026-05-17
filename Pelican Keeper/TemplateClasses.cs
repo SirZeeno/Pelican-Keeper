@@ -187,6 +187,7 @@ public abstract class TemplateClasses
     {
         public string Game { get; init; } = null!;
         public CommandExecutionMethod Protocol { get; init; }
+        public string? ConfigLocation {get; init; }
         public string? RconPortVariable { get; set; }
         public string? RconPasswordVariable { get; set; }
         public string? RconPassword { get; set; }
