@@ -103,6 +103,8 @@ using static DiscordInteractions;
 /// Version Bump in Bot Project (keep forgetting to do so)
 /// Added Docker File to allow Building a docker container with the source code (Official Docker Container Coming soon)
 /// Added a specific GitHub actions file for Gitea actions
+///
+/// V3.0.10
 /// 
 /// 
 /// </summary>

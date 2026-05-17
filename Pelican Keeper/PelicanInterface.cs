@@ -373,7 +373,6 @@ public static class PelicanInterface
         }
 
         await rcon.Connect();
-        
         string response = await rcon.SendCommandAsync(command, regexPattern);
         
         RconServices.Add(rcon);
