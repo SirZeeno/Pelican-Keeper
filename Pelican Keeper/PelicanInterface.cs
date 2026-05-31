@@ -472,7 +472,7 @@ public static class PelicanInterface
             case CommandExecutionMethod.Rcon:
             {
                 int rconPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable, serverInfo.Allocations);
-                var rconPassword = serverToMonitor.RconPassword ?? JsonHandler.ExtractRconPassword(json, serverInfo.Uuid, serverToMonitor.RconPasswordVariable);
+                var rconPassword = serverToMonitor.RconPassword ?? JsonHandler.ExtractRconPassword(json, serverInfo.Uuid, serverToMonitor.RconPasswordVariable);// TODO: Check if the Config Location has been set and extract the password from there if the location and variable is set in the games to monitor
                 
                 if (rconPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
                 {
