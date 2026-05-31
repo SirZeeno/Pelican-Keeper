@@ -17,10 +17,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.5.1"/>
-        <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.1" />
-        <PackageReference Include="RestSharp" Version="112.1.0"/>
-        <PackageReference Include="System.Linq.Async" Version="6.0.3" />
+        <PackageReference Include="DSharpPlus" Version="4.5.2" />
+        <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.2" />
+        <PackageReference Include="RestSharp" Version="114.0.0" />
+        <PackageReference Include="System.Linq.Async" Version="7.0.1" />
     </ItemGroup>
 
     <ItemGroup>

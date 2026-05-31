@@ -105,6 +105,7 @@ using static DiscordInteractions;
 /// Added a specific GitHub actions file for Gitea actions
 ///
 /// V3.0.10
+/// Added IgnoreOtherUserServers to the Config
 /// 
 /// 
 /// </summary>
