@@ -10,7 +10,8 @@ using static TemplateClasses;
 public static class HelperClass
 {
     private static readonly Dictionary<string, string> LastEmbedHashes = new();
-    
+    private static readonly HttpClient Http = new();
+
     /// <summary>
     /// Creates a rest request to the Pelican API
     /// </summary>
@@ -350,8 +351,7 @@ public static class HelperClass
     /// <returns>the raw JSON</returns>
     public static async Task<string> GetJsonTextAsync(string url)
     {
-        using var http = new HttpClient();
-        return await http.GetStringAsync(url);
+        return await Http.GetStringAsync(url);
     }
 
     /// <summary>
@@ -448,5 +448,10 @@ public static class HelperClass
         }
         
         return sizePasses;
+    }
+
+    public static string FilePathConverter(string filePath)
+    {
+        return filePath.Replace("/", "%2F");
     }
 }

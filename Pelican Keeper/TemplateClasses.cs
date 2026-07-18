@@ -9,8 +9,7 @@ public abstract class TemplateClasses
     {
         PerServer,
         Consolidated,
-        Paginated,
-        None
+        Paginated
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -18,16 +17,14 @@ public abstract class TemplateClasses
     {
         Name,
         Status,
-        Uptime,
-        None
+        Uptime
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MessageSortingDirection
     {
         Ascending,
-        Descending,
-        None
+        Descending
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -62,38 +59,40 @@ public abstract class TemplateClasses
     
     public class Config
     {
-        public string? InternalIpStructure { get; init; }
-        public MessageFormat MessageFormat { get; set; } = MessageFormat.None;
-        public MessageSorting MessageSorting { get; init; } = MessageSorting.None;
-        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
+        public string? InternalIpStructure { get; init; } = "192.168.*.*";
+        public MessageFormat MessageFormat { get; set; } = MessageFormat.Consolidated;
+        public MessageSorting MessageSorting { get; init; } = MessageSorting.Name;
+        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.Ascending;
         public bool IgnoreOfflineServers { get; init; }
         public bool IgnoreInternalServers { get; set; }
-        public bool IgnoreServersWithoutAllocations { get; init; }
-        public string[]? ServersToIgnore { get; set; }
+        public bool IgnoreOtherUserServers  { get; init; }
+        public bool IgnoreServersWithoutAllocations { get; init; } = true;
+        public string[]? ServersToIgnore { get; set; } = [];
         
         public bool JoinableIpDisplay { get; init; }
         public bool PlayerCountDisplay { get; init; }
-        public string[]? ServersToMonitor { get; init; }
+        public string[]? ServersToMonitor { get; init; } = [];
         
         public bool AutomaticShutdown { get; init; }
-        public string[]? ServersToAutoShutdown { get; init; }
-        public string? EmptyServerTimeout { get; init; }
-        public bool AllowUserServerStartup { get; init; }
-        public string[]? AllowServerStartup { get; init; }
-        public string[]? UsersAllowedToStartServers { get; init; }
-        public bool AllowUserServerStopping { get; init; }
-        public string[]? AllowServerStopping { get; init; }
-        public string[]? UsersAllowedToStopServers { get; init; }
+        public string[]? ServersToAutoShutdown { get; init; } = [];
+        public string? EmptyServerTimeout { get; init; } = "00:01:00";
+        public bool AllowUserServerStartup { get; init; } = true;
+        public string[]? AllowServerStartup { get; init; } = [];
+        public string[]? UsersAllowedToStartServers { get; init; } = [];
+        public bool AllowUserServerStopping { get; init; } = true;
+        public string[]? AllowServerStopping { get; init; } = [];
+        public string[]? UsersAllowedToStopServers { get; init; } = [];
 
         public bool ContinuesMarkdownRead { get; init; }
         public bool ContinuesGamesToMonitorRead { get; init; }
-        private readonly int _markdownUpdateInterval;
-        public int MarkdownUpdateInterval 
+        private readonly int _markdownUpdateInterval = 30;
+
+        public int MarkdownUpdateInterval
         {
             get => _markdownUpdateInterval;
             init => _markdownUpdateInterval = Math.Max(value, 10);
         }
-        private readonly int _serverUpdateInterval;
+        private readonly int _serverUpdateInterval = 10;
         public int ServerUpdateInterval
         {
             get => _serverUpdateInterval;
@@ -101,8 +100,10 @@ public abstract class TemplateClasses
         }
         
         public bool LimitServerCount { get; set; }
-        public int MaxServerCount { get; set; }
-        public string[]? ServersToDisplay { get; init; }
+        public int MaxServerCount { get; set; } = 10;
+        public string[]? ServersToDisplay { get; init; } = [];
+
+        public string? CustomDateTimeFormat { get; init; } = "HH:mm:ss";
         
         public bool Debug { get; set; }
         public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;

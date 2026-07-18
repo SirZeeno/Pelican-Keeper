@@ -8,7 +8,7 @@ public class UpdaterTesting
     public void Setup()
     {
         ConsoleExt.SuppressProcessExitForTests = true;
-        VersionUpdater.CurrentVersion = "v2.0.2";
+        VersionUpdater.CurrentVersion = "v2.0.2"; //Overwrite to the current version of the program to test its updating capabilities
         ConsoleExt.WriteLine($"Current version: {VersionUpdater.CurrentVersion}");
     }
 

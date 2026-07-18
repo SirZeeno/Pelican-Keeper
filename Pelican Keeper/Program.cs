@@ -105,7 +105,9 @@ using static DiscordInteractions;
 /// Added a specific GitHub actions file for Gitea actions
 ///
 /// V3.0.10
-/// Added IgnoreOtherUserServers to the Config
+/// Added IgnoreOtherUserServers to ignore any servers that arent from the User that provided the API key
+/// Added Support for custom DateTime Format
+/// Added Defaults to each config setting so if something is missing or wrong, the bot wont freak out over it
 /// 
 /// 
 /// </summary>

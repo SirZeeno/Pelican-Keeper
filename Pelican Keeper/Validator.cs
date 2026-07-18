@@ -39,15 +39,6 @@ public static class Validator
         if (string.IsNullOrEmpty(config.InternalIpStructure))
             throw new ArgumentException("InternalIpStructure is null or empty. Make sure to provide a valid IP.");
 
-        if (config.MessageFormat == TemplateClasses.MessageFormat.None)
-            throw new ArgumentException("MessageFormat is not set. Make sure to provide a valid message format.");
-
-        if (config.MessageSorting == TemplateClasses.MessageSorting.None)
-            throw new ArgumentException("MessageSorting is not set. Make sure to provide a valid message sorting format.");
-
-        if (config.MessageSortingDirection == TemplateClasses.MessageSortingDirection.None)
-            throw new ArgumentException("MessageSortingDirection is not set. Make sure to provide a valid message sorting direction.");
-
         if (string.IsNullOrEmpty(config.EmptyServerTimeout))
             throw new ArgumentException("EmptyServerTimeout is not set. Make sure to provide a valid Timeout string.");
 

@@ -19,7 +19,10 @@ public class EmbedBuilderService //TODO: allow of sending multiple messages if t
             ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
         
-        embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" }; //TODO: allow for an expanded format per users choice like this DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")
+        if (!string.IsNullOrWhiteSpace(Program.Config.CustomDateTimeFormat) && !string.IsNullOrEmpty(Program.Config.CustomDateTimeFormat))
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now.ToString(Program.Config.CustomDateTimeFormat)}" };
+        else
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
         
         ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
         ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
