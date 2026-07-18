@@ -32,6 +32,8 @@
   "MaxServerCount": 10,
   "ServersToDisplay": ["UUIDS HERE"],
   
+  "CustomDateTimeFormat": "HH:mm:ss",
+  
   "Debug": false,
   "OutputMode": "None",
   "DryRun": false,

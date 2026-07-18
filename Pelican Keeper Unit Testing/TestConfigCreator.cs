@@ -15,7 +15,9 @@ public static class TestConfigCreator
             MessageSorting = TemplateClasses.MessageSorting.Name,
             MessageSortingDirection = TemplateClasses.MessageSortingDirection.Ascending,
             IgnoreOfflineServers = false,
+            IgnoreOtherUserServers =  false,
             IgnoreInternalServers =  false,
+            IgnoreServersWithoutAllocations =  false,
             ServersToIgnore = ["UUIDS HERE"],
             
             JoinableIpDisplay = true,

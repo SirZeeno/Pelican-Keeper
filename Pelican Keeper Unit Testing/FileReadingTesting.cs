@@ -1,4 +1,5 @@
-﻿using Pelican_Keeper;
+﻿using Newtonsoft.Json;
+using Pelican_Keeper;
 
 namespace Pelican_Keeper_Unit_Testing;
 
@@ -46,14 +47,29 @@ public class FileReadingTesting
         }
     }
 
+    //TODO: also test iteratively how the program handles any of the config variables being wrong or null
     [Test]
     public async Task ReadingConfig()
     {
         TemplateClasses.Config? config = await FileManager.ReadConfigFile(_configFilePath);
-        if (config == null || ConsoleExt.ExceptionOccurred) Assert.Fail("Config file failed to read.\n");
+        if (config == null || ConsoleExt.ExceptionOccurred) Assert.Fail($"Config file failed to read.\n Exception(s): {ConsoleExt.Exceptions}");
         else Assert.Pass("Config file read successfully.\n");
     }
     
+    public static IEnumerable<TestCaseData> ConfigNullCases()
+    {
+        return TestingHelperClass.NullPropertyCases(TestConfigCreator.CreateDefaultConfigInstance);
+    }
+    
+    [TestCaseSource(nameof(ConfigNullCases))]
+    public async Task TestConfigScenarios(TemplateClasses.Config config)
+    {
+        var configJson = JsonConvert.SerializeObject(config); //Stop testing the serialized when the things i want to test is being able to run the bot even if you misspelled something or put a wrong ID or value on the config
+        await File.WriteAllTextAsync("./TestConfig.json", configJson);
+        Assert.DoesNotThrowAsync(() => FileManager.ReadConfigFile("./TestConfig.json")); //TODO: change this to actually run the bot and checks for exceptions or throws
+    }
+    
+    //TODO: also test iteratively how the program handles any of the secret variables being wrong or null
     [Test]
     public async Task ReadingSecrets()
     {
@@ -62,6 +78,7 @@ public class FileReadingTesting
         else Assert.Pass("Secrets file read successfully.\n");
     }
     
+    //TODO: also test iteratively how the program handles any of the games to monitor variables being wrong or null
     [Test]
     public async Task ReadingGamesToMonitor()
     {

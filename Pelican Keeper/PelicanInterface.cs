@@ -55,6 +55,16 @@ public static class PelicanInterface
             ConsoleExt.WriteLine("Response content: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
         }
     }
+
+    public static void GetConfigFile(ServerInfo serverInfo, string pathToFile)
+    {
+        var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/" + serverInfo.Uuid + "/files/contents?" + FilePathConverter(pathToFile));
+        var response = CreateRequest(client, Program.Secrets.ClientToken);
+        
+        if (!response.IsSuccessStatusCode)
+            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, response.ErrorException, true, true);
+        //TODO Implement this further to extract the value of the variable, and do this only once on the first run as to conserve API calls and store it for continued use until bot restart
+    }
     
     /// <summary>
     /// Gets the server resources from the Pelican API
@@ -104,11 +114,11 @@ public static class PelicanInterface
             ConsoleExt.WriteLine("Response content: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
         }
     }
-
-    //TODO: possible addition of filtering out servers that dont belong to the user doing the request
+    
     private static RestResponse GetServerList()
     {
-        var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/?type=admin-all");
+        string apiExtension = Program.Config.IgnoreOtherUserServers ? "/api/client/" : "/api/client/?type=admin-all";
+        var client = new RestClient(Program.Secrets.ServerUrl + apiExtension);
         var response = CreateRequest(client, Program.Secrets.ClientToken);
         
         if (!response.IsSuccessStatusCode)

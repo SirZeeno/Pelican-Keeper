@@ -7,6 +7,9 @@ public class QueryTesting
     TemplateClasses.Secrets? _secrets;
     TemplateClasses.Config? _config;
     
+    //TODO: run a test for each available game server on panel
+    // If the server is not running, start it, test it and shut it down again
+    // If it is running, test it, and keep it running
     [SetUp]
     public async Task Setup()
     {

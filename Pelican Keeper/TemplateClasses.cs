@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper;
 
@@ -10,8 +9,7 @@ public abstract class TemplateClasses
     {
         PerServer,
         Consolidated,
-        Paginated,
-        None
+        Paginated
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -19,16 +17,14 @@ public abstract class TemplateClasses
     {
         Name,
         Status,
-        Uptime,
-        None
+        Uptime
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MessageSortingDirection
     {
         Ascending,
-        Descending,
-        None
+        Descending
     }
     
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -63,65 +59,55 @@ public abstract class TemplateClasses
     
     public class Config
     {
-        public string? InternalIpStructure { get; init; }
-        public MessageFormat MessageFormat { get; set; } = MessageFormat.None;
-        public MessageSorting MessageSorting { get; init; } = MessageSorting.None;
-        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
-        [JsonConverter(typeof(FlexibleBoolConverter))]
+        public string? InternalIpStructure { get; init; } = "192.168.*.*";
+        public MessageFormat MessageFormat { get; set; } = MessageFormat.Consolidated;
+        public MessageSorting MessageSorting { get; init; } = MessageSorting.Name;
+        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.Ascending;
         public bool IgnoreOfflineServers { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool IgnoreInternalServers { get; set; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool IgnoreServersWithoutAllocations { get; init; }
-        public string[]? ServersToIgnore { get; set; }
+        public bool IgnoreOtherUserServers  { get; init; }
+        public bool IgnoreServersWithoutAllocations { get; init; } = true;
+        public string[]? ServersToIgnore { get; set; } = [];
         
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool JoinableIpDisplay { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool PlayerCountDisplay { get; init; }
-        public string[]? ServersToMonitor { get; init; }
+        public string[]? ServersToMonitor { get; init; } = [];
         
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool AutomaticShutdown { get; init; }
-        public string[]? ServersToAutoShutdown { get; init; }
-        public string? EmptyServerTimeout { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool AllowUserServerStartup { get; init; }
-        public string[]? AllowServerStartup { get; init; }
-        public string[]? UsersAllowedToStartServers { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool AllowUserServerStopping { get; init; }
-        public string[]? AllowServerStopping { get; init; }
-        public string[]? UsersAllowedToStopServers { get; init; }
+        public string[]? ServersToAutoShutdown { get; init; } = [];
+        public string? EmptyServerTimeout { get; init; } = "00:01:00";
+        public bool AllowUserServerStartup { get; init; } = true;
+        public string[]? AllowServerStartup { get; init; } = [];
+        public string[]? UsersAllowedToStartServers { get; init; } = [];
+        public bool AllowUserServerStopping { get; init; } = true;
+        public string[]? AllowServerStopping { get; init; } = [];
+        public string[]? UsersAllowedToStopServers { get; init; } = [];
 
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool ContinuesMarkdownRead { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool ContinuesGamesToMonitorRead { get; init; }
-        private readonly int _markdownUpdateInterval;
-        public int MarkdownUpdateInterval 
+        private readonly int _markdownUpdateInterval = 30;
+
+        public int MarkdownUpdateInterval
         {
             get => _markdownUpdateInterval;
             init => _markdownUpdateInterval = Math.Max(value, 10);
         }
-        private readonly int _serverUpdateInterval;
+        private readonly int _serverUpdateInterval = 10;
         public int ServerUpdateInterval
         {
             get => _serverUpdateInterval;
             init => _serverUpdateInterval = Math.Max(value, 10);
         }
         
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool LimitServerCount { get; set; }
-        public int MaxServerCount { get; set; }
-        public string[]? ServersToDisplay { get; init; }
+        public int MaxServerCount { get; set; } = 10;
+        public string[]? ServersToDisplay { get; init; } = [];
+
+        public string? CustomDateTimeFormat { get; init; } = "HH:mm:ss";
         
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool Debug { get; set; }
         public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool DryRun { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool AutoUpdate { get; init; }
     }
     
