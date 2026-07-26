@@ -8,7 +8,8 @@ public class UpdaterTesting
     public void Setup()
     {
         ConsoleExt.SuppressProcessExitForTests = true;
-        VersionUpdater.CurrentVersion = "v2.0.2"; //Overwrite to the current version of the program to test its updating capabilities
+        VersionUpdater.CurrentVersion =
+            "v2.0.2"; //Overwrite to the current version of the program to test its updating capabilities
         ConsoleExt.WriteLine($"Current version: {VersionUpdater.CurrentVersion}");
     }
 
@@ -16,9 +17,10 @@ public class UpdaterTesting
     public async Task UpdateVersionTest()
     {
         ConsoleExt.WriteLine("Starting Updater...");
-        await VersionUpdater.UpdateProgram(); //TODO: Unable to test because the bot will exit itself when using the bash script
+        await VersionUpdater
+            .UpdateProgram(); //TODO: Unable to test because the bot will exit itself when using the bash script
         ConsoleExt.WriteLine("Updater Finished!\n");
-        
+
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");
         else if (VersionUpdater.CurrentVersion != "v2.0.2")

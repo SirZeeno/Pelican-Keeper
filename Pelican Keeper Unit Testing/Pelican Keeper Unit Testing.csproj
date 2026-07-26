@@ -12,16 +12,16 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="10.0.1">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
-        <PackageReference Include="NUnit" Version="4.6.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.6.0"/>
+        <PackageReference Include="NUnit" Version="4.6.1"/>
         <PackageReference Include="NUnit.Analyzers" Version="4.13.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NUnit3TestAdapter" Version="6.2.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="6.2.0"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -29,17 +29,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Pelican Keeper\Pelican Keeper.csproj" />
+        <ProjectReference Include="..\Pelican Keeper\Pelican Keeper.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Secrets.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="update.sh">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </None>
+        <None Update="Secrets.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="update.sh">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
     </ItemGroup>
 
 </Project>

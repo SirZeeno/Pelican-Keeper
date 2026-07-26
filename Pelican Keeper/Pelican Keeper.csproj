@@ -17,10 +17,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DSharpPlus" Version="4.5.2" />
-        <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.2" />
-        <PackageReference Include="RestSharp" Version="114.0.0" />
-        <PackageReference Include="System.Linq.Async" Version="7.0.1" />
+        <PackageReference Include="DSharpPlus" Version="4.5.2"/>
+        <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.2"/>
+        <PackageReference Include="RestSharp" Version="114.0.0"/>
+        <PackageReference Include="System.Linq.Async" Version="7.0.1"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -29,49 +29,49 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="Config.json">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="MessageMarkdown.txt">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="GamesToMonitor.json">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="Update Scripts\Bare Metal\Install.sh">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="Update Scripts\Bare Metal\startup.sh">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="Update Scripts\Pelican\update.sh">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="Update Scripts\Pelican\startup.sh">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
         <None Update="Update Scripts\Pelican\update_config.sh">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-      <Content Include="..\.github\workflows\dotnet.yml">
-        <Link>dotnet.yml</Link>
-      </Content>
-      <Content Include="..\README.md">
-        <Link>README.md</Link>
-      </Content>
+        <Content Include="..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
+        <Content Include="..\.github\workflows\dotnet.yml">
+            <Link>dotnet.yml</Link>
+        </Content>
+        <Content Include="..\README.md">
+            <Link>README.md</Link>
+        </Content>
     </ItemGroup>
 
 </Project>

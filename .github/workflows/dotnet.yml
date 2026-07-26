@@ -2,9 +2,9 @@ name: .NET Multi-RID Publish
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
 
 permissions:
   contents: write
@@ -53,13 +53,13 @@ jobs:
           prerelease: false
 
   publish-and-upload:
-    needs: [check-version, create-release]
+    needs: [ check-version, create-release ]
     if: needs.check-version.outputs.valid == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        rid: [win-x86, win-x64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
+        rid: [ win-x86, win-x64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64 ]
     env:
       PROJECT_PATH: "Pelican Keeper/Pelican Keeper.csproj"
       APP_NAME: "Pelican-Keeper"

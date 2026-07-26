@@ -25,7 +25,7 @@ public class TestingHelperClass
                 .SetName($"{typeof(T).Name}_{property.Name}_Null");
         }
     }
-    
+
     public static IEnumerable<TestCaseData> InvalidEnumJsonCases()
     {
         var enumProperties = typeof(TemplateClasses.Config)
@@ -33,9 +33,7 @@ public class TestingHelperClass
             .Where(p => p.PropertyType.IsEnum);
 
         foreach (var property in enumProperties)
-        {
             yield return new TestCaseData(property.Name, "BadEnumValue")
                 .SetName($"{property.Name}_InvalidEnumString");
-        }
     }
 }

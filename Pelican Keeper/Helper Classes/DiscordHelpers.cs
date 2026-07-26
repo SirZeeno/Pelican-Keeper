@@ -5,7 +5,7 @@ namespace Pelican_Keeper.Helper_Classes;
 public static class DiscordHelpers
 {
     /// <summary>
-    /// Checks the size of each individual component of the embed and compares it to its max size for each component.
+    ///     Checks the size of each individual component of the embed and compares it to its max size for each component.
     /// </summary>
     /// <param name="embed">Discord Embed</param>
     /// <returns>True if Size Passes and false if it doesn't</returns>
@@ -19,37 +19,42 @@ public static class DiscordHelpers
         // Footer text: 2048
         // Author name: 256
         // Total embed characters: 6000
-        
-        bool sizePasses = true;
-        int fullSize = 0;
+
+        var sizePasses = true;
+        var fullSize = 0;
 
         if (embed.Title is { Length: > 256 })
         {
             sizePasses = false;
             fullSize += embed.Title.Length;
-            ConsoleExt.WriteLine($"Title length: {embed.Title.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            ConsoleExt.WriteLine($"Title length: {embed.Title.Length}", ConsoleExt.CurrentStep.EmbedBuilding,
+                ConsoleExt.OutputType.Debug);
         }
-        
+
         if (embed.Description is { Length: > 4096 })
         {
             sizePasses = false;
             fullSize += embed.Description.Length;
-            ConsoleExt.WriteLine($"Description length: {embed.Description.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            ConsoleExt.WriteLine($"Description length: {embed.Description.Length}",
+                ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
         }
-        
+
         foreach (var field in embed.Fields)
         {
             if (field.Name is { Length: > 256 })
             {
                 sizePasses = false;
                 fullSize += field.Name.Length;
-                ConsoleExt.WriteLine($"Field's {field.Name} Name length: {field.Name.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+                ConsoleExt.WriteLine($"Field's {field.Name} Name length: {field.Name.Length}",
+                    ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
             }
-            if  (field.Value is { Length: > 1024 })
+
+            if (field.Value is { Length: > 1024 })
             {
                 sizePasses = false;
                 fullSize += field.Value.Length;
-                ConsoleExt.WriteLine($"Field's {field.Name} Value length: {field.Value.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+                ConsoleExt.WriteLine($"Field's {field.Name} Value length: {field.Value.Length}",
+                    ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
             }
         }
 
@@ -57,27 +62,30 @@ public static class DiscordHelpers
         {
             sizePasses = false;
             fullSize += embed.Footer.Text.Length;
-            ConsoleExt.WriteLine($"Footer Text length: {embed.Footer.Text.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            ConsoleExt.WriteLine($"Footer Text length: {embed.Footer.Text.Length}",
+                ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
         }
 
         if (embed.Author?.Name is { Length: > 256 })
         {
             sizePasses = false;
             fullSize += embed.Author.Name.Length;
-            ConsoleExt.WriteLine($"Author Name length: {embed.Author.Name.Length}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            ConsoleExt.WriteLine($"Author Name length: {embed.Author.Name.Length}",
+                ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
         }
 
         if (fullSize > 6000)
         {
             sizePasses = false;
-            ConsoleExt.WriteLine($"Full Size Embed length: {fullSize}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            ConsoleExt.WriteLine($"Full Size Embed length: {fullSize}", ConsoleExt.CurrentStep.EmbedBuilding,
+                ConsoleExt.OutputType.Debug);
         }
-        
+
         return sizePasses;
     }
-    
+
     /// <summary>
-    /// Puts a list of DiscordComponent's each into one line
+    ///     Puts a list of DiscordComponent's each into one line
     /// </summary>
     /// <param name="mb">DiscordMessageBuilder</param>
     /// <param name="components">List of DiscordComponent's</param>
@@ -85,7 +93,7 @@ public static class DiscordHelpers
     public static void AddRows(this DiscordMessageBuilder mb, IEnumerable<DiscordComponent> components, int maxRows = 5)
     {
         var rowsUsed = 0;
-        var buttonBuffer = new List<DiscordComponent>(capacity: 5);
+        var buttonBuffer = new List<DiscordComponent>(5);
 
         void FlushButtons()
         {
@@ -97,6 +105,7 @@ public static class DiscordHelpers
                 mb.AddComponents(chunk);
                 rowsUsed++;
             }
+
             buttonBuffer.Clear();
         }
 

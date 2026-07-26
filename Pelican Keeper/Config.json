@@ -7,33 +7,43 @@
   "IgnoreInternalServers": false,
   "IgnoreOtherUserServers": false,
   "IgnoreServersWithoutAllocations": true,
-  "ServersToIgnore": ["UUIDS HERE"],
-  
+  "ServersToIgnore": [
+    "UUIDS HERE"
+  ],
   "JoinableIpDisplay": true,
   "PlayerCountDisplay": true,
-  "ServersToMonitor": ["UUIDS HERE"],
-  
+  "ServersToMonitor": [
+    "UUIDS HERE"
+  ],
   "AutomaticShutdown": false,
-  "ServersToAutoShutdown": ["UUIDS HERE"],
+  "ServersToAutoShutdown": [
+    "UUIDS HERE"
+  ],
   "EmptyServerTimeout": "00:01:00",
   "AllowUserServerStartup": true,
-  "AllowServerStartup": ["UUIDS HERE"],
-  "UsersAllowedToStartServers": ["USERIDS HERE"],
+  "AllowServerStartup": [
+    "UUIDS HERE"
+  ],
+  "UsersAllowedToStartServers": [
+    "USERIDS HERE"
+  ],
   "AllowUserServerStopping": true,
-  "AllowServerStopping": ["UUIDS HERE"],
-  "UsersAllowedToStopServers": ["USERIDS HERE"],
-  
+  "AllowServerStopping": [
+    "UUIDS HERE"
+  ],
+  "UsersAllowedToStopServers": [
+    "USERIDS HERE"
+  ],
   "ContinuesMarkdownRead": false,
   "ContinuesGamesToMonitorRead": false,
   "MarkdownUpdateInterval": 30,
   "ServerUpdateInterval": 10,
-  
   "LimitServerCount": false,
   "MaxServerCount": 10,
-  "ServersToDisplay": ["UUIDS HERE"],
-  
+  "ServersToDisplay": [
+    "UUIDS HERE"
+  ],
   "CustomDateTimeFormat": "HH:mm:ss",
-  
   "Debug": false,
   "OutputMode": "None",
   "DryRun": false,

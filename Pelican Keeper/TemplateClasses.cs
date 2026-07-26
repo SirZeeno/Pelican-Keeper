@@ -5,29 +5,6 @@ namespace Pelican_Keeper;
 public abstract class TemplateClasses
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum MessageFormat
-    {
-        PerServer,
-        Consolidated,
-        Paginated
-    }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum MessageSorting
-    {
-        Name,
-        Status,
-        Uptime
-    }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum MessageSortingDirection
-    {
-        Ascending,
-        Descending
-    }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CommandExecutionMethod
     {
         MinecraftJava,
@@ -35,6 +12,29 @@ public abstract class TemplateClasses
         Rcon,
         A2S,
         Terraria //TODO: Still need to implement this
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum MessageFormat
+    {
+        PerServer,
+        Consolidated,
+        Paginated
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum MessageSorting
+    {
+        Name,
+        Status,
+        Uptime
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum MessageSortingDirection
+    {
+        Ascending,
+        Descending
     }
 
     //TODO: for Server status in the template class, so i dont have to compare the literal string but instead use a enum which is more predicatable
@@ -46,9 +46,8 @@ public abstract class TemplateClasses
         Starting,
         Stopping
     }
-    
-    public record Secrets
-    (
+
+    public record Secrets(
         string? ClientToken,
         string? ServerToken,
         string? ServerUrl,
@@ -56,23 +55,25 @@ public abstract class TemplateClasses
         ulong[]? ChannelIds,
         string? ExternalServerIp
     );
-    
+
     public class Config
     {
+        private readonly int _markdownUpdateInterval = 30;
+        private readonly int _serverUpdateInterval = 10;
         public string? InternalIpStructure { get; init; } = "192.168.*.*";
         public MessageFormat MessageFormat { get; set; } = MessageFormat.Consolidated;
         public MessageSorting MessageSorting { get; init; } = MessageSorting.Name;
         public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.Ascending;
         public bool IgnoreOfflineServers { get; init; }
         public bool IgnoreInternalServers { get; set; }
-        public bool IgnoreOtherUserServers  { get; init; }
+        public bool IgnoreOtherUserServers { get; init; }
         public bool IgnoreServersWithoutAllocations { get; init; } = true;
         public string[]? ServersToIgnore { get; set; } = [];
-        
+
         public bool JoinableIpDisplay { get; init; }
         public bool PlayerCountDisplay { get; init; }
         public string[]? ServersToMonitor { get; init; } = [];
-        
+
         public bool AutomaticShutdown { get; init; }
         public string[]? ServersToAutoShutdown { get; init; } = [];
         public string? EmptyServerTimeout { get; init; } = "00:01:00";
@@ -85,32 +86,31 @@ public abstract class TemplateClasses
 
         public bool ContinuesMarkdownRead { get; init; }
         public bool ContinuesGamesToMonitorRead { get; init; }
-        private readonly int _markdownUpdateInterval = 30;
 
         public int MarkdownUpdateInterval
         {
             get => _markdownUpdateInterval;
             init => _markdownUpdateInterval = Math.Max(value, 10);
         }
-        private readonly int _serverUpdateInterval = 10;
+
         public int ServerUpdateInterval
         {
             get => _serverUpdateInterval;
             init => _serverUpdateInterval = Math.Max(value, 10);
         }
-        
+
         public bool LimitServerCount { get; set; }
         public int MaxServerCount { get; set; } = 10;
         public string[]? ServersToDisplay { get; init; } = [];
 
         public string? CustomDateTimeFormat { get; init; } = "HH:mm:ss";
-        
+
         public bool Debug { get; set; }
         public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;
         public bool DryRun { get; init; }
         public bool AutoUpdate { get; init; }
     }
-    
+
     public class ServerInfo
     {
         public int Id { get; init; }
@@ -126,7 +126,7 @@ public abstract class TemplateClasses
     {
         public string CurrentState { get; init; } = null!;
         public long MemoryBytes { get; init; }
-        public long MemoryMaximum { get;  init; }
+        public long MemoryMaximum { get; init; }
         public double CpuAbsolute { get; init; }
         public double CpuMaximum { get; init; }
         public long DiskBytes { get; init; }
@@ -135,7 +135,7 @@ public abstract class TemplateClasses
         public long NetworkTxBytes { get; init; }
         public long Uptime { get; init; }
     }
-    
+
     public class ServerAllocation
     {
         public string Uuid { get; init; } = null!;
@@ -143,13 +143,13 @@ public abstract class TemplateClasses
         public int Port { get; init; }
         public bool IsDefault { get; init; }
     }
-    
+
     public class LiveMessageJsonStorage
     {
         public HashSet<ulong>? LiveStore { get; set; } = new();
         public Dictionary<ulong, int>? PaginatedLiveStore { get; set; } = new();
     }
-    
+
     public class ServerViewModel
     {
         public string PlayerCount { get; set; } = null!;
@@ -168,12 +168,12 @@ public abstract class TemplateClasses
         public string NetworkTx { get; set; } = null!;
         public string Uptime { get; set; } = null!;
     }
-    
+
     public class GamesToMonitor
     {
         public string Game { get; init; } = null!;
         public CommandExecutionMethod Protocol { get; init; }
-        public string? ConfigLocation {get; init; }
+        public string? ConfigLocation { get; init; }
         public string? RconPortVariable { get; set; }
         public string? RconPasswordVariable { get; set; }
         public string? RconPassword { get; set; }
@@ -183,7 +183,7 @@ public abstract class TemplateClasses
         public string? MaxPlayer { get; set; }
         public string? PlayerCountExtractRegex { get; set; }
     }
-    
+
     public class EggInfo
     {
         public int Id { get; init; }

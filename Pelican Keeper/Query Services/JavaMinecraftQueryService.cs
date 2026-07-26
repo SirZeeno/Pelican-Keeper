@@ -8,9 +8,16 @@ namespace Pelican_Keeper.Query_Services;
 
 public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDisposable
 {
-    private TcpClient? _tcpClient;
     private NetworkStream? _stream;
-    
+    private TcpClient? _tcpClient;
+
+    public void Dispose()
+    {
+        _tcpClient?.Close();
+        _tcpClient = null;
+        _stream = null;
+    }
+
     public async Task Connect()
     {
         try
@@ -18,19 +25,22 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
             _tcpClient = new TcpClient();
             try
             {
-                await _tcpClient.ConnectAsync(ip, port); //TODO: This is a Temp Catch All, I am going to refine this when I got the chance to
+                await _tcpClient.ConnectAsync(ip,
+                    port); //TODO: This is a Temp Catch All, I am going to refine this when I got the chance to
             }
             catch (Exception e)
             {
                 ConsoleExt.WriteLine(e, ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
                 return;
             }
+
             _tcpClient.Client.ReceiveTimeout = 5000;
             _stream = _tcpClient.GetStream();
         }
         catch (SocketException ex)
         {
-            ConsoleExt.WriteLine($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLine($"Could not connect to server. {ip}:{port}", ConsoleExt.CurrentStep.MinecraftJavaQuery,
+                ConsoleExt.OutputType.Error, ex);
         }
     }
 
@@ -38,9 +48,11 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
     {
         if (_tcpClient == null || _stream == null)
         {
-            ConsoleExt.WriteLine(new InvalidOperationException("Call Connect() before sending commands."),  ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+            ConsoleExt.WriteLine(new InvalidOperationException("Call Connect() before sending commands."),
+                ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
             return string.Empty;
         }
+
         var protocolVersion = 760;
         using var cts = new CancellationTokenSource(_tcpClient.Client.ReceiveTimeout);
         try
@@ -71,19 +83,21 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
 
             using var doc = JsonDocument.Parse(json);
             var players = doc.RootElement.GetProperty("players");
-            int online = players.GetProperty("online").GetInt32();
-            int max = players.GetProperty("max").GetInt32();
+            var online = players.GetProperty("online").GetInt32();
+            var max = players.GetProperty("max").GetInt32();
 
             return $"{online}/{max}";
         }
         catch (OperationCanceledException)
         {
-            ConsoleExt.WriteLine("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("Timed out waiting for server response.", ConsoleExt.CurrentStep.MinecraftJavaQuery,
+                ConsoleExt.OutputType.Error);
             return string.Empty;
         }
         catch (Exception ex)
         {
-            ConsoleExt.WriteLine($"Error: {ex.Message}", ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine($"Error: {ex.Message}", ConsoleExt.CurrentStep.MinecraftJavaQuery,
+                ConsoleExt.OutputType.Error);
             return string.Empty;
         }
     }
@@ -101,10 +115,15 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
 
     private static void WriteVarInt(Stream s, int value)
     {
-        uint u = (uint)value;
+        var u = (uint)value;
         while (true)
         {
-            if ((u & ~0x7Fu) == 0) { s.WriteByte((byte)u); return; }
+            if ((u & ~0x7Fu) == 0)
+            {
+                s.WriteByte((byte)u);
+                return;
+            }
+
             s.WriteByte((byte)((u & 0x7F) | 0x80));
             u >>= 7;
         }
@@ -126,20 +145,21 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
 
     private static async Task<int> ReadVarIntAsync(NetworkStream stream, CancellationToken ct)
     {
-        int numRead = 0;
-        int result = 0;
+        var numRead = 0;
+        var result = 0;
         byte read;
         do
         {
             read = await ReadByteAsync(stream, ct);
-            int value = (read & 0b0111_1111);
-            result |= (value << (7 * numRead));
+            var value = read & 0b0111_1111;
+            result |= value << (7 * numRead);
             numRead++;
             if (numRead > 5) throw new InvalidDataException("VarInt too big");
         } while ((read & 0b1000_0000) != 0);
+
         return result;
     }
-    
+
     private static int ReadVarInt(Stream s)
     {
         int numRead = 0, result = 0, read;
@@ -147,44 +167,39 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
         {
             read = s.ReadByte();
             if (read == -1) throw new EndOfStreamException();
-            int value = read & 0x7F;
+            var value = read & 0x7F;
             result |= value << (7 * numRead++);
             if (numRead > 5) throw new InvalidDataException("VarInt too big");
         } while ((read & 0x80) != 0);
+
         return result;
     }
 
     private static async Task<byte[]> ReadExactAsync(NetworkStream stream, int len, CancellationToken ct)
     {
         var buf = new byte[len];
-        int off = 0;
+        var off = 0;
         while (off < len)
         {
-            int read = await stream.ReadAsync(buf, off, len - off, ct);
+            var read = await stream.ReadAsync(buf, off, len - off, ct);
             if (read == 0) throw new EndOfStreamException();
             off += read;
         }
+
         return buf;
     }
-    
+
     private static async Task<byte[]> ReadPacketAsync(NetworkStream stream, CancellationToken ct)
     {
-        var length  = await ReadVarIntAsync(stream, ct);
+        var length = await ReadVarIntAsync(stream, ct);
         return await ReadExactAsync(stream, length, ct);
     }
 
     private static async Task<byte> ReadByteAsync(NetworkStream stream, CancellationToken ct)
     {
         var buffer = new byte[1];
-        int read = await stream.ReadAsync(buffer, 0, 1, ct);
+        var read = await stream.ReadAsync(buffer, 0, 1, ct);
         if (read == 0) throw new EndOfStreamException();
         return buffer[0];
-    }
-
-    public void Dispose()
-    {
-        _tcpClient?.Close();
-        _tcpClient = null;
-        _stream = null;
     }
 }

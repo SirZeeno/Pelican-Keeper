@@ -1,52 +1,63 @@
 ﻿using DSharpPlus.Entities;
 
 namespace Pelican_Keeper;
+
 using static TemplateClasses;
 
-public class EmbedBuilderService //TODO: allow of sending multiple messages if the current message is too long to allow fitting in more servers
+public class
+    EmbedBuilderService //TODO: allow of sending multiple messages if the current message is too long to allow fitting in more servers
 {
     public Task<DiscordEmbed> BuildSingleServerEmbed(ServerInfo server)
     {
         var serverInfo = ServerMarkdown.ParseTemplate(server);
-        
+
         var embed = new DiscordEmbedBuilder { Title = serverInfo.serverName, Color = DiscordColor.Azure };
-        
-        embed.AddField("\u200B", serverInfo.message, inline: true);
-        
+
+        embed.AddField("\u200B", serverInfo.message, true);
+
         if (Program.Config.DryRun)
         {
             ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
             ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
-        
-        if (!string.IsNullOrWhiteSpace(Program.Config.CustomDateTimeFormat) && !string.IsNullOrEmpty(Program.Config.CustomDateTimeFormat))
-            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now.ToString(Program.Config.CustomDateTimeFormat)}" };
+
+        if (!string.IsNullOrWhiteSpace(Program.Config.CustomDateTimeFormat) &&
+            !string.IsNullOrEmpty(Program.Config.CustomDateTimeFormat))
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter
+                { Text = $"Last Updated: {DateTime.Now.ToString(Program.Config.CustomDateTimeFormat)}" };
         else
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
-        
-        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
-        ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+
+        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding,
+            ConsoleExt.OutputType.Debug);
+        ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}",
+            ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
         return Task.FromResult(embed.Build());
     }
 
-    public Task<DiscordEmbed> BuildMultiServerEmbed(List<ServerInfo> servers) //TODO: Add the ability to use the game icon as the emoji next to the server name
+    public Task<DiscordEmbed>
+        BuildMultiServerEmbed(
+            List<ServerInfo> servers) //TODO: Add the ability to use the game icon as the emoji next to the server name
     {
         var embed = new DiscordEmbedBuilder { Title = "📡 Game Server Status Overview", Color = DiscordColor.Azure };
 
-        for (int i = 0; i < servers.Count && embed.Fields.Count < 25; i++)
+        for (var i = 0; i < servers.Count && embed.Fields.Count < 25; i++)
         {
             var serverInfo = ServerMarkdown.ParseTemplate(servers[i]);
-            embed.AddField(serverInfo.serverName, serverInfo.message, inline: true); //TODO:Allow customization of it being inline or not but test first if this is worth customizing
+            embed.AddField(serverInfo.serverName, serverInfo.message,
+                true); //TODO:Allow customization of it being inline or not but test first if this is worth customizing
 
             if (!Program.Config.DryRun) continue;
             ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
             ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
-        
+
         embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
-        
-        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
-        ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+
+        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding,
+            ConsoleExt.OutputType.Debug);
+        ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}",
+            ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
         return Task.FromResult(embed.Build());
     }
 
@@ -60,21 +71,23 @@ public class EmbedBuilderService //TODO: allow of sending multiple messages if t
 
             var embed = new DiscordEmbedBuilder { Title = serverInfo.serverName, Color = DiscordColor.Azure };
 
-            embed.AddField("\u200B", serverInfo.message,true);
-            
+            embed.AddField("\u200B", serverInfo.message, true);
+
             if (Program.Config.DryRun)
             {
                 ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
                 ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
-            
+
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
-            
-            ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
-            ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+
+            ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"),
+                ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
+            ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}",
+                ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
             embeds.Add(embed.Build());
         }
-        
+
         return Task.FromResult(embeds);
     }
 }
@@ -86,7 +99,7 @@ public static class EmbedBuilderHelper
     {
         builder.AddField(name, string.IsNullOrEmpty(value) ? "N/A" : value, inline);
     }
-    
+
     internal static int GetEmbedCharacterCount(DiscordEmbedBuilder embed)
     {
         var count = 0;
@@ -112,4 +125,3 @@ public static class EmbedBuilderHelper
         return count;
     }
 }
-

@@ -12,104 +12,98 @@ using static ConsoleExt;
 using static DiscordInteractions;
 
 /// <summary>
-/// Changelog
-///
-/// V2.0.4
-/// Added Previous Message checks to the cache validation to try and get the previous message in the target channel if none of the messages in the cache exist.
-/// Fixed Redundant double checks to the message history cache
-/// Split each message update loop into its own class
-/// Added the Version parameter into the project config and into the Update checker.
-/// Added OutputMode into the config to further narrow down what debug levels should be written into console
-/// Added an option that allows the bypass of the debug config check for console outputs
-/// Changed the Default for Debug mode to false
-///
-/// V2.0.5
-/// Added the OutputMode variable to the Egg
-/// Simplified the WriteStep function to automatically turn any step if written in camel into a proper string
-///
-/// V3.0.0
-/// Added length check for the client and server token
-/// Added a token prefix check and a warning if the token doesn't match the prefix format (only warning due to the prefix having changed before and shouldn't break anything if they do again)
-/// Switched the loading order of secrets and config to be config then secrets
-/// Removed the MessageHistory JSON due to it being redundant with message lookup
-/// Removed Message History Testing, and any file loading tests or references
-/// Added Default Debug being toggled on if in debug built in Editor
-/// Fixed the console output to display Debug outputs as well now
-/// Fixed Output mode to work as intended now when set
-/// Fixed Inverted dry run behavior in consolidated mode
-/// Removed message history cache validation due to redundancy
-/// Added Last Message Checks when getting the last cache entry and nothing is found in the cache
-/// Added setup instructions for the Pelican Egg into the README.md
-/// Added Maximum CPU, Memory, and Disk usage to the Markdown as variables that can be used
-/// Added Embed size checks before sending the message, and stopping the message from being sent if the embed goes beyond discord specifications
-/// Added BadRequestException (aka. Error code 400) to be caught to better catch if discord refuses the message (mostly due to its size)
-/// Fixed Start and Stop server discord interaction to not use the right ID which caused it to fail
-/// Fixed Start and Stop server discord interaction response to stop throwing errors and actually responding to the interaction
-/// Switched IsBot check behind the ID check to stop unnecessary checks
-/// Fixed IgnoreInternalServers removing ever server due to it checking before allocations get populated.
-/// Changed The ExtractRconPort and ExtractQueryPort function to use the already existing list of network allocations for that server instead of extracting it again
-/// Fixed the Discord Interactions to be more robust and not giving a discord response in paginated
-/// Reduced the amount of duplicate code in button creation
-/// Removed a lot of boiler plate and duplicate code in Paginated Message creation and updating
-/// Fixed Buttons not being updated in Paginated Format if message previously existed
-/// Fixed Page Flipping discord interaction
-/// Fixed Start and Stop buttons not being added or removed if start and stop permission changed
-/// Changed all the start stop button debug output to use the debug output tag
-/// Removed Duplicate code during button creation
-/// Added more Debug logging to the JSON information extraction
-/// Replaced all references to Debug checks before sending a debug output with the debug tag
-/// Added more error handling when flipping pages, to handle more edge cases
-/// Added recursive search as a fallback to the JSON Element extraction
-/// Cleaned up the code for getting the server list and all its information together to transform it into more of a 1 function 1 purpose
-///
-/// V3.0.1
-/// Added a special Update script for Pelican and Docker container that runs before the bot and not after the bot is started
-/// Added a disable environment variable for the updater class if inside container
-///
-/// V3.0.2
-/// Added Terraria as a case in the Server request execution methods
-///
-/// V3.0.3
-/// Updated Pelican Egg to use the new Startup script
-/// Updated the Path to the Update Scrip in the Startup Script
-///
-/// V3.0.4
-/// Fixed Discord Dropdown buttons Debug output to still be displayed when outside of debug mode
-/// Fixed Some issues concerning the Pelican Startup and Update script
-/// Updated The Egg Startup script to use bash
-///
-/// V3.0.5
-/// Fixed a small bash error that would pop up in Pelican
-/// Updated the Startup Command to now use the startup.sh script like intended
-///
-/// V3.0.6
-/// Added Flexible Boolean Conversion to account for issues with the Pelican Panel's Boolean Tag (fixed in testing branch of Pelican Panel)
-/// Split some of the Helper functions into their own class to clean up the Helper Class
-/// Moved the Helper Classes into their own folder
-///
-/// V3.0.7
-/// Updated the Variable for auto update in the pelican startup script
-/// Updated the Bot environment version number
-/// Fixed Capitalization of Secrets and Config in the Pelican update script
-/// Added a update_config.sh script that takes the Pelican Panel settings and writes them into the config
-///
-/// V3.0.8
-/// Updated Egg to exclude the configuration files configuration and new Image options (Images not yet tested)
-/// Added update_config.sh to the export and preserve list
-///
-///V3.0.9
-/// Added Byte conversions into the maximum disk and memory counters
-/// Added Decimal format conversion for maximum cpu usage.
-/// Version Bump in Bot Project (keep forgetting to do so)
-/// Added Docker File to allow Building a docker container with the source code (Official Docker Container Coming soon)
-/// Added a specific GitHub actions file for Gitea actions
-///
-/// V3.0.10
-/// Added IgnoreOtherUserServers to ignore any servers that arent from the User that provided the API key
-/// Added Support for custom DateTime Format
-/// Added Defaults to each config setting so if something is missing or wrong, the bot wont freak out over it
-/// 
-/// 
+///     Changelog
+///     V2.0.4
+///     Added Previous Message checks to the cache validation to try and get the previous message in the target channel if
+///     none of the messages in the cache exist.
+///     Fixed Redundant double checks to the message history cache
+///     Split each message update loop into its own class
+///     Added the Version parameter into the project config and into the Update checker.
+///     Added OutputMode into the config to further narrow down what debug levels should be written into console
+///     Added an option that allows the bypass of the debug config check for console outputs
+///     Changed the Default for Debug mode to false
+///     V2.0.5
+///     Added the OutputMode variable to the Egg
+///     Simplified the WriteStep function to automatically turn any step if written in camel into a proper string
+///     V3.0.0
+///     Added length check for the client and server token
+///     Added a token prefix check and a warning if the token doesn't match the prefix format (only warning due to the
+///     prefix having changed before and shouldn't break anything if they do again)
+///     Switched the loading order of secrets and config to be config then secrets
+///     Removed the MessageHistory JSON due to it being redundant with message lookup
+///     Removed Message History Testing, and any file loading tests or references
+///     Added Default Debug being toggled on if in debug built in Editor
+///     Fixed the console output to display Debug outputs as well now
+///     Fixed Output mode to work as intended now when set
+///     Fixed Inverted dry run behavior in consolidated mode
+///     Removed message history cache validation due to redundancy
+///     Added Last Message Checks when getting the last cache entry and nothing is found in the cache
+///     Added setup instructions for the Pelican Egg into the README.md
+///     Added Maximum CPU, Memory, and Disk usage to the Markdown as variables that can be used
+///     Added Embed size checks before sending the message, and stopping the message from being sent if the embed goes
+///     beyond discord specifications
+///     Added BadRequestException (aka. Error code 400) to be caught to better catch if discord refuses the message (mostly
+///     due to its size)
+///     Fixed Start and Stop server discord interaction to not use the right ID which caused it to fail
+///     Fixed Start and Stop server discord interaction response to stop throwing errors and actually responding to the
+///     interaction
+///     Switched IsBot check behind the ID check to stop unnecessary checks
+///     Fixed IgnoreInternalServers removing ever server due to it checking before allocations get populated.
+///     Changed The ExtractRconPort and ExtractQueryPort function to use the already existing list of network allocations
+///     for that server instead of extracting it again
+///     Fixed the Discord Interactions to be more robust and not giving a discord response in paginated
+///     Reduced the amount of duplicate code in button creation
+///     Removed a lot of boiler plate and duplicate code in Paginated Message creation and updating
+///     Fixed Buttons not being updated in Paginated Format if message previously existed
+///     Fixed Page Flipping discord interaction
+///     Fixed Start and Stop buttons not being added or removed if start and stop permission changed
+///     Changed all the start stop button debug output to use the debug output tag
+///     Removed Duplicate code during button creation
+///     Added more Debug logging to the JSON information extraction
+///     Replaced all references to Debug checks before sending a debug output with the debug tag
+///     Added more error handling when flipping pages, to handle more edge cases
+///     Added recursive search as a fallback to the JSON Element extraction
+///     Cleaned up the code for getting the server list and all its information together to transform it into more of a 1
+///     function 1 purpose
+///     V3.0.1
+///     Added a special Update script for Pelican and Docker container that runs before the bot and not after the bot is
+///     started
+///     Added a disable environment variable for the updater class if inside container
+///     V3.0.2
+///     Added Terraria as a case in the Server request execution methods
+///     V3.0.3
+///     Updated Pelican Egg to use the new Startup script
+///     Updated the Path to the Update Scrip in the Startup Script
+///     V3.0.4
+///     Fixed Discord Dropdown buttons Debug output to still be displayed when outside of debug mode
+///     Fixed Some issues concerning the Pelican Startup and Update script
+///     Updated The Egg Startup script to use bash
+///     V3.0.5
+///     Fixed a small bash error that would pop up in Pelican
+///     Updated the Startup Command to now use the startup.sh script like intended
+///     V3.0.6
+///     Added Flexible Boolean Conversion to account for issues with the Pelican Panel's Boolean Tag (fixed in testing
+///     branch of Pelican Panel)
+///     Split some of the Helper functions into their own class to clean up the Helper Class
+///     Moved the Helper Classes into their own folder
+///     V3.0.7
+///     Updated the Variable for auto update in the pelican startup script
+///     Updated the Bot environment version number
+///     Fixed Capitalization of Secrets and Config in the Pelican update script
+///     Added a update_config.sh script that takes the Pelican Panel settings and writes them into the config
+///     V3.0.8
+///     Updated Egg to exclude the configuration files configuration and new Image options (Images not yet tested)
+///     Added update_config.sh to the export and preserve list
+///     V3.0.9
+///     Added Byte conversions into the maximum disk and memory counters
+///     Added Decimal format conversion for maximum cpu usage.
+///     Version Bump in Bot Project (keep forgetting to do so)
+///     Added Docker File to allow Building a docker container with the source code (Official Docker Container Coming soon)
+///     Added a specific GitHub actions file for Gitea actions
+///     V3.0.10
+///     Added IgnoreOtherUserServers to ignore any servers that arent from the User that provided the API key
+///     Added Support for custom DateTime Format
+///     Added Defaults to each config setting so if something is missing or wrong, the bot wont freak out over it
 /// </summary>
 
 //TODO: Check if long term usage increases RAM usage over 100mb (too many collections and list that never got caught by GC would cause this)
@@ -126,18 +120,18 @@ public static class Program
     private static async Task Main()
     {
         _targetChannel = [];
-        
+
         await FileManager.ReadConfigFile();
         await FileManager.ReadSecretsFile();
-        
-        #if DEBUG
-            Config.MessageFormat = MessageFormat.Consolidated;
-            Config.Debug = true;
-            Config.LimitServerCount = true;
-            Config.MaxServerCount = 20;
-            Config.IgnoreInternalServers = true;
-            Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1"];
-        #endif
+
+#if DEBUG
+        Config.MessageFormat = MessageFormat.Consolidated;
+        Config.Debug = true;
+        Config.LimitServerCount = true;
+        Config.MaxServerCount = 20;
+        Config.IgnoreInternalServers = true;
+        Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1"];
+#endif
 
         if (FileManager.GetFilePath("MessageMarkdown.txt") == string.Empty)
         {
@@ -147,19 +141,16 @@ public static class Program
 
         GetGamesToMonitorFileAsync();
         ServerMarkdown.GetMarkdownFileContentAsync();
-        
+
         WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
 
-        if (Config.AutoUpdate)
-        {
-            await VersionUpdater.UpdateProgram();
-        }
+        if (Config.AutoUpdate) await VersionUpdater.UpdateProgram();
 
         var discord = new DiscordClient(new DiscordConfiguration
         {
             Token = Secrets.BotToken,
             TokenType = TokenType.Bot,
-            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents,
+            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents
         });
 
         discord.Ready += OnClientReady;
@@ -168,14 +159,14 @@ public static class Program
         discord.ComponentInteractionCreated += OnServerStartInteraction;
         discord.ComponentInteractionCreated += OnServerStopInteraction;
         discord.ComponentInteractionCreated += OnDropDownInteration;
-        
+
         await discord.ConnectAsync();
         BotId = discord.CurrentUser.Id;
         await Task.Delay(-1);
     }
-    
+
     /// <summary>
-    /// Function that is called when the bot is ready to send messages.
+    ///     Function that is called when the bot is ready to send messages.
     /// </summary>
     /// <param name="sender">DiscordClient</param>
     /// <param name="e">ReadyEventArgs</param>
@@ -195,12 +186,13 @@ public static class Program
         }
         else
         {
-            WriteLine("ChannelIds in the Secrets File is empty or not spelled correctly!", CurrentStep.None, OutputType.Error);
+            WriteLine("ChannelIds in the Secrets File is empty or not spelled correctly!", CurrentStep.None,
+                OutputType.Error);
         }
     }
 
     /// <summary>
-    /// Starts the Sever statistics updater loop.
+    ///     Starts the Sever statistics updater loop.
     /// </summary>
     /// <param name="client">Bot client</param>
     /// <param name="channelIds">Target channels</param>
@@ -226,13 +218,15 @@ public static class Program
     }
 
     /// <summary>
-    /// Starts the embed updater loop called by the StartStatsUpdater method
+    ///     Starts the embed updater loop called by the StartStatsUpdater method
     /// </summary>
     /// <param name="mode">The EmbedUpdateMode to use</param>
     /// <param name="generateEmbedsAsync">A function that generates the embeds</param>
     /// <param name="applyEmbedUpdateAsync">A function that applies the embed update</param>
     /// <param name="delaySeconds">Delay in seconds between updates</param>
-    public static void StartEmbedUpdaterLoop(MessageFormat mode, Func<Task<(List<string?> uuids, object embedOrEmbeds)>> generateEmbedsAsync, Func<object, List<string?>, Task> applyEmbedUpdateAsync, int delaySeconds = 10)
+    public static void StartEmbedUpdaterLoop(MessageFormat mode,
+        Func<Task<(List<string?> uuids, object embedOrEmbeds)>> generateEmbedsAsync,
+        Func<object, List<string?>, Task> applyEmbedUpdateAsync, int delaySeconds = 10)
     {
         Task.Run(async () =>
         {
@@ -246,7 +240,9 @@ public static class Program
                 }
                 catch (BadRequestException ex)
                 {
-                    WriteLine("Bad request when sending message, which is usually triggered by a message that is too long.", CurrentStep.DiscordMessage, OutputType.Error, ex);
+                    WriteLine(
+                        "Bad request when sending message, which is usually triggered by a message that is too long.",
+                        CurrentStep.DiscordMessage, OutputType.Error, ex);
                 }
                 catch (Exception ex)
                 {

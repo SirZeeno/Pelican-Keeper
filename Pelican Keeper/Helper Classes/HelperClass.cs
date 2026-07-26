@@ -8,9 +8,9 @@ using static TemplateClasses;
 public static class HelperClass
 {
     private static readonly Dictionary<string, string> LastEmbedHashes = new();
-    
+
     /// <summary>
-    /// Creates a rest request to the Pelican API
+    ///     Creates a rest request to the Pelican API
     /// </summary>
     /// <param name="client">RestClient</param>
     /// <param name="token">Pelican API token</param>
@@ -25,7 +25,7 @@ public static class HelperClass
     }
 
     /// <summary>
-    /// Checks if the embed has changed
+    ///     Checks if the embed has changed
     /// </summary>
     /// <param name="uuid">list of server UUIDs</param>
     /// <param name="newEmbed">new embed</param>
@@ -39,32 +39,39 @@ public static class HelperClass
             if (LastEmbedHashes.TryGetValue(uuidItem, out var lastHash) && lastHash == hash) return false;
             LastEmbedHashes[uuidItem] = hash;
         }
+
         return true;
     }
-    
+
     /// <summary>
-    /// Sorts a list of ServerInfo's in the desired format and direction.
+    ///     Sorts a list of ServerInfo's in the desired format and direction.
     /// </summary>
     /// <param name="servers">List of ServerInfos</param>
     /// <param name="sortFormat">The Format the Servers should be sorted in</param>
     /// <param name="direction">The direction the Servers should be sorted in</param>
     /// <returns>The Sorted List of ServerInfo's</returns>
-    public static List<ServerInfo> SortServers(IEnumerable<ServerInfo> servers, MessageSorting sortFormat, MessageSortingDirection direction)
+    public static List<ServerInfo> SortServers(IEnumerable<ServerInfo> servers, MessageSorting sortFormat,
+        MessageSortingDirection direction)
     {
         return (field: sortFormat, direction) switch
         {
             (MessageSorting.Name, MessageSortingDirection.Ascending) => servers.OrderBy(s => s.Name).ToList(),
-            (MessageSorting.Name, MessageSortingDirection.Descending) => servers.OrderByDescending(s => s.Name).ToList(),
-            (MessageSorting.Status, MessageSortingDirection.Ascending) => servers.OrderBy(s => s.Resources?.CurrentState).ToList(),
-            (MessageSorting.Status, MessageSortingDirection.Descending) => servers.OrderByDescending(s => s.Resources?.CurrentState).ToList(),
-            (MessageSorting.Uptime, MessageSortingDirection.Ascending) => servers.OrderBy(s => s.Resources?.Uptime).ToList(),
-            (MessageSorting.Uptime, MessageSortingDirection.Descending) => servers.OrderByDescending(s => s.Resources?.Uptime).ToList(),
+            (MessageSorting.Name, MessageSortingDirection.Descending) =>
+                servers.OrderByDescending(s => s.Name).ToList(),
+            (MessageSorting.Status, MessageSortingDirection.Ascending) => servers
+                .OrderBy(s => s.Resources?.CurrentState).ToList(),
+            (MessageSorting.Status, MessageSortingDirection.Descending) => servers
+                .OrderByDescending(s => s.Resources?.CurrentState).ToList(),
+            (MessageSorting.Uptime, MessageSortingDirection.Ascending) => servers.OrderBy(s => s.Resources?.Uptime)
+                .ToList(),
+            (MessageSorting.Uptime, MessageSortingDirection.Descending) => servers
+                .OrderByDescending(s => s.Resources?.Uptime).ToList(),
             _ => servers.ToList()
         };
     }
-    
+
     /// <summary>
-    /// Chunks any list of items into multiple lists with the desired size
+    ///     Chunks any list of items into multiple lists with the desired size
     /// </summary>
     /// <param name="source">Source List</param>
     /// <param name="size">Maximum size you want the output lists to be</param>
@@ -80,11 +87,12 @@ public static class HelperClass
             yield return list;
             list.Clear();
         }
+
         if (list.Count > 0) yield return list;
     }
-    
+
     /// <summary>
-    /// Gets the raw JSON text from a URL
+    ///     Gets the raw JSON text from a URL
     /// </summary>
     /// <param name="url">Github URL</param>
     /// <returns>the raw JSON</returns>
