@@ -241,7 +241,7 @@ public static class DiscordInteractions
 
         switch (server.Resources?.CurrentState.ToLower())
         {
-            case "online":
+            case "online" or "running":
                 PelicanInterface.SendPowerCommand(server.Uuid, "stop");
 
                 await e.Interaction.CreateFollowupMessageAsync(
@@ -342,7 +342,7 @@ public static class DiscordInteractions
 
                     switch (serverInfo.Resources?.CurrentState.ToLower())
                     {
-                        case "online":
+                        case "online" or "running":
                             PelicanInterface.SendPowerCommand(serverInfo.Uuid, "stop");
 
                             await e.Interaction.CreateFollowupMessageAsync(
