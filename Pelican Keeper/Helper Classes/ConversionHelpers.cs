@@ -55,4 +55,9 @@ public static class ConversionHelpers
 
         return $"{serverResponse}/{maxPlayerCount}";
     }
+    
+    public static string FilePathConverter(string filePath)
+    {
+        return filePath.Replace("/", "%2F");
+    }
 }

@@ -50,7 +50,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         if (_tcpClient == null || _stream == null)
         {
             ConsoleExt.WriteLine(new InvalidOperationException("Call Connect() before sending commands."),  ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
-            return HelperClass.ExtractPlayerCount(null, regexPattern).ToString();
+            return ExtractorHelpers.ExtractPlayerCount(null, regexPattern).ToString();
         }
         _requestId++;
         byte[] packet = CreatePacket(_requestId, 2, command);
