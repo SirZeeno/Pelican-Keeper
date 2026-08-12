@@ -105,23 +105,66 @@ public static class EmbedBuilderHelper
         var count = 0;
 
         if (embed.Title != null)
+        {
             count += embed.Title.Length;
+            if (Program.Config.Debug)
+                ConsoleExt.WriteLine($"Embed Title Character count: {embed.Title.Length}", ConsoleExt.CurrentStep.EmbedBuilding);
+            if (embed.Title.Length > 256)
+                ConsoleExt.WriteLine("Message Title exceeds Character count of 256", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Error);
+        }
 
         if (embed.Description != null)
+        {
             count += embed.Description.Length;
+            if (Program.Config.Debug)
+                ConsoleExt.WriteLine($"Embed Description Character count: {embed.Description.Length}", ConsoleExt.CurrentStep.EmbedBuilding);
+            if (embed.Description.Length > 4096)
+                ConsoleExt.WriteLine("Message Description exceeds Character count of 4096", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Error);
+        }
 
         if (embed.Footer?.Text != null)
+        {
             count += embed.Footer.Text.Length;
+            if (Program.Config.Debug)
+                ConsoleExt.WriteLine($"Embed Footer Character count: {embed.Footer.Text.Length}", ConsoleExt.CurrentStep.EmbedBuilding);
+            if (embed.Footer.Text.Length > 2048)
+                ConsoleExt.WriteLine("Message Footer exceeds Character count of 2048", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Error);
+        }
 
         if (embed.Author?.Name != null)
+        {
             count += embed.Author.Name.Length;
+            if (Program.Config.Debug)
+                ConsoleExt.WriteLine($"Embed Author Character count: {embed.Author.Name.Length}", ConsoleExt.CurrentStep.EmbedBuilding);
+            if (embed.Author.Name.Length > 256)
+            {
+                ConsoleExt.WriteLine("Message Author exceeds Character count of 256", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Error);
+            }
+        }
 
         foreach (var field in embed.Fields)
         {
-            count += field.Name?.Length ?? 0;
-            count += field.Value?.Length ?? 0;
+            if (field.Name != null)
+            {
+                count += field.Name.Length;
+                if (Program.Config.Debug)
+                    ConsoleExt.WriteLine($"Embed {field.Name} Name Character count: {field.Name.Length}", ConsoleExt.CurrentStep.EmbedBuilding);
+                if (field.Name.Length > 256)
+                    ConsoleExt.WriteLine($"Message {field.Name} Field Name exceeds Character count of 256", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Error);
+            }
+
+            if (field.Value != null)
+            {
+                count += field.Value.Length;
+                if (Program.Config.Debug)
+                    ConsoleExt.WriteLine($"Embed {field.Name} Value Character count: {field.Value.Length}", ConsoleExt.CurrentStep.EmbedBuilding);
+                if (field.Value.Length > 1024)
+                    ConsoleExt.WriteLine($"Message {field.Name} Field Value exceeds Character count of 1024", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Error);
+            }
         }
 
+        if (count > 6000)
+            ConsoleExt.WriteLine("Message total exceeds Character count of 6000", ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Error);
         return count;
     }
 }

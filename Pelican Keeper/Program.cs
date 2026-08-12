@@ -104,6 +104,15 @@ using static DiscordInteractions;
 ///     Added IgnoreOtherUserServers to ignore any servers that arent from the User that provided the API key
 ///     Added Support for custom DateTime Format
 ///     Added Defaults to each config setting so if something is missing or wrong, the bot wont freak out over it
+///     Fixed user permissions not being check with the dropdown menus
+///     Consolidated the response messages sent to discord by start and stop dropdown menus and buttons
+///     Added customDirectoryOrFile being taken into account when creating Default Files
+///     Improved Secrets and Config Validation
+///     Removed Errors being ignored when reading Secrets file
+///     Fixed Discord Message existence checks to not return false information
+///     Added better logging for message length and errors for specific parts exceeding length limits
+///     Updated Project Packages
+///     
 /// </summary>
 
 //TODO: Check if long term usage increases RAM usage over 100mb (too many collections and list that never got caught by GC would cause this)
@@ -158,7 +167,7 @@ public static class Program
         discord.ComponentInteractionCreated += OnPageFlipInteraction;
         discord.ComponentInteractionCreated += OnServerStartInteraction;
         discord.ComponentInteractionCreated += OnServerStopInteraction;
-        discord.ComponentInteractionCreated += OnDropDownInteration;
+        discord.ComponentInteractionCreated += OnDropDownInteraction;
 
         await discord.ConnectAsync();
         BotId = discord.CurrentUser.Id;

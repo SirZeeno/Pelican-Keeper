@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
-using Pelican_Keeper.Helper_Classes;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+﻿using System.Text.Json;
 
 namespace Pelican_Keeper;
 
+using Helper_Classes;
 using static ConsoleExt;
 using static TemplateClasses;
 
@@ -29,30 +28,12 @@ public static class FileManager
     }
 
     /// <summary>
-    ///     Gets the file either in the current environment folder if no custom directory of file was specified, otherwise gets
-    ///     it in the specified folder or gets the specified file.
-    /// </summary>
-    /// <param name="fileNameWithExtension">File with Extension</param>
-    /// <param name="customDirectoryOrFile">Custom Directory to search in or direct File Path</param>
-    /// <returns>String of the found File</returns>
-    /// c
-    public static string GetCustomFilePath(string fileNameWithExtension, string? customDirectoryOrFile = null)
-    {
-        if (string.IsNullOrEmpty(customDirectoryOrFile))
-            return File.Exists(customDirectoryOrFile)
-                ? customDirectoryOrFile
-                : GetFilePath(fileNameWithExtension, customDirectoryOrFile);
-
-        return GetFilePath(fileNameWithExtension);
-    }
-
-    /// <summary>
     ///     Creates a default Secrets.json file in the current execution directory.
     /// </summary>
-    private static async Task CreateSecretsFile()
+    private static async Task CreateSecretsFile(string? customDirectoryOrFile = null)
     {
         WriteLine("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
-        await using var secretsFile = File.Create("Secrets.json");
+        await using var secretsFile = PreliminaryCustomChecks("Secrets.json", customDirectoryOrFile);
         var defaultSecrets = new string(
             "{\n  \"ClientToken\": \"YOUR_CLIENT_TOKEN\",\n  \"ServerToken\": \"YOUR_SERVER_TOKEN\",\n  \"ServerUrl\": \"YOUR_BASIC_SERVER_URL\",\n  \"BotToken\": \"YOUR_DISCORD_BOT_TOKEN\",\n  \"ChannelIds\": [THE_CHANNEL_ID_YOU_WANT_THE_BOT_TO_POST_IN],\n  \"ExternalServerIp\": \"YOUR_EXTERNAL_SERVER_IP\"\n}");
         await using var writer = new StreamWriter(secretsFile);
@@ -64,18 +45,31 @@ public static class FileManager
     /// <summary>
     ///     Creates a default Config.json file in the current execution directory.
     /// </summary>
-    private static async Task CreateConfigFile()
+    private static async Task CreateConfigFile(string? customDirectoryOrFile = null)
     {
-        await using var configFile = File.Create("Config.json");
+        await using var configFile = PreliminaryCustomChecks("Config.json", customDirectoryOrFile);
         var defaultConfig = await HelperClass.GetJsonTextAsync(
             "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/Config.json");
         await using var writer = new StreamWriter(configFile);
         await writer.WriteAsync(defaultConfig);
     }
 
-    private static async Task CreateGamesToMonitorFile()
+    /// <summary>
+    ///     Checks if the custom location is a file or directory and creates a file as needed in the custom location or default location
+    /// </summary>
+    /// <param name="fileName">File Name with Extension</param>
+    /// <param name="customDirectoryOrFile">Custom Directory or File</param>
+    /// <returns>File Stream of the created file</returns>
+    private static FileStream PreliminaryCustomChecks(string fileName, string? customDirectoryOrFile = null)
     {
-        await using var gamesToMonitorFile = File.Create("GamesToMonitor.json");
+        if (string.IsNullOrEmpty(customDirectoryOrFile)) return File.Create(fileName);
+        FileAttributes atrributes = File.GetAttributes(customDirectoryOrFile);
+        return File.Create(atrributes.HasFlag(FileAttributes.Directory) ? Path.Combine(customDirectoryOrFile, fileName) : customDirectoryOrFile);
+    }
+
+    private static async Task CreateGamesToMonitorFile(string? customDirectoryOrFile = null)
+    {
+        await using var gamesToMonitorFile = PreliminaryCustomChecks("GamesToMonitor.json", customDirectoryOrFile);
         var gamesToMonitor = await HelperClass.GetJsonTextAsync(
             "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/GamesToMonitor.json");
         await using var writer = new StreamWriter(gamesToMonitorFile);
@@ -85,9 +79,9 @@ public static class FileManager
     /// <summary>
     ///     Creates a default MessageMarkdown.txt file in the current execution directory.
     /// </summary>
-    public static async Task CreateMessageMarkdownFile()
+    public static async Task CreateMessageMarkdownFile(string? customDirectoryOrFile = null)
     {
-        await using var messageMarkdownFile = File.Create("MessageMarkdown.txt");
+        await using var messageMarkdownFile = PreliminaryCustomChecks("MessageMarkdown.txt", customDirectoryOrFile);
         var defaultMarkdown = await HelperClass.GetJsonTextAsync(
             "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/MessageMarkdown.txt");
         await using var writer = new StreamWriter(messageMarkdownFile);
@@ -102,28 +96,22 @@ public static class FileManager
     {
         string secretsPath;
 
-        if (string.IsNullOrEmpty(customDirectoryOrFile))
-            secretsPath = File.Exists(customDirectoryOrFile)
-                ? customDirectoryOrFile
-                : GetFilePath("Secrets.json", customDirectoryOrFile);
+        if (!string.IsNullOrEmpty(customDirectoryOrFile))
+        {
+            FileAttributes attr = File.GetAttributes(customDirectoryOrFile);
+            secretsPath = attr.HasFlag(FileAttributes.Directory) ? GetFilePath("Secrets.json", customDirectoryOrFile) : customDirectoryOrFile;
+        }
         else
+        {
             secretsPath = GetFilePath("Secrets.json");
+        }
 
         if (secretsPath == string.Empty)
         {
             WriteLine("Secrets.json not found. Creating default one.", CurrentStep.FileReading, OutputType.Warning);
 
-            if (string.IsNullOrEmpty(customDirectoryOrFile))
-            {
-                await CreateSecretsFile();
-                secretsPath = GetFilePath("Secrets.json");
-            }
-            else
-            {
-                WriteLine("Custom File or Directory specified, but unable to find Secrets File there!",
-                    CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-                return null;
-            }
+            await CreateSecretsFile(customDirectoryOrFile);
+            secretsPath = GetFilePath("Secrets.json");
 
             if (secretsPath == string.Empty)
             {
@@ -135,24 +123,10 @@ public static class FileManager
 
         try
         {
-            var settings = new JsonSerializerSettings
-            {
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                NullValueHandling = NullValueHandling.Include,
-                Error = (_, args) => { args.ErrorContext.Handled = true; } // skip invalid values instead of throwing
-            };
-
             var secretsJson = await File.ReadAllTextAsync(secretsPath);
-
-            var secrets = JsonConvert.DeserializeObject<Secrets>(secretsJson, settings);
-            Validator.ValidateSecrets(secrets);
-
-            if (secrets == null)
-            {
-                WriteLine("Secrets file is empty or not in the correct format. Please check Secrets.json",
-                    CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-                return null;
-            }
+            
+            Secrets secrets = JsonSerializer.Deserialize<Secrets>(secretsJson)!; // Can never be null since it would throw an error if anything is wrong
+            Validator.ValidateSecrets(secrets); //Validates the given information for possible issues before proceeding
 
             Program.Secrets = secrets;
             return secrets;
@@ -174,29 +148,23 @@ public static class FileManager
     {
         string configPath;
 
-        if (string.IsNullOrEmpty(customDirectoryOrFile))
-            configPath = File.Exists(customDirectoryOrFile)
-                ? customDirectoryOrFile
-                : GetFilePath("Config.json", customDirectoryOrFile);
+        if (!string.IsNullOrEmpty(customDirectoryOrFile))
+        {
+            FileAttributes attr = File.GetAttributes(customDirectoryOrFile);
+            configPath = attr.HasFlag(FileAttributes.Directory) ? GetFilePath("Config.json", customDirectoryOrFile) : customDirectoryOrFile;
+        }
         else
+        {
             configPath = GetFilePath("Config.json");
+        }
 
         if (configPath == string.Empty)
         {
             WriteLine("Config.json not found. Pulling Default from Github!", CurrentStep.FileReading,
                 OutputType.Warning);
 
-            if (string.IsNullOrEmpty(customDirectoryOrFile))
-            {
-                await CreateConfigFile();
-                configPath = GetFilePath("Config.json");
-            }
-            else
-            {
-                WriteLine("Custom File or Directory specified, but unable to find Config File there!",
-                    CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-                return null;
-            }
+            await CreateConfigFile(customDirectoryOrFile);
+            configPath = GetFilePath("Config.json");
 
             if (configPath == string.Empty)
             {
@@ -209,38 +177,9 @@ public static class FileManager
         try
         {
             var configJson = await File.ReadAllTextAsync(configPath);
-            var config = JsonSerializer.Deserialize<Config>(configJson);
-            Validator.ValidateConfig(config);
-
-            //For the environment variables that have to get written into the config from the pelican panel
-            /*
-            // --- ENV VAR OVERRIDES (Syncs with Pelican Panel) ---
-            // Helper to get raw env var (returns null if missing, string if present)
-            string? GetEnv(string key) => Environment.GetEnvironmentVariable(key);
-            string? val;
-
-            // Enums
-            val = GetEnv("MessageFormat");
-            if (!string.IsNullOrEmpty(val) && Enum.TryParse(val, true, out MessageFormat mf)) config.MessageFormat = mf;
-
-            // Ints
-            val = GetEnv("MarkdownUpdateInterval");
-            if (!string.IsNullOrEmpty(val) && int.TryParse(val, out int mui)) config.MarkdownUpdateInterval = mui;
-
-            // Strings & Arrays
-            val = GetEnv("ServersToIgnore");
-            if (val != null) config.ServersToIgnore = string.IsNullOrWhiteSpace(val) ? [] : val.Split(',');
-
-            val = GetEnv("EmptyServerTimeout");
-            if (val != null) config.EmptyServerTimeout = val;
-            */
-
-            if (config == null)
-            {
-                WriteLine("Config file is empty or not in the correct format. Please check Config.json",
-                    CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-                return null;
-            }
+            Config config = JsonSerializer.Deserialize<Config>(configJson)!; // Can never be null since it would throw an error if anything is wrong
+            Validator.ValidateConfig(config); //Validates the given information for possible issues before proceeding
+            //TODO: All I need to check is the format of the values like the DateTime, Discord User IDs, etc
 
             Program.Config = config;
             return config;
@@ -261,28 +200,23 @@ public static class FileManager
     {
         string gameCommPath;
 
-        if (string.IsNullOrEmpty(customDirectoryOrFile))
-            gameCommPath = File.Exists(customDirectoryOrFile)
-                ? customDirectoryOrFile
-                : GetFilePath("GamesToMonitor.json", customDirectoryOrFile);
+        if (!string.IsNullOrEmpty(customDirectoryOrFile))
+        {
+            FileAttributes attr = File.GetAttributes(customDirectoryOrFile);
+            gameCommPath = attr.HasFlag(FileAttributes.Directory) ? GetFilePath("GamesToMonitor.json", customDirectoryOrFile) : customDirectoryOrFile;
+        }
         else
+        {
             gameCommPath = GetFilePath("GamesToMonitor.json");
+        }
 
         if (gameCommPath == string.Empty)
         {
             WriteLine("GamesToMonitor.json not found. Pulling from Github Repo!", CurrentStep.FileReading,
                 OutputType.Error, new FileLoadException(), true);
-            if (string.IsNullOrEmpty(customDirectoryOrFile))
-            {
-                await CreateGamesToMonitorFile();
-                gameCommPath = GetFilePath("GamesToMonitor.json");
-            }
-            else
-            {
-                WriteLine("Custom File or Directory specified, but unable to find GamesToMonitor File there!",
-                    CurrentStep.FileReading, OutputType.Error, new FileLoadException(), true);
-                return null;
-            }
+            
+            await CreateGamesToMonitorFile(customDirectoryOrFile);
+            gameCommPath = GetFilePath("GamesToMonitor.json");
 
             if (gameCommPath == string.Empty)
             {

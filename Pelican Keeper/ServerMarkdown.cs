@@ -11,9 +11,11 @@ public static class ServerMarkdown
     private static readonly string
         MessageMarkdownPath =
             FileManager.GetFilePath(
-                "MessageMarkdown.txt"); //TODO: Add error handling for missing file and Validation for correct format
+                "MessageMarkdown.txt"); //TODO: Add Validation for correct format
 
     private static string _templateText = File.ReadAllText(MessageMarkdownPath);
+    
+    
 
     /// <summary>
     ///     Processes [Tag]...[/Tag] blocks, replaces placeholders inside them,
@@ -67,6 +69,7 @@ public static class ServerMarkdown
     public static (string message, string serverName) ParseTemplate(TemplateClasses.ServerInfo serverResponse)
     {
         if (serverResponse.Resources == null) throw new ArgumentException("Server Resource response cannot be null.");
+        Validator.ValidateMarkdown(_templateText);
 
         var viewModel = new TemplateClasses.ServerViewModel
         {
@@ -117,7 +120,7 @@ public static class ServerMarkdown
         });
     }
 
-    internal static string FormatBytes(long bytes)
+    private static string FormatBytes(long bytes)
     {
         const long kb = 1024;
         const long mb = kb * 1024;
@@ -134,13 +137,13 @@ public static class ServerMarkdown
         };
     }
 
-    internal static string FormatUptime(long uptimeMs)
+    private static string FormatUptime(long uptimeMs)
     {
         var uptime = TimeSpan.FromMilliseconds(uptimeMs);
         return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m";
     }
 
-    public static string GetStatusIcon(string status)
+    private static string GetStatusIcon(string status)
     {
         return status.ToLower() switch
         {

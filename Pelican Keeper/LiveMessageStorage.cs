@@ -64,7 +64,7 @@ public static class LiveMessageStorage
     /// <returns>bool whether the message exists</returns>
     private static async Task<bool> MessageExistsAsync(List<DiscordChannel> channels, ulong messageId)
     {
-        if (channels is not { Count: > 0 }) return true;
+        if (channels is not { Count: > 0 }) return false;
 
         foreach (var channel in channels)
             try
@@ -86,8 +86,6 @@ public static class LiveMessageStorage
                 WriteLine($"Bad request on #{channel.Name}: {ex.Message}", CurrentStep.MessageHistory,
                     OutputType.Warning);
             }
-
-        if (channels.Count == 1) return false; // I am searching only one channel, so I don't need to log.
 
         WriteLine($"Message {messageId} not found in any channel", CurrentStep.MessageHistory, OutputType.Debug);
         return false;

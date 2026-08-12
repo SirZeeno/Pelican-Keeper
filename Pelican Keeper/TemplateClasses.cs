@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Pelican_Keeper;
 
@@ -169,7 +170,7 @@ public abstract class TemplateClasses
         public string Uptime { get; set; } = null!;
     }
 
-    public class GamesToMonitor
+    public abstract class GamesToMonitor
     {
         public string Game { get; init; } = null!;
         public CommandExecutionMethod Protocol { get; init; }
