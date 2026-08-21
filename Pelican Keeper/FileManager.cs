@@ -180,7 +180,6 @@ public static class FileManager
             var configJson = await File.ReadAllTextAsync(configPath);
             Config config = JsonSerializer.Deserialize<Config>(configJson)!; // Can never be null since it would throw an error if anything is wrong
             ConfigValidator.ValidateConfig(config); //Validates the given information for possible issues before proceeding
-            //TODO: All I need to check is the format of the values like the DateTime, Discord User IDs, etc
 
             Program.Config = config;
             return config;

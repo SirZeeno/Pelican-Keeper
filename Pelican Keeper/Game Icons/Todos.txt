@@ -1,5 +1,8 @@
-- Find a remote database holds a collection of the game icons that's freely usable
+- Find a remote database that holds a collection of the game icons that's freely usable
 - Figure out a way to automatically pull the imaged for these games from a collection
-- Figure out if it's best to pull each one as they are needed and store them or pull all of them on first boot as a one and done
+- Figure out if it's best to pull each one as they are needed and store them or pull all of them on the first boot as a one and done
 - Figure out what file format to use for the icons to keep the space being used as minimal as possible
 - Figure out what image size suits the use case best, since they are only going to be small icons in the discord message
+
+Found igdb that has a free API that can be used to get the game icons, but it requires an API key that each user has to create themselves. So my thought is to pull the icons from all the games in the game list and store them with the bot.
+Otherwise, I'll have to give the user an option to provide their own API key.

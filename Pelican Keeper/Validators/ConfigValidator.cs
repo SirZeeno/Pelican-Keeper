@@ -46,13 +46,11 @@ public static class ConfigValidator
                 "EmptyServerTimeout is null or empty. Make sure to set a valid d:hh:mm Time span Format.");
         try
         {
-            TimeSpan.ParseExact(Program.Config.EmptyServerTimeout!, @"d\:hh\:mm",
-                CultureInfo.InvariantCulture); //Catches invalid formats in the conversion process
+            TimeSpan.ParseExact(config.EmptyServerTimeout!, @"dd\:hh\:mm", CultureInfo.InvariantCulture); //Catches invalid formats in the conversion process
         }
-        catch
+        catch (Exception e)
         {
-            throw new ArgumentException(
-                "EmptyServerTimeout is not set to a valid format. Make sure to set a valid d:hh:mm Time span Format.");
+            throw new ArgumentException("EmptyServerTimeout is not set to a valid format. Make sure to set a valid dd:hh:mm Time span Format.");
         }
 
         //ServersToIgnore

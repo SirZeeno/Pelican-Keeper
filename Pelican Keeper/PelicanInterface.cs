@@ -225,7 +225,7 @@ public static class PelicanInterface
                         }
                         else
                         {
-                            TimeSpan.TryParseExact(Program.Config.EmptyServerTimeout, @"d\:hh\:mm",
+                            TimeSpan.TryParseExact(Program.Config.EmptyServerTimeout, @"dd\:hh\:mm",
                                 CultureInfo.InvariantCulture, out var timeTillShutdown);
                             if (timeTillShutdown == TimeSpan.Zero)
                                 timeTillShutdown = TimeSpan.FromHours(1);

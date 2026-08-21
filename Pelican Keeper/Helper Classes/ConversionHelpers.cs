@@ -4,8 +4,9 @@ namespace Pelican_Keeper.Helper_Classes;
 
 public static class ConversionHelpers
 {
+    //TODO: This doesnt seem to work and seems to display a 16KiB instead of a ∞
     /// <summary>
-    ///     Takes an input string number and checks if its zero, null or empty
+    ///     Takes an input string number and checks if it's zero, null or empty
     /// </summary>
     /// <param name="value">input string number</param>
     /// <returns>null if null of empty, or Infinite if 0, otherwise its Original value</returns>
