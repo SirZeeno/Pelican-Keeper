@@ -2,6 +2,7 @@
 
 namespace Pelican_Keeper;
 
+using Validators;
 using Helper_Classes;
 using static ConsoleExt;
 using static TemplateClasses;
@@ -126,7 +127,7 @@ public static class FileManager
             var secretsJson = await File.ReadAllTextAsync(secretsPath);
             
             Secrets secrets = JsonSerializer.Deserialize<Secrets>(secretsJson)!; // Can never be null since it would throw an error if anything is wrong
-            Validator.ValidateSecrets(secrets); //Validates the given information for possible issues before proceeding
+            SecretsValidator.ValidateSecrets(secrets); //Validates the given information for possible issues before proceeding
 
             Program.Secrets = secrets;
             return secrets;
@@ -178,7 +179,7 @@ public static class FileManager
         {
             var configJson = await File.ReadAllTextAsync(configPath);
             Config config = JsonSerializer.Deserialize<Config>(configJson)!; // Can never be null since it would throw an error if anything is wrong
-            Validator.ValidateConfig(config); //Validates the given information for possible issues before proceeding
+            ConfigValidator.ValidateConfig(config); //Validates the given information for possible issues before proceeding
             //TODO: All I need to check is the format of the values like the DateTime, Discord User IDs, etc
 
             Program.Config = config;

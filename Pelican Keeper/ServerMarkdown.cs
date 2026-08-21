@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper;
+using Validators;
 
 using static ConversionHelpers;
 
@@ -11,7 +12,7 @@ public static class ServerMarkdown
     private static readonly string
         MessageMarkdownPath =
             FileManager.GetFilePath(
-                "MessageMarkdown.txt"); //TODO: Add Validation for correct format
+                "MessageMarkdown.txt");
 
     private static string _templateText = File.ReadAllText(MessageMarkdownPath);
     
@@ -69,7 +70,7 @@ public static class ServerMarkdown
     public static (string message, string serverName) ParseTemplate(TemplateClasses.ServerInfo serverResponse)
     {
         if (serverResponse.Resources == null) throw new ArgumentException("Server Resource response cannot be null.");
-        Validator.ValidateMarkdown(_templateText);
+        MarkdownValidator.ValidateMarkdown(_templateText);
 
         var viewModel = new TemplateClasses.ServerViewModel
         {

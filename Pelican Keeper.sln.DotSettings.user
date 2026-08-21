@@ -2,10 +2,10 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ADiscordButtonComponent_002Ecs_002Fl_003AC_0021_003FUsers_003Fleon_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E3_003Fresharper_002Dhost_003FDecompilerCache_003Fdecompiler_003Fe08a9ce4591f4f18b4a8a5659e48e1e4188400_003Fda_003F14858369_003FDiscordButtonComponent_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ALast_002Ecs_002Fl_003AC_0021_003FUsers_003Fleon_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E1_003Fresharper_002Dhost_003FSourcesCache_003F52b09ac89238d56cb6a5e7637da6e9b1176d731419d972ca2899781aa7684_003FLast_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ARuntimeHelpers_002ECoreCLR_002Ecs_002Fl_003AC_0021_003FUsers_003Fleon_003FAppData_003FRoaming_003FJetBrains_003FRider2025_002E1_003Fresharper_002Dhost_003FSourcesCache_003F8d42d5f1712377031e2892d1c29db5c23b8c7d49b9dc632fbf463bd930a8_003FRuntimeHelpers_002ECoreCLR_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f1ea3623_002D71fc_002D4962_002D9074_002D4fe94f3880b7/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestConfigScenarios" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::F9E53A39-DC4B-4DEB-8C0B-408A1904D62A::net8.0::Pelican_Keeper_Unit_Testing.FileReadingTesting.TestConfigScenarios&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f1ea3623_002D71fc_002D4962_002D9074_002D4fe94f3880b7/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestConfigScenarios" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::F9E53A39-DC4B-4DEB-8C0B-408A1904D62A::net8.0::Pelican_Keeper_Unit_Testing.FileReadingTesting.TestConfigScenarios&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	
 	

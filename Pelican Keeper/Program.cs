@@ -112,6 +112,12 @@ using static DiscordInteractions;
 ///     Fixed Discord Message existence checks to not return false information
 ///     Added better logging for message length and errors for specific parts exceeding length limits
 ///     Updated Project Packages
+///     Updated Github action for creating releases to account and produce pre-release versions
+///     Switched release creation to gh release create
+///     Moved release creation after all matrix builds succeed
+///     Fixed many more issues with the old github actions release creation process
+///     Broke the file format validators into their own files
+///     Added Markdown file format, variables, and block validation
 ///     
 /// </summary>
 

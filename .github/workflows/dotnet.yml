@@ -2,9 +2,8 @@ name: .NET Multi-RID Publish
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -12,92 +11,164 @@ permissions:
 jobs:
   check-version:
     runs-on: ubuntu-latest
+
     outputs:
-      valid: ${{ steps.check_version.outputs.valid }}
-      version: ${{ steps.get_commit.outputs.title }}
+      valid: ${{ steps.version.outputs.valid }}
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      tag: ${{ steps.version.outputs.tag }}
+      release_name: ${{ steps.version.outputs.release_name }}
+      asset_suffix: ${{ steps.version.outputs.asset_suffix }}
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      - name: Get last commit message
-        id: get_commit
+      - name: Parse release version
+        id: version
+        shell: bash
         run: |
-          TITLE=$(git log -1 --pretty=%s)
-          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          TITLE="$(git log -1 --pretty=%s)"
 
-      - name: Check if commit is version tag (X.Y.Z)
-        id: check_version
-        run: |
-          if [[ "${{ steps.get_commit.outputs.title }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Commit title: $TITLE"
+
+          if [[ "$TITLE" =~ ^([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+
             echo "valid=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+            echo "release_name=v$VERSION" >> "$GITHUB_OUTPUT"
+            echo "asset_suffix=" >> "$GITHUB_OUTPUT"
+
+          elif [[ "${TITLE,,}" =~ ^([0-9]+\.[0-9]+\.[0-9]+)[[:space:]-]+beta$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "tag=v${VERSION}-beta" >> "$GITHUB_OUTPUT"
+            echo "release_name=v${VERSION} Beta" >> "$GITHUB_OUTPUT"
+            echo "asset_suffix=-beta" >> "$GITHUB_OUTPUT"
+
           else
             echo "valid=false" >> "$GITHUB_OUTPUT"
           fi
 
-  create-release:
-    needs: check-version
-    if: needs.check-version.outputs.valid == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ needs.check-version.outputs.version }}
-          release_name: v${{ needs.check-version.outputs.version }}
-          draft: false
-          prerelease: false
 
-  publish-and-upload:
-    needs: [ check-version, create-release ]
+  publish:
+    needs: check-version
+
     if: needs.check-version.outputs.valid == 'true'
+
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
+
       matrix:
-        rid: [ win-x86, win-x64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64 ]
+        rid:
+          - win-x86
+          - win-x64
+          - linux-x64
+          - linux-arm
+          - linux-arm64
+          - osx-x64
+          - osx-arm64
+
     env:
       PROJECT_PATH: "Pelican Keeper/Pelican Keeper.csproj"
       APP_NAME: "Pelican-Keeper"
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: "8.x"
 
-      - name: Restore (per RID)
-        run: dotnet restore "$PROJECT_PATH" -r ${{ matrix.rid }}
+      - name: Restore
+        run: |
+          dotnet restore \
+            "$PROJECT_PATH" \
+            -r "${{ matrix.rid }}"
 
-      - name: Publish (${{ matrix.rid }})
+      - name: Publish
+        shell: bash
         run: |
           OUTDIR="dist/${{ matrix.rid }}"
-          mkdir -p "$OUTDIR"
-          dotnet publish "$PROJECT_PATH" \
-            -c Release -r ${{ matrix.rid }} --no-restore --nologo \
-            -p:PublishSingleFile=true -p:SelfContained=true -p:EnableCompressionInSingleFile=true \
-            -o "$OUTDIR"
-          echo "OUTDIR=$OUTDIR" >> "$GITHUB_ENV"
 
-      - name: Zip publish output (${{ matrix.rid }})
+          mkdir -p "$OUTDIR"
+
+          dotnet publish \
+            "$PROJECT_PATH" \
+            -c Release \
+            -r "${{ matrix.rid }}" \
+            --no-restore \
+            --nologo \
+            -p:PublishSingleFile=true \
+            -p:SelfContained=true \
+            -p:EnableCompressionInSingleFile=true \
+            -o "$OUTDIR"
+
+      - name: Package
+        shell: bash
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
-          NAME="${{ env.APP_NAME }}-v${VERSION}-${{ matrix.rid }}.zip"
-          cd "$OUTDIR"
-          zip -r "../$NAME" .
-          echo "ZIP=dist/$NAME" >> $GITHUB_ENV
+          SUFFIX="${{ needs.check-version.outputs.asset_suffix }}"
 
-      - name: Upload Release Asset (${{ matrix.rid }})
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAME="${APP_NAME}-v${VERSION}${SUFFIX}-${{ matrix.rid }}.zip"
+
+          cd "dist/${{ matrix.rid }}"
+          zip -r "../$NAME" .
+
+          echo "ASSET=dist/$NAME" >> "$GITHUB_ENV"
+          echo "ASSET_NAME=$NAME" >> "$GITHUB_ENV"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ${{ env.ZIP }}
-          asset_name: ${{ env.APP_NAME }}-v${{ needs.check-version.outputs.version }}-${{ matrix.rid }}.zip
-          asset_content_type: application/zip
+          name: ${{ env.ASSET_NAME }}
+          path: ${{ env.ASSET }}
+
+
+  create-release:
+    needs:
+      - check-version
+      - publish
+
+    if: needs.check-version.outputs.valid == 'true'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check-version.outputs.tag }}
+          RELEASE_NAME: ${{ needs.check-version.outputs.release_name }}
+          PRERELEASE: ${{ needs.check-version.outputs.prerelease }}
+
+        shell: bash
+        run: |
+          ARGS=(
+            "$TAG"
+            release-assets/*.zip
+            --title "$RELEASE_NAME"
+            --generate-notes
+          )
+
+          if [[ "$PRERELEASE" == "true" ]]; then
+            ARGS+=(--prerelease)
+          fi
+
+          gh release create "${ARGS[@]}"
