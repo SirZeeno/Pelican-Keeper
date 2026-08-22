@@ -120,17 +120,11 @@ using static DiscordInteractions;
 ///     Added Markdown file format, variables, and block validation
 ///     Fixed the config validator to check the right config value
 ///     Switched the Max and current values in the message markdown file
+///     Improved logged information when pelican API Requests don't succeed
+///     Added a request retry mechanism for Pelican API calls in case the API fails to respond the first time
 ///     
 /// </summary>
 
-/// [08/20/2026 21:48:27] [Pelican Api] [Error] Error: 0
-/// Exception: Error while copying content to a stream.
-///    Stack Trace:    at System.Net.Http.HttpContent.LoadIntoBufferAsyncCore(Task serializeToStreamTask, MemoryStream tempBuffer)
-/// at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
-/// at RestSharp.RestClient.SendWithRedirectsAsync(HttpRequestMessage message, Uri url, HttpMethod httpMethod, RestRequest request, CookieContainer cookieContainer, List`1 contentToDispose, CancellationToken ct)
-
-
-//TODO: Getting an error 0 when requesting the egg list sometimes, investigate further why that would happen
 //TODO: Check if long term usage increases RAM usage over 100mb (too many collections and list that never got caught by GC would cause this)
 public static class Program
 {

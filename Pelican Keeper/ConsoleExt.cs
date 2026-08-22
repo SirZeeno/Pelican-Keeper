@@ -8,10 +8,6 @@ namespace Pelican_Keeper;
 ///     TODOs
 ///     Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per
 ///     message
-///     Move the config debug mode check into here so i only have to call the write line function and not also check if
-///     debug is on, before the call
-///     Add the OutputMode enum into here to allow for granular control of what type of output is being displayed
-///     Re-Organize the output types of all the console write calls to better reflect the new Debug Output type
 /// </summary>
 public static class ConsoleExt
 {

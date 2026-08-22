@@ -10,18 +10,57 @@ public static class HelperClass
     private static readonly Dictionary<string, string> LastEmbedHashes = new();
 
     /// <summary>
-    ///     Creates a rest request to the Pelican API
+    ///     Creates a rest request to the Pelican API and automatically retries connection failures.
     /// </summary>
     /// <param name="client">RestClient</param>
     /// <param name="token">Pelican API token</param>
+    /// <param name="maxAttempts">Maximum number of attempts, including the initial request.</param>
     /// <returns>The RestResponse</returns>
-    public static RestResponse CreateRequest(RestClient client, string? token)
+    public static RestResponse CreateRequest(RestClient client, string? token, int maxAttempts = 3)
     {
-        var request = new RestRequest("");
-        request.AddHeader("Accept", "application/json");
-        request.AddHeader("Authorization", "Bearer " + token);
-        var response = client.Execute(request);
-        return response;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            var request = new RestRequest("");
+            request.AddHeader("Accept", "application/json");
+            request.AddHeader("Authorization", "Bearer " + token);
+
+            try
+            {
+                var response = client.Execute(request);
+                
+                if (response.IsSuccessful)
+                    return response;
+
+                // The bot received an actual HTTP response. So don't retry normal HTTP errors such as 400, 401, 403, 404, 422, 500, etc.
+                if ((int)response.StatusCode != 0)
+                    return response;
+
+                // StatusCode 0 means the bot didn't receive a usable HTTP response.
+                if (attempt < maxAttempts)
+                {
+                    int delay = 1000 * (int)Math.Pow(2, attempt - 1);
+
+                    ConsoleExt.WriteLine($"Pelican API request failed: {response.ErrorMessage}. Retrying in {delay / 1000} second(s) (attempt {attempt}/{maxAttempts})...", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Warning);
+                    Thread.Sleep(delay);
+                }
+                else
+                {
+                    return response;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                if (attempt >= maxAttempts)
+                    throw;
+
+                int delay = 1000 * (int)Math.Pow(2, attempt - 1);
+
+                ConsoleExt.WriteLine($"Pelican API request failed: {ex.Message}. Retrying in {delay / 1000} second(s) (attempt {attempt}/{maxAttempts})...", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error);
+                Thread.Sleep(delay);
+            }
+        }
+        ConsoleExt.WriteLine("Failed to get Pelican API response. Check your settings and make sure the Pelican API is reachable!", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error);
+        throw new InvalidOperationException("Request failed unexpectedly.");
     }
 
     /// <summary>

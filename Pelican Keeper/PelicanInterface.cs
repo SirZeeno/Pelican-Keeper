@@ -22,7 +22,7 @@ public static class PelicanInterface
 
     private static readonly RestResponse LocalServerListResponse = GetServerList();
     private static readonly List<ServerInfo> ServerListResponse = GetPelicanServerList();
-
+    
     /// <summary>
     ///     Gets the entire List of Eggs from the Pelican API
     /// </summary>
@@ -32,7 +32,7 @@ public static class PelicanInterface
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
         if (!response.IsSuccessStatusCode)
-            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi,
+            ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
                 ConsoleExt.OutputType.Error, response.ErrorException, true, true);
 
         try
@@ -61,7 +61,7 @@ public static class PelicanInterface
             ConsoleExt.WriteLine("Response content: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
         }
     }
-
+    
     public static void GetConfigFile(ServerInfo serverInfo, string pathToFile)
     {
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/" + serverInfo.Uuid + "/files/contents?" +
@@ -69,7 +69,7 @@ public static class PelicanInterface
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
         if (!response.IsSuccessStatusCode)
-            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi,
+            ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
                 ConsoleExt.OutputType.Error, response.ErrorException, true, true);
         //TODO Implement this further to extract the value of the variable, and do this only once on the first run as to conserve API calls and store it for continued use until bot restart
     }
@@ -93,7 +93,7 @@ public static class PelicanInterface
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
         if (!response.IsSuccessStatusCode)
-            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi,
+            ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
                 ConsoleExt.OutputType.Error, response.ErrorException, true, true);
 
         try
@@ -134,7 +134,7 @@ public static class PelicanInterface
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
         if (!response.IsSuccessStatusCode)
-            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi,
+            ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
                 ConsoleExt.OutputType.Error, response.ErrorException, true, true);
 
         if (!string.IsNullOrEmpty(response.Content)) return response;
@@ -262,7 +262,7 @@ public static class PelicanInterface
         var response = CreateRequest(client, Program.Secrets.ServerToken);
 
         if (!response.IsSuccessStatusCode)
-            ConsoleExt.WriteLine("Error: " + response.StatusCode, ConsoleExt.CurrentStep.PelicanApi,
+            ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
                 ConsoleExt.OutputType.Error, response.ErrorException, true, true);
 
         if (!string.IsNullOrEmpty(response.Content) && !string.IsNullOrWhiteSpace(response.Content))
