@@ -27,19 +27,18 @@ public static class HelperClass
             try
             {
                 var response = client.Execute(request);
-                
                 if (response.IsSuccessful)
                     return response;
 
                 // The bot received an actual HTTP response. So don't retry normal HTTP errors such as 400, 401, 403, 404, 422, 500, etc.
-                if ((int)response.StatusCode != 0)
+                if ((int)response.StatusCode != 0 && (int)response.StatusCode != 504)
                     return response;
 
                 // StatusCode 0 means the bot didn't receive a usable HTTP response.
+                // StatusCode 504 means the Pelican API timed out.
                 if (attempt < maxAttempts)
                 {
                     int delay = 1000 * (int)Math.Pow(2, attempt - 1);
-
                     ConsoleExt.WriteLine($"Pelican API request failed: {response.ErrorMessage}. Retrying in {delay / 1000} second(s) (attempt {attempt}/{maxAttempts})...", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Warning);
                     Thread.Sleep(delay);
                 }
@@ -54,7 +53,6 @@ public static class HelperClass
                     throw;
 
                 int delay = 1000 * (int)Math.Pow(2, attempt - 1);
-
                 ConsoleExt.WriteLine($"Pelican API request failed: {ex.Message}. Retrying in {delay / 1000} second(s) (attempt {attempt}/{maxAttempts})...", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error);
                 Thread.Sleep(delay);
             }

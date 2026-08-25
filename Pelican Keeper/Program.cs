@@ -122,6 +122,7 @@ using static DiscordInteractions;
 ///     Switched the Max and current values in the message markdown file
 ///     Improved logged information when pelican API Requests don't succeed
 ///     Added a request retry mechanism for Pelican API calls in case the API fails to respond the first time
+///     Added a request retry mechanism for Pelican API calls in case the API times out.
 ///     
 /// </summary>
 
