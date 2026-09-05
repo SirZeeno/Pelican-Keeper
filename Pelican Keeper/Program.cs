@@ -143,6 +143,9 @@ public static class Program
 
         await FileManager.ReadConfigFile();
         await FileManager.ReadSecretsFile();
+        await ServerMarkdown.ReadMarkdownFile();
+        ServerMarkdown.GetMarkdownFileContentRoutine();
+        GetGamesToMonitorFileAsync();
 
 #if DEBUG
         Config.MessageFormat = MessageFormat.Consolidated;
@@ -152,15 +155,6 @@ public static class Program
         Config.IgnoreInternalServers = true;
         Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1"];
 #endif
-
-        if (FileManager.GetFilePath("MessageMarkdown.txt") == string.Empty)
-        {
-            Console.WriteLine("MessageMarkdown.txt not found. Pulling Default from Github!");
-            _ = FileManager.CreateMessageMarkdownFile();
-        }
-
-        GetGamesToMonitorFileAsync();
-        ServerMarkdown.GetMarkdownFileContentAsync();
 
         WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
 

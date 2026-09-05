@@ -14,9 +14,15 @@ public static class ServerMarkdown
             FileManager.GetFilePath(
                 "MessageMarkdown.txt");
 
-    private static string _templateText = File.ReadAllText(MessageMarkdownPath);
-    
-    
+    private static string _templateText = null!;
+
+    public static async Task ReadMarkdownFile()
+    {
+        _templateText = await File.ReadAllTextAsync(MessageMarkdownPath);
+        if (MessageMarkdownPath != string.Empty) return;
+        Console.WriteLine("MessageMarkdown.txt not found. Pulling Default from Github!");
+        await FileManager.CreateMessageMarkdownFile();
+    }
 
     /// <summary>
     ///     Processes [Tag]...[/Tag] blocks, replaces placeholders inside them,
@@ -109,13 +115,16 @@ public static class ServerMarkdown
         return (message, serverName);
     }
 
-    public static void GetMarkdownFileContentAsync()
+    public static void GetMarkdownFileContentRoutine()
     {
         Task.Run(async () =>
         {
             while (Program.Config.ContinuesMarkdownRead)
             {
-                _templateText = await File.ReadAllTextAsync(MessageMarkdownPath);
+                if (_templateText == string.Empty)
+                {
+                    _templateText = await File.ReadAllTextAsync(MessageMarkdownPath);
+                }
                 await Task.Delay(TimeSpan.FromSeconds(Program.Config.MarkdownUpdateInterval));
             }
         });
