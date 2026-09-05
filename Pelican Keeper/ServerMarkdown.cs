@@ -87,10 +87,10 @@ public static class ServerMarkdown
             Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
             MaxCpu = DynamicallyAddPercentSign(IfZeroThenInfinite($"{serverResponse.Resources.CpuMaximum:0.00}")),
             Memory = FormatBytes(serverResponse.Resources.MemoryBytes),
-            MaxMemory = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.MemoryMaximum)
+            MaxMemory = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.MemoryMaximum * 1048576)
                 .ToString(CultureInfo.InvariantCulture)),
             Disk = FormatBytes(serverResponse.Resources.DiskBytes),
-            MaxDisk = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.DiskMaximum)
+            MaxDisk = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.DiskMaximum * 1048576)
                 .ToString(CultureInfo.InvariantCulture)),
             NetworkRx = FormatBytes(serverResponse.Resources.NetworkRxBytes),
             NetworkTx = FormatBytes(serverResponse.Resources.NetworkTxBytes),
