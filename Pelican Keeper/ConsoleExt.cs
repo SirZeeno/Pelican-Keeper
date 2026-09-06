@@ -44,6 +44,16 @@ public static class ConsoleExt
         Debug,
         None
     }
+    
+    private static readonly Dictionary<CurrentStep, string> StepLabels =
+        Enum.GetValues<CurrentStep>()
+            .ToDictionary(
+                step => step,
+                step => Regex.Replace(
+                    step.ToString(),
+                    @"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])",
+                    " "
+                ));
 
     public static bool ExceptionOccurred;
     private static readonly LinkedList<Exception> ExceptionsList = new();
@@ -52,6 +62,9 @@ public static class ConsoleExt
     // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
     public static bool SuppressProcessExitForTests { get; set; }
 
+    //TODO: Add an option to turn off colored output to improve performance in increased output scenarios
+    //TODO: See if I can batch console logging calls to reduce the overall performance in increased output scenarios
+    
     /// <summary>
     ///     Writes a line to the console with a pretext based on the output type.
     /// </summary>
@@ -138,13 +151,7 @@ public static class ConsoleExt
     {
         if (step == CurrentStep.None) return;
 
-        var label = Regex.Replace(
-            step.ToString(),
-            @"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])",
-            " "
-        );
-
-        Console.Write($"[{label}] ");
+        Console.Write($"[{StepLabels[step]}] ");
     }
 
     private static void WriteConsoleOutput<T>(T output, CurrentStep currentStep, OutputType outputType,
