@@ -7,36 +7,6 @@ namespace Pelican_Keeper;
 public static class JsonHandler
 {
     /// <summary>
-    ///     Extracts a list of Eggs from the input JSON
-    /// </summary>
-    /// <param name="json">Input JSON</param>
-    /// <returns>List of EggInfo that includes the ID and Name</returns>
-    internal static List<EggInfo> ExtractEggInfo(string json)
-    {
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
-
-        var eggs = new List<EggInfo>();
-        var eggArray = root.GetPropertySafe("data").EnumerateArray();
-        ConsoleExt.WriteLine(
-            $"Egg List: {string.Join(", ", eggArray.Select(x => x.GetPropertySafe("name").GetString()))}",
-            ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
-
-        foreach (var egg in eggArray)
-        {
-            var attr = egg.GetPropertySafe("attributes");
-            var name = attr.GetPropertySafe("name").GetString() ?? string.Empty;
-            var id = attr.GetPropertySafe("id").GetInt32();
-            ConsoleExt.WriteLine($"Egg Name: {name}, Egg ID: {id}", ConsoleExt.CurrentStep.JsonProcessing,
-                ConsoleExt.OutputType.Debug);
-
-            eggs.Add(new EggInfo { Id = id, Name = name });
-        }
-
-        return eggs;
-    }
-
-    /// <summary>
     ///     Extracts the RCON Port from the Input JSON
     /// </summary>
     /// <param name="json">Input JSON</param>
@@ -270,7 +240,7 @@ public static class JsonHandler
             var uuid = attr.GetPropertySafe("uuid").GetString() ?? string.Empty;
 
             if (uuid != serverUuid && serverUuid != null) continue;
-            ConsoleExt.WriteLine($"[ExtractMaxPlayerCount] Server UUID: {uuid}", ConsoleExt.CurrentStep.JsonProcessing,
+            ConsoleExt.WriteLine($"[ExtractNetworkAllocations] Server UUID: {uuid}", ConsoleExt.CurrentStep.JsonProcessing,
                 ConsoleExt.OutputType.Debug);
 
             var allocationsArray = attr.GetPropertySafe("relationships").GetPropertySafe("allocations")
@@ -317,7 +287,7 @@ public static class JsonHandler
             var id = server.GetPropertySafe("attributes").GetPropertySafe("id").GetInt32();
             var uuid = server.GetPropertySafe("attributes").GetPropertySafe("uuid").GetString() ?? string.Empty;
             var name = server.GetPropertySafe("attributes").GetPropertySafe("name").GetString() ?? string.Empty;
-            var egg = server.GetPropertySafe("attributes").GetPropertySafe("egg").GetInt32();
+            var eggName = server.GetPropertySafe("attributes").GetPropertySafe("relationships").GetPropertySafe("egg").GetPropertySafe("attributes").GetPropertySafe("name").GetString() ?? string.Empty;
 
             var maxMemory = server.GetPropertySafe("attributes").GetPropertySafe("limits").GetPropertySafe("memory")
                 .GetInt32();
@@ -331,7 +301,7 @@ public static class JsonHandler
                 Id = id,
                 Uuid = uuid,
                 Name = name,
-                Egg = new EggInfo { Id = egg },
+                EggName = eggName,
                 Resources = new ServerResources
                 {
                     MemoryMaximum = maxMemory,
@@ -341,7 +311,7 @@ public static class JsonHandler
             });
 
             ConsoleExt.WriteLine(
-                $"[ExtractServerListInfo] Server Info Added ID: {id}, UUID: {uuid}, Server Name: {name}, Egg ID: {egg}, Max Memory: {maxMemory}, Max CPU: {maxCpu}, Max Disk: {maxDisk}",
+                $"[ExtractServerListInfo] Server Info Added ID: {id}, UUID: {uuid}, Server Name: {name}, Egg Name: {eggName}, Max Memory: {maxMemory}, Max CPU: {maxCpu}, Max Disk: {maxDisk}",
                 ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
         }
 

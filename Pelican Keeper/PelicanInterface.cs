@@ -23,45 +23,6 @@ public static class PelicanInterface
     private static readonly RestResponse LocalServerListResponse = GetServerList();
     private static readonly List<ServerInfo> ServerListResponse = GetPelicanServerList();
     
-    /// <summary>
-    ///     Gets the entire List of Eggs from the Pelican API
-    /// </summary>
-    private static void GetEggList(this List<ServerInfo> servers)
-    {
-        var client = new RestClient(Program.Secrets.ServerUrl + "/api/application/eggs");
-        var response = CreateRequest(client, Program.Secrets.ClientToken);
-
-        if (!response.IsSuccessStatusCode)
-            ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
-                ConsoleExt.OutputType.Error, response.ErrorException, true, true);
-
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(response.Content))
-            {
-                var eggsList = JsonHandler.ExtractEggInfo(response.Content);
-                foreach (var serverInfo in servers)
-                {
-                    var foundEgg = eggsList?.Find(x => x.Id == serverInfo.Egg.Id);
-                    if (foundEgg == null) continue;
-                    serverInfo.Egg.Name = foundEgg.Name;
-                    ConsoleExt.WriteLine($"Egg Name found: {serverInfo.Egg.Name}", ConsoleExt.CurrentStep.PelicanApi,
-                        ConsoleExt.OutputType.Debug);
-                }
-
-                return;
-            }
-
-            ConsoleExt.WriteLine("Empty Egg List response content.", ConsoleExt.CurrentStep.PelicanApi);
-        }
-        catch (JsonException ex)
-        {
-            ConsoleExt.WriteLine("JSON deserialization or fetching Error: " + ex.Message,
-                ConsoleExt.CurrentStep.PelicanApi);
-            ConsoleExt.WriteLine("Response content: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
-        }
-    }
-    
     public static void GetConfigFile(ServerInfo serverInfo, string pathToFile)
     {
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/" + serverInfo.Uuid + "/files/contents?" +
@@ -126,10 +87,10 @@ public static class PelicanInterface
             ConsoleExt.WriteLine("Response content: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
         }
     }
-
+    
     private static RestResponse GetServerList()
     {
-        var apiExtension = Program.Config.IgnoreOtherUserServers ? "/api/client/" : "/api/client/?type=admin-all";
+        var apiExtension = Program.Config.IgnoreOtherUserServers ? "/api/client/?include=egg" : "/api/client/?type=admin-all&include=egg";
         var client = new RestClient(Program.Secrets.ServerUrl + apiExtension);
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
@@ -325,7 +286,6 @@ public static class PelicanInterface
     public static List<ServerInfo> GetServersList()
     {
         var serverInfos = GetPelicanServerList();
-        serverInfos.GetEggList();
         serverInfos = ProcessServerList(serverInfos);
         _ = GetServerResourcesList(ServerListResponse);
         GetServerAllocations(serverInfos);
@@ -490,7 +450,7 @@ public static class PelicanInterface
     {
         if (_gamesToMonitor == null || _gamesToMonitor.Count == 0) return;
 
-        var serverToMonitor = _gamesToMonitor.FirstOrDefault(s => s.Game == serverInfo.Egg.Name);
+        var serverToMonitor = _gamesToMonitor.FirstOrDefault(s => s.Game == serverInfo.EggName);
         if (serverToMonitor == null)
         {
             ConsoleExt.WriteLine("No monitoring configuration found for server: " + serverInfo.Name,
@@ -548,7 +508,7 @@ public static class PelicanInterface
                 {
                     var rconResponse = SendRconGameServerCommand(GetCorrectIp(serverInfo), rconPort, rconPassword,
                             serverToMonitor.Command,
-                            _gamesToMonitor.First(s => s.Game == serverInfo.Egg.Name).PlayerCountExtractRegex)
+                            _gamesToMonitor.First(s => s.Game == serverInfo.EggName).PlayerCountExtractRegex)
                         .GetAwaiter()
                         .GetResult();
                     serverInfo.PlayerCountText = ServerPlayerCountDisplayCleanup(rconResponse, maxPlayers);

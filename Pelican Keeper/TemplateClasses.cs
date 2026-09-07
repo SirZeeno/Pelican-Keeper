@@ -117,7 +117,7 @@ public abstract class TemplateClasses
         public int Id { get; init; }
         public string Uuid { get; init; } = null!;
         public string Name { get; init; } = null!;
-        public EggInfo Egg { get; init; } = null!;
+        public string EggName { get; init; } = null!;
         public ServerResources? Resources { get; set; }
         public List<ServerAllocation>? Allocations { get; set; }
         public string? PlayerCountText { get; set; }

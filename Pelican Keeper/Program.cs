@@ -123,7 +123,11 @@ using static DiscordInteractions;
 ///     Improved logged information when pelican API Requests don't succeed
 ///     Added a request retry mechanism for Pelican API calls in case the API fails to respond the first time
 ///     Added a request retry mechanism for Pelican API calls in case the API times out.
-///     
+///     Changed the Markdown file reading to be consistent to all the other files being read
+///     Fixed an issue where the maximum for memory and disk would be shown as Kib instead of its actual value
+///     Fixed and issue where the infinity symbol wouldn't be used when it actually was infinite
+///     Changed the Regex Replace to be done once and stored instead of each time a console output is being written
+///     Removed the need for a separate API call for the egg name reducing the overall API calls per cycle
 /// </summary>
 
 //TODO: Check if long term usage increases RAM usage over 100mb (too many collections and list that never got caught by GC would cause this)
