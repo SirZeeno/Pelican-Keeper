@@ -68,6 +68,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         var packet = CreatePacket(_requestId, 3, password);
         await _stream!.WriteAsync(packet);
 
+        //TODO: Check if connection is alive/successful before reading response
         var response = await ReadResponseAsync();
         return response.type == 2 && response.id == _requestId;
     }

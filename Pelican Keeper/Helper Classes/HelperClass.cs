@@ -34,11 +34,12 @@ public static class HelperClass
                     return response;
 
                 // The bot received an actual HTTP response. So don't retry normal HTTP errors such as 400, 401, 403, 404, 422, 500, etc.
-                if ((int)response.StatusCode != 0 && (int)response.StatusCode != 504)
+                if ((int)response.StatusCode != 0 && (int)response.StatusCode != 504 && (int)response.StatusCode != 429)
                     return response;
 
                 // StatusCode 0 means the bot didn't receive a usable HTTP response.
                 // StatusCode 504 means the Pelican API timed out.
+                // StatusCode 429 means the Pelican API rate limit was exceeded.
                 if (attempt < maxAttempts)
                 {
                     int delay = 1000 * (int)Math.Pow(2, attempt - 1);

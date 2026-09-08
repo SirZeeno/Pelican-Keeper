@@ -15,16 +15,6 @@ public static class SecretsValidator
                 "ClientToken is not in the proper pacc or plcn format. Make sure to provide a valid client token.",
                 ConsoleExt.CurrentStep.FileChecks, ConsoleExt.OutputType.Warning);
 
-        //ServerToken
-        if (string.IsNullOrWhiteSpace(secrets.ServerToken))
-            throw new ArgumentException("ServerToken is null or empty. Make sure to provide a valid token.");
-        if (secrets.ServerToken.Length != 48)
-            throw new ArgumentException("ServerToken is invalid. Make sure to provide a valid server token.");
-        if (secrets.ServerToken.StartsWith("papp_") || secrets.ClientToken.StartsWith("peli_"))
-            ConsoleExt.WriteLine(
-                "ServerToken is not in the proper papp or peli format. Make sure to provide a valid server token.",
-                ConsoleExt.CurrentStep.FileChecks, ConsoleExt.OutputType.Warning);
-
         //ServerUrl
         if (string.IsNullOrWhiteSpace(secrets.ServerUrl))
             throw new ArgumentException("ServerUrl is null or empty. Make sure to provide a valid URL.");

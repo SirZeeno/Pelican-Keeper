@@ -219,6 +219,7 @@ public static class JsonHandler
         return maxPlayers;
     }
 
+    //TODO: Think about adding this to the initial server info list creation since it uses the same JSON now
     /// <summary>
     ///     Extracts the Network Allocations from the Input JSON
     /// </summary>
@@ -284,16 +285,18 @@ public static class JsonHandler
         var serversArray = root.GetPropertySafe("data").EnumerateArray();
         foreach (var server in serversArray)
         {
-            var id = server.GetPropertySafe("attributes").GetPropertySafe("id").GetInt32();
-            var uuid = server.GetPropertySafe("attributes").GetPropertySafe("uuid").GetString() ?? string.Empty;
-            var name = server.GetPropertySafe("attributes").GetPropertySafe("name").GetString() ?? string.Empty;
-            var eggName = server.GetPropertySafe("attributes").GetPropertySafe("relationships").GetPropertySafe("egg").GetPropertySafe("attributes").GetPropertySafe("name").GetString() ?? string.Empty;
+            var attributes = server.GetPropertySafe("attributes");
+            
+            var id = attributes.GetPropertySafe("id").GetInt32();
+            var uuid = attributes.GetPropertySafe("uuid").GetString() ?? string.Empty;
+            var name = attributes.GetPropertySafe("name").GetString() ?? string.Empty;
+            var eggName = attributes.GetPropertySafe("relationships").GetPropertySafe("egg").GetPropertySafe("attributes").GetPropertySafe("name").GetString() ?? string.Empty;
 
-            var maxMemory = server.GetPropertySafe("attributes").GetPropertySafe("limits").GetPropertySafe("memory")
+            var maxMemory = attributes.GetPropertySafe("limits").GetPropertySafe("memory")
                 .GetInt32();
-            var maxCpu = server.GetPropertySafe("attributes").GetPropertySafe("limits").GetPropertySafe("cpu")
+            var maxCpu = attributes.GetPropertySafe("limits").GetPropertySafe("cpu")
                 .GetInt32();
-            var maxDisk = server.GetPropertySafe("attributes").GetPropertySafe("limits").GetPropertySafe("disk")
+            var maxDisk = attributes.GetPropertySafe("limits").GetPropertySafe("disk")
                 .GetInt32();
 
             serverInfo.Add(new ServerInfo

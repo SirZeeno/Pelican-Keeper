@@ -122,12 +122,16 @@ using static DiscordInteractions;
 ///     Switched the Max and current values in the message markdown file
 ///     Improved logged information when pelican API Requests don't succeed
 ///     Added a request retry mechanism for Pelican API calls in case the API fails to respond the first time
-///     Added a request retry mechanism for Pelican API calls in case the API times out.
+///     Added 504 in case the API times out to the Retry mechanism.
 ///     Changed the Markdown file reading to be consistent to all the other files being read
 ///     Fixed an issue where the maximum for memory and disk would be shown as Kib instead of its actual value
 ///     Fixed and issue where the infinity symbol wouldn't be used when it actually was infinite
 ///     Changed the Regex Replace to be done once and stored instead of each time a console output is being written
 ///     Removed the need for a separate API call for the egg name reducing the overall API calls per cycle
+///     Added 429 rate limit was exceeded to the Retry mechanism.
+///     Removed the need for the server application token. Client token has all the permissions and functionality needed.
+///     Fixed an issue where the games to monitor weren't being read due to the template class being abstract.
+///     
 /// </summary>
 
 //TODO: Check if long term usage increases RAM usage over 100mb (too many collections and list that never got caught by GC would cause this)

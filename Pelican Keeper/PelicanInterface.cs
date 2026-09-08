@@ -111,11 +111,9 @@ public static class PelicanInterface
     /// <param name="serverInfos">List of ServerInfo</param>
     public static void GetServerAllocations(List<ServerInfo> serverInfos)
     {
-        var response = LocalServerListResponse;
-
         try
         {
-            var allocations = JsonHandler.ExtractNetworkAllocations(response.Content!);
+            var allocations = JsonHandler.ExtractNetworkAllocations(LocalServerListResponse.Content!);
             foreach (var serverInfo in serverInfos)
                 serverInfo.Allocations = allocations.Where(s => s.Uuid == serverInfo.Uuid).ToList();
         }
@@ -123,14 +121,12 @@ public static class PelicanInterface
         {
             ConsoleExt.WriteLine("JSON deserialization or fetching Error: " + ex.Message,
                 ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, ex);
-            ConsoleExt.WriteLine("Response content: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
+            ConsoleExt.WriteLine("Response content: " + LocalServerListResponse.Content, ConsoleExt.CurrentStep.PelicanApi);
         }
     }
 
     private static void MonitorServers(List<ServerInfo> serverInfos)
     {
-        var response = LocalServerListResponse;
-
         if (!Program.Config.PlayerCountDisplay) return;
         if (serverInfos.Count == 0)
             ConsoleExt.WriteLine("Servers list is empty.", ConsoleExt.CurrentStep.PelicanApi,
@@ -155,7 +151,7 @@ public static class PelicanInterface
                         ConsoleExt.CurrentStep.PelicanApi);
                 }
 
-                RequestToMonitoringServers(serverInfo, response.Content!);
+                RequestToMonitoringServers(serverInfo, LocalServerListResponse.Content!);
 
                 if (Program.Config.AutomaticShutdown)
                     if (serverInfo.PlayerCountText != "N/A" && !string.IsNullOrEmpty(serverInfo.PlayerCountText))
@@ -219,25 +215,18 @@ public static class PelicanInterface
     /// <returns>Server Info list</returns>
     private static List<ServerInfo> GetPelicanServerList()
     {
-        var client = new RestClient(Program.Secrets.ServerUrl + "/api/application/servers");
-        var response = CreateRequest(client, Program.Secrets.ServerToken);
-
-        if (!response.IsSuccessStatusCode)
-            ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
-                ConsoleExt.OutputType.Error, response.ErrorException, true, true);
-
-        if (!string.IsNullOrEmpty(response.Content) && !string.IsNullOrWhiteSpace(response.Content))
-            try
-            {
-                return JsonHandler.ExtractServerListInfo(response.Content);
-            }
-            catch (JsonException ex)
-            {
-                ConsoleExt.WriteLine("JSON deserialization or fetching Error: " + ex.Message,
-                    ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, ex);
-                ConsoleExt.WriteLine("JSON: " + response.Content, ConsoleExt.CurrentStep.PelicanApi);
-            }
-
+        if (string.IsNullOrEmpty(LocalServerListResponse.Content) ||
+            string.IsNullOrWhiteSpace(LocalServerListResponse.Content)) return [];
+        try
+        {
+            return JsonHandler.ExtractServerListInfo(LocalServerListResponse.Content);
+        }
+        catch (JsonException ex)
+        {
+            ConsoleExt.WriteLine("JSON deserialization or fetching Error: " + ex.Message,
+                ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLine("JSON: " + LocalServerListResponse.Content, ConsoleExt.CurrentStep.PelicanApi);
+        }
         return [];
     }
 
@@ -379,7 +368,7 @@ public static class PelicanInterface
         }
         else
         {
-            ConsoleExt.WriteLine("Creating new RCON connection to " + ip + ":" + port, ConsoleExt.CurrentStep.RconQuery,
+            ConsoleExt.WriteLine($"Creating new RCON connection to {ip}:{port}", ConsoleExt.CurrentStep.RconQuery,
                 ConsoleExt.OutputType.Debug);
         }
 

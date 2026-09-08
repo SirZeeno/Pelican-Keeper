@@ -7,6 +7,7 @@ using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
 
+//TODO: This seems to fail with the Purpur-Geyser-Floodgate server
 public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, IDisposable
 {
     // RakNet "magic" bytes used in ping/pong

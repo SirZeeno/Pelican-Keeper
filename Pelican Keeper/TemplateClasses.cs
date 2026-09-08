@@ -50,7 +50,6 @@ public abstract class TemplateClasses
 
     public record Secrets(
         string? ClientToken,
-        string? ServerToken,
         string? ServerUrl,
         string? BotToken,
         ulong[]? ChannelIds,
@@ -170,7 +169,7 @@ public abstract class TemplateClasses
         public string Uptime { get; set; } = null!;
     }
 
-    public abstract class GamesToMonitor
+    public class GamesToMonitor
     {
         public string Game { get; init; } = null!;
         public CommandExecutionMethod Protocol { get; init; }
