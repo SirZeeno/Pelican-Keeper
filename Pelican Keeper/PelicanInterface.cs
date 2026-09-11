@@ -359,6 +359,7 @@ public static class PelicanInterface
     public static async Task<string> SendRconGameServerCommand(string ip, int port, string password, string command,
         string? regexPattern = null)
     {
+        //TODO: Check if the RCON Port is allocated for the server instead of blindly trusting that it is
         var rcon = new RconService(ip, port, password);
         if (RconServices.Any(x => x.Ip == ip && x.Port == port))
         {
