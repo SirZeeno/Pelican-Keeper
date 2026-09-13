@@ -131,10 +131,10 @@ using static DiscordInteractions;
 ///     Added 429 rate limit was exceeded to the Retry mechanism.
 ///     Removed the need for the server application token. Client token has all the permissions and functionality needed.
 ///     Fixed an issue where the games to monitor weren't being read due to the template class being abstract.
-///     
+///     Added a response stream length check to the RCON Query to prevent a no response from continuing to be processed
+/// 
 /// </summary>
 
-//TODO: Check if long term usage increases RAM usage over 100mb (too many collections and list that never got caught by GC would cause this)
 public static class Program
 {
     private static List<DiscordChannel> _targetChannel = null!;
@@ -161,7 +161,7 @@ public static class Program
         Config.LimitServerCount = true;
         Config.MaxServerCount = 20;
         Config.IgnoreInternalServers = true;
-        Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1"];
+        Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1","c76c19e3-85f4-41b1-9cd4-0699dfcc78e9"];
 #endif
 
         WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");

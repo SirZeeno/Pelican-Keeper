@@ -35,13 +35,20 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
 
         _stream = _tcpClient.GetStream();
 
-        var authenticated = await AuthenticateAsync();
-        if (authenticated)
-            ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery,
-                ConsoleExt.OutputType.Debug);
+        if (_stream != null && _stream.Length != 0)
+        {
+            var authenticated = await AuthenticateAsync();
+            if (authenticated)
+                ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery,
+                    ConsoleExt.OutputType.Debug);
+            else
+                ConsoleExt.WriteLine("RCON authentication failed.", ConsoleExt.CurrentStep.RconQuery,
+                    ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
+        }
         else
-            ConsoleExt.WriteLine("RCON authentication failed.", ConsoleExt.CurrentStep.RconQuery,
-                ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
+        {
+            ConsoleExt.WriteLine("RCON connection failed. The return stream is null or empty. Make sure the RCON port is allocated and open.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error);
+        }
     }
 
     public async Task<string> SendCommandAsync(string command, string? regexPattern)
@@ -68,10 +75,17 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         _requestId++;
         var packet = CreatePacket(_requestId, 3, password);
         await _stream!.WriteAsync(packet);
-
-        //TODO: Check if connection is alive/successful before reading response
-        var response = await ReadResponseAsync();
-        return response.type == 2 && response.id == _requestId;
+        
+        try
+        {
+            var response = await ReadResponseAsync();
+            return response.type == 2 && response.id == _requestId;
+        }
+        catch (Exception ex)
+        {
+            ConsoleExt.WriteLine($"Error during authentication: {ex.Message}", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error, ex);
+            return false;
+        }
     }
 
     private byte[] CreatePacket(int id, int type, string body)
