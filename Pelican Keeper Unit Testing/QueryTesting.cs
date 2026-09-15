@@ -32,7 +32,7 @@ public class QueryTesting
         string? response = null;
 
         if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendA2SRequest(_secrets.ExternalServerIp, 27051);
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 27051, TemplateClasses.CommandExecutionMethod.A2S);
 
         if
             (ConsoleExt
@@ -55,7 +55,7 @@ public class QueryTesting
         string? response = null;
 
         if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendRconGameServerCommand(_secrets.ExternalServerIp, 37015, "YouSuck",
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 37015, TemplateClasses.CommandExecutionMethod.Rcon, "YouSuck",
                 "listplayers"); // should load these from the secrets file and the information provided by the pelican API
 
         if (ConsoleExt.ExceptionOccurred)
@@ -77,7 +77,7 @@ public class QueryTesting
         string? response = null;
 
         if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendBedrockMinecraftRequest(_secrets.ExternalServerIp, 19132);
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 19132, TemplateClasses.CommandExecutionMethod.MinecraftBedrock);
 
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");
@@ -98,7 +98,7 @@ public class QueryTesting
         string? response = null;
 
         if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendJavaMinecraftRequest(_secrets.ExternalServerIp, 1251);
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 1251, TemplateClasses.CommandExecutionMethod.MinecraftJava);
 
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");

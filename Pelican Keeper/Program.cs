@@ -132,7 +132,10 @@ using static DiscordInteractions;
 ///     Removed the need for the server application token. Client token has all the permissions and functionality needed.
 ///     Fixed an issue where the games to monitor weren't being read due to the template class being abstract.
 ///     Added a response stream length check to the RCON Query to prevent a no response from continuing to be processed
-/// 
+///     Condensed the query protocols to use the Interface to reduce duplicate code and improve readability.
+///     Removed the storage of new RCON connections since there was no implemented way to check if the connection stayed open.
+///     Added a Dispose function to be mandatory in the connection interface to close the connection and clean up after use.
+///     
 /// </summary>
 
 public static class Program

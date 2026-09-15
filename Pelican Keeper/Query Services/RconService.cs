@@ -51,7 +51,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         }
     }
 
-    public async Task<string> SendCommandAsync(string command, string? regexPattern)
+    public async Task<string> SendCommandAsync(string? command, string? regexPattern)
     {
         if (_tcpClient == null || _stream == null)
         {
@@ -60,6 +60,13 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
             return ExtractorHelpers.ExtractPlayerCount(null, regexPattern).ToString();
         }
 
+        if (command == null)
+        {
+            ConsoleExt.WriteLine(new InvalidOperationException("No command provided for sending RCON command."),
+                ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+            return ExtractorHelpers.ExtractPlayerCount(null, regexPattern).ToString();
+        }
+        
         _requestId++;
         var packet = CreatePacket(_requestId, 2, command);
         await _stream.WriteAsync(packet);

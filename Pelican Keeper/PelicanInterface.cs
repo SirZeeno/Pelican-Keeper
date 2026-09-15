@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Pelican_Keeper.Helper_Classes;
+using Pelican_Keeper.Interfaces;
 using Pelican_Keeper.Query_Services;
 using RestSharp;
 
@@ -16,8 +17,7 @@ public static class PelicanInterface
 {
     private static List<GamesToMonitor>?
         _gamesToMonitor = FileManager.ReadGamesToMonitorFile().GetAwaiter().GetResult();
-
-    private static readonly List<RconService> RconServices = new();
+    
     private static readonly Dictionary<string, DateTime> ShutdownTracker = new();
 
     private static readonly RestResponse LocalServerListResponse = GetServerList();
@@ -345,89 +345,43 @@ public static class PelicanInterface
         if (string.IsNullOrEmpty(response.Content))
             ConsoleExt.WriteLine(response.Content, ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
     }
-
+    
     /// <summary>
-    ///     Sends a RCON Server command to the Specified IP and Port
+    ///     Sends a request depending on the CommandExecutionMethod being used to the specified IP and Port
     /// </summary>
     /// <param name="ip">IP of the Server</param>
     /// <param name="port">Port of the Server</param>
+    /// <param name="executionMethod">Execution method being used to establish the connection and send the request</param>
     /// <param name="password">RCON Password of the Server</param>
     /// <param name="command">Game command to send</param>
-    /// <param name="regexPattern">Regex Pattern to use when </param>
+    /// <param name="regexPattern">Regex Pattern to use when extracting player count</param>
     /// <returns>The response to the command that was sent</returns>
-    // TODO: Generalize the connection protocol calls so I don't have to have separate methods for RCON and A2S and i can just generalize it with the ISendCommand interface.
-    public static async Task<string> SendRconGameServerCommand(string ip, int port, string password, string command,
-        string? regexPattern = null)
+    public static async Task<string> SendServerRequest(string ip, int port, CommandExecutionMethod executionMethod,
+        string? password = null, string? command = null, string? regexPattern = null)
     {
-        //TODO: Check if the RCON Port is allocated for the server instead of blindly trusting that it is
-        var rcon = new RconService(ip, port, password);
-        if (RconServices.Any(x => x.Ip == ip && x.Port == port))
+        ISendCommand connectionClass = null!;
+        switch (executionMethod)
         {
-            rcon = RconServices.First(x => x.Ip == ip && x.Port == port);
-            ConsoleExt.WriteLine("Reusing existing RCON connection to " + ip + ":" + port,
-                ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+            case CommandExecutionMethod.Rcon:
+                connectionClass = new RconService(ip, port, password!);
+                break;
+            case CommandExecutionMethod.A2S:
+                connectionClass = new A2SService(ip, port);
+                break;
+            case CommandExecutionMethod.MinecraftJava:
+                connectionClass = new JavaMinecraftQueryService(ip, port);
+                break;
+            case CommandExecutionMethod.MinecraftBedrock:
+                connectionClass = new BedrockMinecraftQueryService(ip, port);
+                break;
+            case CommandExecutionMethod.Terraria:
+                connectionClass = new TShock(ip, port);// Not Implemented
+                break;
         }
-        else
-        {
-            ConsoleExt.WriteLine($"Creating new RCON connection to {ip}:{port}", ConsoleExt.CurrentStep.RconQuery,
-                ConsoleExt.OutputType.Debug);
-        }
 
-        await rcon.Connect();
-        var response = await rcon.SendCommandAsync(command, regexPattern);
-
-        RconServices.Add(rcon);
-        return response;
-    }
-
-    /// <summary>
-    ///     Sends a A2S(Steam Query) request to the specified IP and Port
-    /// </summary>
-    /// <param name="ip">IP of the Server</param>
-    /// <param name="port">Port of the Server</param>
-    /// <returns>The Response to the command that was sent</returns>
-    public static async Task<string> SendA2SRequest(string ip, int port)
-    {
-        var a2S = new A2SService(ip, port);
-
-        await a2S.Connect();
-        var response = await a2S.SendCommandAsync();
-        a2S.Dispose();
-
-        return response;
-    }
-
-    /// <summary>
-    ///     Sends a Bedrock Minecraft request to the specified IP and Port
-    /// </summary>
-    /// <param name="ip">IP of the Server</param>
-    /// <param name="port">Port of the Server</param>
-    /// <returns></returns>
-    public static async Task<string?> SendBedrockMinecraftRequest(string ip, int port)
-    {
-        var bedrockMinecraftQuery = new BedrockMinecraftQueryService(ip, port);
-
-        await bedrockMinecraftQuery.Connect();
-        var response = await bedrockMinecraftQuery.SendCommandAsync();
-        bedrockMinecraftQuery.Dispose();
-
-        return response;
-    }
-
-    /// <summary>
-    ///     Sends a Java Minecraft request to the specified IP and Port
-    /// </summary>
-    /// <param name="ip">IP of the Server</param>
-    /// <param name="port">Port of the Server</param>
-    /// <returns></returns>
-    public static async Task<string?> SendJavaMinecraftRequest(string ip, int port)
-    {
-        var javaMinecraftQuery = new JavaMinecraftQueryService(ip, port);
-
-        await javaMinecraftQuery.Connect();
-        var response = await javaMinecraftQuery.SendCommandAsync();
-        javaMinecraftQuery.Dispose();
-
+        await connectionClass.Connect();
+        var response = await connectionClass.SendCommandAsync(command, regexPattern);
+        connectionClass.Dispose();
         return response;
     }
 
@@ -453,113 +407,55 @@ public static class PelicanInterface
         var maxPlayers = JsonHandler.ExtractMaxPlayerCount(json, serverInfo.Uuid, serverToMonitor.MaxPlayerVariable,
             serverToMonitor.MaxPlayer);
 
-        switch (serverToMonitor.Protocol)
+        if (serverToMonitor.Protocol == CommandExecutionMethod.Terraria)
         {
-            case CommandExecutionMethod.A2S:
+            ConsoleExt.WriteLine("Terraria query protocol not implemented yet!", ConsoleExt.CurrentStep.GameMonitoring, ConsoleExt.OutputType.Error);
+            return;
+        }
+        int queryPort;
+        string rconPassword = string.Empty;
+        if (serverToMonitor.Protocol == CommandExecutionMethod.Rcon)
+        {
+            queryPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable, serverInfo.Allocations);
+            rconPassword = serverToMonitor.RconPassword ??
+                           JsonHandler.ExtractRconPassword(json, serverInfo.Uuid,
+                               serverToMonitor
+                                   .RconPasswordVariable); // TODO: Check if the Config Location has been set and extract the password from there if the location and variable is set in the games to monitor
+
+            if (queryPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
             {
-                var queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable,
-                    serverInfo.Allocations);
-
-                ConsoleExt.WriteLine("Query port for server " + serverInfo.Name + ": " + queryPort,
-                    ConsoleExt.CurrentStep.A2SQuery);
-                if (queryPort == 0)
-                {
-                    ConsoleExt.WriteLine("No Query port found for server: " + serverInfo.Name,
-                        ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Warning);
-                    return;
-                }
-
-                if (Program.Secrets.ExternalServerIp == null) return;
-                ConsoleExt.WriteLine(
-                    $"Sending A2S request to {Program.Secrets.ExternalServerIp}:{queryPort} for server {serverInfo.Name}",
-                    ConsoleExt.CurrentStep.A2SQuery);
-                var a2SResponse = SendA2SRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter().GetResult();
-                serverInfo.PlayerCountText = a2SResponse;
-
+                ConsoleExt.WriteLine($"No RCON port or password found for server: {serverInfo.Name}",
+                    ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Warning);
                 return;
             }
-            case CommandExecutionMethod.Rcon:
-            {
-                var rconPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable,
-                    serverInfo.Allocations);
-                var rconPassword = serverToMonitor.RconPassword ??
-                                   JsonHandler.ExtractRconPassword(json, serverInfo.Uuid,
-                                       serverToMonitor
-                                           .RconPasswordVariable); // TODO: Check if the Config Location has been set and extract the password from there if the location and variable is set in the games to monitor
-
-                if (rconPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
-                {
-                    ConsoleExt.WriteLine($"No RCON port or password found for server: {serverInfo.Name}",
-                        ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Warning);
-                    return;
-                }
-
-                if (Program.Secrets.ExternalServerIp != null && serverToMonitor.Command != null)
-                {
-                    var rconResponse = SendRconGameServerCommand(GetCorrectIp(serverInfo), rconPort, rconPassword,
-                            serverToMonitor.Command,
-                            _gamesToMonitor.First(s => s.Game == serverInfo.EggName).PlayerCountExtractRegex)
-                        .GetAwaiter()
-                        .GetResult();
-                    serverInfo.PlayerCountText = ServerPlayerCountDisplayCleanup(rconResponse, maxPlayers);
-                }
-
-                break;
-            }
-            case CommandExecutionMethod.MinecraftJava:
-            {
-                var queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable,
-                    serverInfo.Allocations);
-
-                if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
-                {
-                    var minecraftResponse = SendJavaMinecraftRequest(GetCorrectIp(serverInfo), queryPort).GetAwaiter()
-                        .GetResult();
-                    ConsoleExt.WriteLine(
-                        $"Sent Java Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}",
-                        ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Debug);
-                    ConsoleExt.WriteLine($"Java Minecraft Response: {minecraftResponse}",
-                        ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Debug);
-                    serverInfo.PlayerCountText = minecraftResponse;
-                }
-                else
-                {
-                    ConsoleExt.WriteLine("ExternalServerIp or Query Port is null or empty",
-                        ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Error);
-                }
-
-                break;
-            }
-            case CommandExecutionMethod.MinecraftBedrock:
-            {
-                var queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable,
-                    serverInfo.Allocations);
-
-                if (Program.Secrets.ExternalServerIp != null && queryPort != 0)
-                {
-                    var minecraftResponse = SendBedrockMinecraftRequest(GetCorrectIp(serverInfo), queryPort)
-                        .GetAwaiter().GetResult();
-                    ConsoleExt.WriteLine(
-                        $"Sent Bedrock Minecraft Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}",
-                        ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Debug);
-                    ConsoleExt.WriteLine($"Bedrock Minecraft Response: {minecraftResponse}",
-                        ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Debug);
-                    serverInfo.PlayerCountText = minecraftResponse;
-                }
-                else
-                {
-                    ConsoleExt.WriteLine("ExternalServerIp or Query Port is null or empty",
-                        ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error);
-                }
-
-                break;
-            }
-            case CommandExecutionMethod.Terraria:
-            {
-                // Not Implemented
-                break;
-            }
         }
+        else
+        {
+            queryPort = JsonHandler.ExtractQueryPort(json, serverInfo.Uuid, serverToMonitor.QueryPortVariable,
+                serverInfo.Allocations);
+        }
+
+        if (queryPort == 0)
+        {
+            ConsoleExt.WriteLine("No Query port found for server: " + serverInfo.Name,
+                ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Warning);
+            return;
+        }
+        if (Program.Secrets.ExternalServerIp == null)
+        {
+            ConsoleExt.WriteLine("ExternalServerIp is null", ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Warning);
+            return;
+        }
+                
+        var serverResponse = SendServerRequest(GetCorrectIp(serverInfo), queryPort, serverToMonitor.Protocol, rconPassword, serverToMonitor.Command,
+                _gamesToMonitor.First(s => s.Game == serverInfo.EggName).PlayerCountExtractRegex)
+            .GetAwaiter().GetResult();
+        ConsoleExt.WriteLine(
+            $"Sent {serverToMonitor.Protocol} Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}",
+            ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Debug);
+        ConsoleExt.WriteLine($"Java Minecraft Response: {serverResponse}",
+            ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Debug);
+        serverInfo.PlayerCountText = serverToMonitor.Protocol == CommandExecutionMethod.Rcon ? ServerPlayerCountDisplayCleanup(serverResponse, maxPlayers) : serverResponse;
     }
 
     /// <summary>

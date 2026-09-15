@@ -17,6 +17,7 @@ public static class ConsoleExt
         FileChecks,
         MessageHistory,
         PelicanApi,
+        Serverquery,
         A2SQuery,
         RconQuery,
         MinecraftJavaQuery,
