@@ -8,8 +8,6 @@ namespace Pelican_Keeper.Query_Services;
 //TODO: if this fails and throws, it shouldn't stop the entire program from continuing and sending anything. Especially when establishing the connection or reading the server response.
 public class RconService(string ip, int port, string password) : ISendCommand, IDisposable
 {
-    public readonly string Ip = ip;
-    public readonly int Port = port;
     private int _requestId;
     private NetworkStream? _stream;
     private TcpClient? _tcpClient;
@@ -25,7 +23,7 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         _tcpClient = new TcpClient();
         try
         {
-            await _tcpClient.ConnectAsync(Ip, Port);
+            await _tcpClient.ConnectAsync(ip, port);
         }
         catch (Exception e)
         {
@@ -42,12 +40,16 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
                 ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery,
                     ConsoleExt.OutputType.Debug);
             else
+            {
                 ConsoleExt.WriteLine("RCON authentication failed.", ConsoleExt.CurrentStep.RconQuery,
                     ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
+                Dispose();
+            }
         }
         else
         {
             ConsoleExt.WriteLine("RCON connection failed. The return stream is null or empty. Make sure the RCON port is allocated and open.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error);
+            Dispose();
         }
     }
 
