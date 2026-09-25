@@ -38,15 +38,15 @@ public abstract class TemplateClasses
         Ascending,
         Descending
     }
-
-    //TODO: for Server status in the template class, so i dont have to compare the literal string but instead use a enum which is more predicatable
+    
     public enum ServerStatus
     {
         Online,
         Offline,
         Paused,
         Starting,
-        Stopping
+        Stopping,
+        Missing
     }
 
     public record Secrets(
@@ -126,7 +126,7 @@ public abstract class TemplateClasses
 
     public record ServerResources
     {
-        public string CurrentState { get; init; } = null!;
+        public ServerStatus CurrentState { get; init; } = ServerStatus.Offline;
         public long MemoryBytes { get; init; }
         public long MemoryMaximum { get; init; }
         public double CpuAbsolute { get; init; }
@@ -157,7 +157,7 @@ public abstract class TemplateClasses
         public string IpAndPort { get; set; } = null!;
         public string? Uuid { get; set; }
         public string ServerName { get; init; } = null!;
-        public string Status { get; set; } = null!;
+        public ServerStatus Status { get; set; } = ServerStatus.Offline;
         public string StatusIcon { get; set; } = null!;
         public string Cpu { get; set; } = null!;
         public string MaxCpu { get; set; } = null!;

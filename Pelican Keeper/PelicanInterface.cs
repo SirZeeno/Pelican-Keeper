@@ -119,9 +119,9 @@ public static class PelicanInterface
         foreach (var serverInfo in serversToProcess)
         {
             var isTracked = ShutdownTracker.Any(x => x.Key == serverInfo.Uuid);
-            var serverState = serverInfo.Resources?.CurrentState.ToLower();
-            if (serverState != "offline" && serverState != "stopping" && serverState != "starting" &&
-                serverState != "missing")
+            var serverState = serverInfo.Resources?.CurrentState;
+            if (serverState != ServerStatus.Offline && serverState != ServerStatus.Stopping && serverState != ServerStatus.Starting &&
+                serverState != ServerStatus.Missing)
             {
                 if (!isTracked)
                 {
@@ -222,8 +222,8 @@ public static class PelicanInterface
         _ = GetServerResourcesList(servers);
         if (Program.Config.IgnoreOfflineServers)
             servers = servers.Where(s =>
-                    s.Resources?.CurrentState.ToLower() != "offline" &&
-                    s.Resources?.CurrentState.ToLower() != "missing")
+                    s.Resources?.CurrentState != ServerStatus.Offline &&
+                    s.Resources?.CurrentState != ServerStatus.Missing)
                 .ToList();
 
         servers = SortServers(servers, Program.Config.MessageSorting, Program.Config.MessageSortingDirection);

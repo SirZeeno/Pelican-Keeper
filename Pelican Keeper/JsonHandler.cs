@@ -309,6 +309,15 @@ public static class JsonHandler
         var resources = attributes.GetPropertySafe("resources");
 
         var currentState = attributes.GetPropertySafe("current_state").GetString() ?? string.Empty;
+        ServerStatus currentEnumState = currentState.ToLower() switch
+        {
+            "online" or "running" => ServerStatus.Online,
+            "offline" or "stopped" => ServerStatus.Offline,
+            "starting" => ServerStatus.Starting,
+            "stopping" => ServerStatus.Stopping,
+            "missing" => ServerStatus.Missing,
+            _ => ServerStatus.Offline
+        };
 
         var memory = resources.GetPropertySafe("memory_bytes").GetInt64();
         var cpu = resources.GetPropertySafe("cpu_absolute").GetDouble();
@@ -319,7 +328,7 @@ public static class JsonHandler
 
         var resourcesInfo = new ServerResources
         {
-            CurrentState = currentState,
+            CurrentState = currentEnumState,
             MemoryBytes = memory,
             CpuAbsolute = cpu,
             DiskBytes = disk,

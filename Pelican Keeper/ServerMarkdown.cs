@@ -77,6 +77,7 @@ public static class ServerMarkdown
     {
         if (serverResponse.Resources == null) throw new ArgumentException("Server Resource response cannot be null.");
         MarkdownValidator.ValidateMarkdown(_templateText);
+        TextInfo textInfo = CultureInfo.CurrentCulture.TextInfo;
 
         var viewModel = new TemplateClasses.ServerViewModel
         {
@@ -153,14 +154,14 @@ public static class ServerMarkdown
         return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m";
     }
 
-    private static string GetStatusIcon(string status)
+    private static string GetStatusIcon(TemplateClasses.ServerStatus status)
     {
-        return status.ToLower() switch
+        return status switch
         {
-            "offline" => "🔴",
-            "missing" => "🟡",
-            "running" => "🟢",
-            _ => "⚪"
+            TemplateClasses.ServerStatus.Offline => "🔴",
+            TemplateClasses.ServerStatus.Missing => "⚪",
+            TemplateClasses.ServerStatus.Online => "🟢",
+            _ => "🟡"
         };
     }
 

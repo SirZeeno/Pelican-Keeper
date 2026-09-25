@@ -6,7 +6,7 @@ using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
 
-//TODO: if this fails and throws, it shouldn't stop the entire program from continuing and sending anything. Especially when establishing the connection or reading the server response.
+//TODO: Monitor for Unhandled exceptions and handle them gracefully without stopping the entire program.
 public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDisposable
 {
     private NetworkStream? _stream;
@@ -26,8 +26,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
             _tcpClient = new TcpClient();
             try
             {
-                await _tcpClient.ConnectAsync(ip,
-                    port); //TODO: This is a Temp Catch All, I am going to refine this when I got the chance to
+                await _tcpClient.ConnectAsync(ip, port);
             }
             catch (Exception e)
             {
@@ -38,8 +37,8 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
             _tcpClient.Client.ReceiveTimeout = 5000;
             _stream = _tcpClient.GetStream();
             
-            ConsoleExt.WriteLine($"Connected to Bedrock Minecraft server at {ip}:{port}",
-                ConsoleExt.CurrentStep.MinecraftBedrockQuery);
+            ConsoleExt.WriteLine($"Connected to Java Minecraft server at {ip}:{port}",
+                ConsoleExt.CurrentStep.MinecraftJavaQuery);
         }
         catch (SocketException ex)
         {

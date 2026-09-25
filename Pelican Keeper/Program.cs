@@ -140,6 +140,11 @@ using static DiscordInteractions;
 ///     Fixed an issue where servers were filtered out if they had allocations of external IPs and internal IPs when ignoring internal servers.
 ///     Fixed an issue where max server count also affected the paginated message when the paginated message will never hit character limits and does not need a server limit.
 ///     Added mixed query support for Minecraft Geyser servers in case one protocol fails to connect to the default port.
+///     Updated README
+///     Added Capitalization to server status
+///     Fixed an issue where the Java Minecraft query service was using the wrong step and text in the console output.
+///     Switched server status to use an enum instead of a string to improve readability and maintainability.
+///     Switched the color of missing servers to white and starting and stopping servers to yellow.
 ///     
 /// </summary>
 

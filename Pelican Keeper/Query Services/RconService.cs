@@ -5,7 +5,7 @@ using Pelican_Keeper.Interfaces;
 
 namespace Pelican_Keeper.Query_Services;
 
-//TODO: if this fails and throws, it shouldn't stop the entire program from continuing and sending anything. Especially when establishing the connection or reading the server response.
+//TODO: Monitor for Unhandled exceptions and handle them gracefully without stopping the entire program.
 public class RconService(string ip, int port, string password) : ISendCommand, IDisposable
 {
     private int _requestId;

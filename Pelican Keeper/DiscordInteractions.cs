@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Pelican_Keeper.Update_Loop_Structures;
+using static Pelican_Keeper.TemplateClasses;
 
 namespace Pelican_Keeper;
 
@@ -271,9 +272,9 @@ public static class DiscordInteractions
         }
         await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
-        switch (serverInfo.Resources?.CurrentState.ToLower())
+        switch (serverInfo.Resources?.CurrentState)
         {
-            case "online" or "running":
+            case ServerStatus.Online:
                 PelicanInterface.SendPowerCommand(serverInfo.Uuid, "stop");
 
                 await e.Interaction.CreateFollowupMessageAsync(
@@ -283,7 +284,7 @@ public static class DiscordInteractions
                 );
                 WriteLine($"⏹ Stopping server `{serverInfo.Name}`");
                 break;
-            case "starting":
+            case ServerStatus.Starting:
                 await e.Interaction.CreateFollowupMessageAsync(
                     new DiscordFollowupMessageBuilder()
                         .WithContent(
@@ -321,9 +322,9 @@ public static class DiscordInteractions
 
         await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
-        switch (serverInfo.Resources?.CurrentState.ToLower())
+        switch (serverInfo.Resources?.CurrentState)
         {
-            case "offline":
+            case ServerStatus.Offline:
                 PelicanInterface.SendPowerCommand(serverInfo.Uuid, "start");
 
                 await e.Interaction.CreateFollowupMessageAsync(
@@ -333,7 +334,7 @@ public static class DiscordInteractions
                 );
                 WriteLine($"▶️ Starting server `{serverInfo.Name}`");
                 break;
-            case "stopping":
+            case ServerStatus.Stopping:
                 await e.Interaction.CreateFollowupMessageAsync(
                     new DiscordFollowupMessageBuilder()
                         .WithContent(
