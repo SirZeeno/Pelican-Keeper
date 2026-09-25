@@ -219,58 +219,6 @@ public static class JsonHandler
         return maxPlayers;
     }
 
-    //TODO: Think about adding this to the initial server info list creation since it uses the same JSON now
-    /// <summary>
-    ///     Extracts the Network Allocations from the Input JSON
-    /// </summary>
-    /// <param name="json">Input JSON</param>
-    /// <param name="serverUuid">Optional! UUID of the server you want to extract the Network allocations from</param>
-    /// <returns>List of ServerAllocation</returns>
-    internal static List<ServerAllocation> ExtractNetworkAllocations(string json, string? serverUuid = null)
-    {
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
-
-        // Extract allocations
-        var allocations = new List<ServerAllocation>();
-        var serversArray = root.GetPropertySafe("data").EnumerateArray();
-
-        foreach (var data in serversArray)
-        {
-            var attr = data.GetPropertySafe("attributes");
-            var uuid = attr.GetPropertySafe("uuid").GetString() ?? string.Empty;
-
-            if (uuid != serverUuid && serverUuid != null) continue;
-            ConsoleExt.WriteLine($"[ExtractNetworkAllocations] Server UUID: {uuid}", ConsoleExt.CurrentStep.JsonProcessing,
-                ConsoleExt.OutputType.Debug);
-
-            var allocationsArray = attr.GetPropertySafe("relationships").GetPropertySafe("allocations")
-                .GetPropertySafe("data").EnumerateArray();
-            foreach (var alloc in allocationsArray)
-            {
-                var attrib = alloc.GetPropertySafe("attributes");
-                var ip = attrib.GetPropertySafe("ip").GetString() ?? string.Empty;
-                var port = attrib.GetPropertySafe("port").GetInt32();
-                var isDefault = attrib.GetPropertySafe("is_default").GetBoolean();
-
-                var allocation = new ServerAllocation
-                {
-                    Uuid = uuid,
-                    Ip = ip,
-                    Port = port,
-                    IsDefault = isDefault
-                };
-
-                allocations.Add(allocation);
-                ConsoleExt.WriteLine(
-                    $"[ExtractNetworkAllocations] Network Allocation Added UUID: {allocation.Uuid}, IP: {allocation.Ip}, Port: {allocation.Port},  IsDefault: {allocation.IsDefault}",
-                    ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
-            }
-        }
-
-        return allocations;
-    }
-
     /// <summary>
     ///     Extracts the Server List from the Input JSON
     /// </summary>
@@ -291,6 +239,25 @@ public static class JsonHandler
             var uuid = attributes.GetPropertySafe("uuid").GetString() ?? string.Empty;
             var name = attributes.GetPropertySafe("name").GetString() ?? string.Empty;
             var eggName = attributes.GetPropertySafe("relationships").GetPropertySafe("egg").GetPropertySafe("attributes").GetPropertySafe("name").GetString() ?? string.Empty;
+            
+            List<ServerAllocation> allocations = new List<ServerAllocation>();
+            var allocationsArray = attributes.GetPropertySafe("relationships").GetPropertySafe("allocations").GetPropertySafe("data").EnumerateArray();
+            foreach (var alloc in allocationsArray)
+            {
+                var attrib = alloc.GetPropertySafe("attributes");
+                var ip = attrib.GetPropertySafe("ip").GetString() ?? string.Empty;
+                var port = attrib.GetPropertySafe("port").GetInt32();
+                var isDefault = attrib.GetPropertySafe("is_default").GetBoolean();
+
+                var allocation = new ServerAllocation
+                {
+                    Ip = ip,
+                    Port = port,
+                    IsDefault = isDefault
+                };
+
+                allocations.Add(allocation);
+            }
 
             var maxMemory = attributes.GetPropertySafe("limits").GetPropertySafe("memory")
                 .GetInt32();
@@ -305,6 +272,7 @@ public static class JsonHandler
                 Uuid = uuid,
                 Name = name,
                 EggName = eggName,
+                Allocations = allocations,
                 Resources = new ServerResources
                 {
                     MemoryMaximum = maxMemory,
@@ -316,6 +284,12 @@ public static class JsonHandler
             ConsoleExt.WriteLine(
                 $"[ExtractServerListInfo] Server Info Added ID: {id}, UUID: {uuid}, Server Name: {name}, Egg Name: {eggName}, Max Memory: {maxMemory}, Max CPU: {maxCpu}, Max Disk: {maxDisk}",
                 ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            foreach (var allocation in allocations)
+            {
+                ConsoleExt.WriteLine(
+                    $"[ExtractNetworkAllocations] Network Allocation Added IP: {allocation.Ip}, Port: {allocation.Port},  IsDefault: {allocation.IsDefault}",
+                    ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+            }
         }
 
         return serverInfo;

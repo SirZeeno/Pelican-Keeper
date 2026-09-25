@@ -135,6 +135,10 @@ using static DiscordInteractions;
 ///     Condensed the query protocols to use the Interface to reduce duplicate code and improve readability.
 ///     Removed the storage of new RCON connections since there was no implemented way to check if the connection stayed open.
 ///     Added a Dispose function to be mandatory in the connection interface to close the connection and clean up after use.
+///     Added an option to turn off colored output to improve performance on low-resource instances, and in increased output scenarios
+///     Merged the GetServerAllocations function into the GetServerResourcesList function since they use the same JSON returned by the Pelican API.
+///     Fixed an issue where servers were filtered out if they had allocations of external IPs and internal IPs when ignoring internal servers.
+///     Fixed an issue where max server count also affected the paginated message when the paginated message will never hit character limits and does not need a server limit.
 ///     
 /// </summary>
 
@@ -165,6 +169,7 @@ public static class Program
         Config.MaxServerCount = 20;
         Config.IgnoreInternalServers = true;
         Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1","c76c19e3-85f4-41b1-9cd4-0699dfcc78e9"];
+        Config.IgnoreOfflineServers = false;
 #endif
 
         WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");

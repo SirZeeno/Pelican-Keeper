@@ -123,7 +123,7 @@ public static class ExtractorHelpers
     /// <returns>No Connectable Address if nothing is found, and Ip:Port if a match is found</returns>
     public static string
         GetReadableConnectableAddress(
-            ServerInfo serverInfo) //TODO: mat-pandaz was having issues here when it came to his servers not displaying the connectable IP
+            ServerInfo serverInfo) //TODO: mat-pandaz was having issues here when it came to his servers not displaying the connectable IP (not sure if that is still an issue to date)
     {
         var allocation = GetConnectableAllocation(serverInfo);
         if (allocation == null)

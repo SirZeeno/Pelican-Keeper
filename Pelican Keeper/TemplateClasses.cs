@@ -64,7 +64,7 @@ public abstract class TemplateClasses
         public MessageFormat MessageFormat { get; set; } = MessageFormat.Consolidated;
         public MessageSorting MessageSorting { get; init; } = MessageSorting.Name;
         public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.Ascending;
-        public bool IgnoreOfflineServers { get; init; }
+        public bool IgnoreOfflineServers { get; set; }
         public bool IgnoreInternalServers { get; set; }
         public bool IgnoreOtherUserServers { get; init; }
         public bool IgnoreServersWithoutAllocations { get; init; } = true;
@@ -107,6 +107,7 @@ public abstract class TemplateClasses
 
         public bool Debug { get; set; }
         public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;
+        public bool DisableColorOutput { get; init; }
         public bool DryRun { get; init; }
         public bool AutoUpdate { get; init; }
     }
@@ -138,7 +139,6 @@ public abstract class TemplateClasses
 
     public class ServerAllocation
     {
-        public string Uuid { get; init; } = null!;
         public string Ip { get; init; } = null!;
         public int Port { get; init; }
         public bool IsDefault { get; init; }

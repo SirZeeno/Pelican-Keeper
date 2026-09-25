@@ -59,15 +59,4 @@ public class PelicanApiRequestTesting
         if (_serverInfos![1].Resources != null) Assert.Pass();
         else Assert.Fail("Server resources are null");
     }
-
-    [Test]
-    [Order(5)]
-    public void GetAllocationsList()
-    {
-        if (_serverInfos == null) Assert.Fail("Server info list is null");
-
-        PelicanInterface.GetServerAllocations(_serverInfos!);
-        if (_serverInfos![0].Allocations != null) Assert.Pass();
-        else Assert.Fail("Server resources are null");
-    }
 }

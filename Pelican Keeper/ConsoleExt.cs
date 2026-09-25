@@ -17,7 +17,7 @@ public static class ConsoleExt
         FileChecks,
         MessageHistory,
         PelicanApi,
-        Serverquery,
+        ServerQuery,
         A2SQuery,
         RconQuery,
         MinecraftJavaQuery,
@@ -62,8 +62,7 @@ public static class ConsoleExt
 
     // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
     public static bool SuppressProcessExitForTests { get; set; }
-
-    //TODO: Add an option to turn off colored output to improve performance in increased output scenarios
+    
     //TODO: See if I can batch console logging calls to reduce the overall performance in increased output scenarios
     
     /// <summary>
@@ -108,7 +107,7 @@ public static class ConsoleExt
                 WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
                 return;
             }
-            // Catch All if debug is turned on but none of the conditions before matched
+            // Catch All if debug is turned on, but none of the conditions before matched
             case true:
                 WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
                 break;
@@ -137,9 +136,8 @@ public static class ConsoleExt
 
     private static void CurrentTime()
     {
-        var dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
         Console.ForegroundColor = ConsoleColor.White;
-        Console.Write($"[{dateTime}] ");
+        Console.Write($"[{DateTime.Now:MM/dd/yyyy HH:mm:ss}] ");
         Console.ResetColor();
     }
 
@@ -158,9 +156,16 @@ public static class ConsoleExt
     private static void WriteConsoleOutput<T>(T output, CurrentStep currentStep, OutputType outputType,
         Exception? exception, bool shouldExit)
     {
-        CurrentTime();
-        WriteStep(currentStep);
-        WriteOutputType(outputType);
+        if (Program.Config.DisableColorOutput)
+        {
+            Console.Write($"[{DateTime.Now:MM/dd/yyyy HH:mm:ss}] [{StepLabels[currentStep]}] [{outputType}] ");
+        }
+        else
+        {
+            CurrentTime();
+            WriteStep(currentStep);
+            WriteOutputType(outputType);
+        }
         if (output is IEnumerable enumerable && !(output is string))
             Console.Write(string.Join(", ", enumerable.Cast<object>()));
         else

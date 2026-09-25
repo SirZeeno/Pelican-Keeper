@@ -104,27 +104,6 @@ public static class PelicanInterface
         throw new Exception("Server List Response is null or empty.");
     }
 
-    /// <summary>
-    ///     Gets the Client Server List from the Pelican API, and gets  the Network Allocations, and tracks the server for
-    ///     player count and automatic shutdown.
-    /// </summary>
-    /// <param name="serverInfos">List of ServerInfo</param>
-    public static void GetServerAllocations(List<ServerInfo> serverInfos)
-    {
-        try
-        {
-            var allocations = JsonHandler.ExtractNetworkAllocations(LocalServerListResponse.Content!);
-            foreach (var serverInfo in serverInfos)
-                serverInfo.Allocations = allocations.Where(s => s.Uuid == serverInfo.Uuid).ToList();
-        }
-        catch (JsonException ex)
-        {
-            ConsoleExt.WriteLine("JSON deserialization or fetching Error: " + ex.Message,
-                ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, ex);
-            ConsoleExt.WriteLine("Response content: " + LocalServerListResponse.Content, ConsoleExt.CurrentStep.PelicanApi);
-        }
-    }
-
     private static void MonitorServers(List<ServerInfo> serverInfos)
     {
         if (!Program.Config.PlayerCountDisplay) return;
@@ -248,22 +227,22 @@ public static class PelicanInterface
                 .ToList();
 
         servers = SortServers(servers, Program.Config.MessageSorting, Program.Config.MessageSortingDirection);
-
+        
         if (Program.Config.IgnoreInternalServers && Program.Config.InternalIpStructure != null)
         {
             var internalIpPattern = "^" + Regex.Escape(Program.Config.InternalIpStructure).Replace("\\*", "\\d+") + "$";
-            servers = servers.Where(s => !(s.Allocations?.Any(a => Regex.IsMatch(a.Ip, internalIpPattern)) ?? false))
+            servers = servers.Where(s => !(s.Allocations?.All(a => Regex.IsMatch(a.Ip, internalIpPattern)) ?? false))
                 .ToList();
         }
 
-        if (Program.Config.LimitServerCount && Program.Config.MaxServerCount > 0)
-        {
-            if (Program.Config.ServersToDisplay != null && Program.Config.ServersToDisplay.Length > 0 &&
-                Program.Config.ServersToDisplay[0] != "UUIDS HERE")
-                servers = servers.Where(s => Program.Config.ServersToDisplay.Contains(s.Uuid)).ToList();
-            else
-                servers = servers.Take(Program.Config.MaxServerCount).ToList();
-        }
+        if (!Program.Config.LimitServerCount || Program.Config.MaxServerCount <= 0 ||
+            Program.Config.MessageFormat == MessageFormat.Paginated) return servers;
+        
+        if (Program.Config.ServersToDisplay != null && Program.Config.ServersToDisplay.Length > 0 &&
+            Program.Config.ServersToDisplay[0] != "UUIDS HERE")
+            servers = servers.Where(s => Program.Config.ServersToDisplay.Contains(s.Uuid)).ToList();
+        else
+            servers = servers.Take(Program.Config.MaxServerCount).ToList();
 
         return servers;
     }
@@ -277,7 +256,6 @@ public static class PelicanInterface
         var serverInfos = GetPelicanServerList();
         serverInfos = ProcessServerList(serverInfos);
         _ = GetServerResourcesList(ServerListResponse);
-        GetServerAllocations(serverInfos);
         MonitorServers(serverInfos);
         return serverInfos;
     }
@@ -425,7 +403,7 @@ public static class PelicanInterface
             if (queryPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
             {
                 ConsoleExt.WriteLine($"No RCON port or password found for server: {serverInfo.Name}",
-                    ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Warning);
+                    ConsoleExt.CurrentStep.ServerQuery, ConsoleExt.OutputType.Warning);
                 return;
             }
         }
@@ -438,12 +416,12 @@ public static class PelicanInterface
         if (queryPort == 0)
         {
             ConsoleExt.WriteLine("No Query port found for server: " + serverInfo.Name,
-                ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Warning);
+                ConsoleExt.CurrentStep.ServerQuery, ConsoleExt.OutputType.Warning);
             return;
         }
         if (Program.Secrets.ExternalServerIp == null)
         {
-            ConsoleExt.WriteLine("ExternalServerIp is null", ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Warning);
+            ConsoleExt.WriteLine("ExternalServerIp is null", ConsoleExt.CurrentStep.ServerQuery, ConsoleExt.OutputType.Warning);
             return;
         }
                 
@@ -452,9 +430,9 @@ public static class PelicanInterface
             .GetAwaiter().GetResult();
         ConsoleExt.WriteLine(
             $"Sent {serverToMonitor.Protocol} Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}",
-            ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Debug);
+            ConsoleExt.CurrentStep.ServerQuery, ConsoleExt.OutputType.Debug);
         ConsoleExt.WriteLine($"Java Minecraft Response: {serverResponse}",
-            ConsoleExt.CurrentStep.Serverquery, ConsoleExt.OutputType.Debug);
+            ConsoleExt.CurrentStep.ServerQuery, ConsoleExt.OutputType.Debug);
         serverInfo.PlayerCountText = serverToMonitor.Protocol == CommandExecutionMethod.Rcon ? ServerPlayerCountDisplayCleanup(serverResponse, maxPlayers) : serverResponse;
     }
 

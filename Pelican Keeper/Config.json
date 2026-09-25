@@ -46,6 +46,7 @@
   "CustomDateTimeFormat": "HH:mm:ss",
   "Debug": false,
   "OutputMode": "None",
+  "DisableColorOutput": false,
   "DryRun": false,
   "AutoUpdate": false
 }
