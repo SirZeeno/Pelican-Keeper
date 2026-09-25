@@ -12,21 +12,22 @@ A Discord bot that will display the status of your Pelican Game Servers in a Dis
 
 This Discord bot is a basic compile-and-run or Egg install through Pelican bot built in .NET 8.0
 
-| Feature                 | Description                                                                 | Supported    |
-|-------------------------|-----------------------------------------------------------------------------|--------------|
-| CPU Usage               | Shows live CPU percentage                                                   | ✅           |
-| Memory Usage            | Displays RAM used by the server                                             | ✅           |
-| Disk Space              | Shows total disk usage                                                      | ✅           |
-| Network Stats           | RX/TX bandwidth tracking                                                    | ✅           |
-| Uptime                  | Displays how long the server has been running                               | ✅           |
-| Per Server Messages     | Puts each server in its own message (Subject to rate limitation)            | ✅           |
-| Consolidation           | Consolidates All Servers into one message (limited to 25 in a single embed) | ✅           |
-| Pagination              | Flip through multiple servers in one paginated message                      | ✅           |
-| Custom Templates        | Markdown style message embed system for customizable structure              | ✅           |
-| Auto Updates            | Messages update automatically every X seconds                               | ✅           |
-| Player Count            | Show live player count from server (if supported)                           | ✅           |
-| Server Joinable IP:Port | Show server joinable IP:Port                                                | ✅           |
-| Pelican Egg             | Installable Egg where you can run and configure the bot in the panel        | ❌ (Planned) |
+| Feature                 | Description                                                                 | Supported         |
+|-------------------------|-----------------------------------------------------------------------------|-------------------|
+| CPU Usage               | Displays CPU percentage used and allocated                                  | ✅                |
+| Memory Usage            | Displays RAM used and allocated                                             | ✅                |
+| Disk Space              | Shows total disk usage and allocation                                       | ✅                |
+| Network Stats           | RX/TX bandwidth tracking                                                    | ✅                |
+| Uptime                  | Displays how long the server has been running                               | ✅                |
+| Per Server Messages     | Puts each server in its own message (Subject to rate limitation)            | ✅                |
+| Consolidation           | Consolidates All Servers into one message (limited to 25 in a single embed) | ✅                |
+| Pagination              | Flip through each server in one paginated message                           | ✅                |
+| Custom Templates        | Markdown style message embed system for customizable structure              | ✅                |
+| Auto Updates            | Messages update automatically every X seconds                               | ✅                |
+| Player Count            | Show live player count from server (if supported)                           | ✅                |
+| Server Joinable IP:Port | Show server joinable IP:Port                                                | ✅                |
+| Pelican Egg             | Installable Egg where you can run and configure the bot in the panel        | ✅                |
+| Docker Container        | Docker Container running the bot                                            | ❌ (Planned)      |
 
 ## Setup using Pelican Keeper Egg
 
