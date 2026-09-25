@@ -22,17 +22,24 @@ public static class PelicanInterface
 
     private static readonly RestResponse LocalServerListResponse = GetServerList();
     private static readonly List<ServerInfo> ServerListResponse = GetPelicanServerList();
-    
-    public static void GetConfigFile(ServerInfo serverInfo, string pathToFile)
+
+    private static RestResponse GetConfigFile(ServerInfo serverInfo, string pathToFile)
     {
-        var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/" + serverInfo.Uuid + "/files/contents?" +
-                                    FilePathConverter(pathToFile));
+        var client = new RestClient(Program.Secrets.ServerUrl + "/api/client/servers/" + serverInfo.Uuid + "/files/contents?file=" + FilePathConverter(pathToFile));
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 
         if (!response.IsSuccessStatusCode)
             ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
                 ConsoleExt.OutputType.Error, response.ErrorException, true, true);
-        //TODO Implement this further to extract the value of the variable, and do this only once on the first run as to conserve API calls and store it for continued use until bot restart
+        if (!string.IsNullOrEmpty(response.Content))
+        {
+            ConsoleExt.WriteLine("Config File Successfully Retrieved", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
+            return response;
+        }
+        
+        ConsoleExt.WriteLine("Error: No File content returned from Pelican API", ConsoleExt.CurrentStep.PelicanApi,
+            ConsoleExt.OutputType.Error, new NullReferenceException());
+        throw new Exception("File not found, response null or empty.");
     }
 
     /// <summary>
@@ -364,7 +371,7 @@ public static class PelicanInterface
         var response = await connectionClass.SendCommandAsync(command, regexPattern);
         if (string.IsNullOrEmpty(response) && executionMethod == CommandExecutionMethod.MinecraftMixed)
         {
-            ConsoleExt.WriteLine("Could not connect to server using Bedrock Minecraft Query Service. Trying Java Minecraft Query Service.", ConsoleExt.CurrentStep.GameMonitoring, ConsoleExt.OutputType.Warning);
+            ConsoleExt.WriteLine("Could not connect to server using Bedrock Minecraft Query Service. Trying Java Minecraft Query Service.", ConsoleExt.CurrentStep.GameMonitoring);
             connectionClass.Dispose();
             connectionClass = new JavaMinecraftQueryService(ip, port);
             await connectionClass.Connect();
@@ -406,10 +413,26 @@ public static class PelicanInterface
         if (serverToMonitor.Protocol == CommandExecutionMethod.Rcon)
         {
             queryPort = JsonHandler.ExtractRconPort(json, serverInfo.Uuid, serverToMonitor.RconPortVariable, serverInfo.Allocations);
+            if (!string.IsNullOrEmpty(serverToMonitor.ConfigLocation) && string.IsNullOrEmpty(serverToMonitor.RconPassword))
+            {
+                var response = GetConfigFile(serverInfo, serverToMonitor.ConfigLocation);
+                if (serverToMonitor.RconPasswordVariable != null)
+                {
+                    var variableContent = JsonHandler.ExtractFileVariable(response.Content!, serverToMonitor.RconPasswordVariable);
+                    if (string.IsNullOrEmpty(variableContent))
+                    {
+                        ConsoleExt.WriteLine("Error: No variable content returned from Pelican API", ConsoleExt.CurrentStep.PelicanApi,
+                            ConsoleExt.OutputType.Error, new NullReferenceException());
+                        return;
+                    }
+                    ConsoleExt.WriteLine("Rcon Password Variable Content Retrieved.", ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Debug);
+                    serverToMonitor.RconPassword = variableContent.Trim();
+                }
+            }
             rconPassword = serverToMonitor.RconPassword ??
                            JsonHandler.ExtractRconPassword(json, serverInfo.Uuid,
                                serverToMonitor
-                                   .RconPasswordVariable); // TODO: Check if the Config Location has been set and extract the password from there if the location and variable is set in the games to monitor
+                                   .RconPasswordVariable);
 
             if (queryPort == 0 || string.IsNullOrWhiteSpace(rconPassword))
             {

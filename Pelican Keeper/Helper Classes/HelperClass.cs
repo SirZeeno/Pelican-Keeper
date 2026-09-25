@@ -8,8 +8,7 @@ using static TemplateClasses;
 public static class HelperClass
 {
     private static readonly Dictionary<string, string> LastEmbedHashes = new();
-
-    //TODO: See if I can batch API calls to reduce the overall performance in increased output scenarios
+    
     //TODO: See if turning API call functions into async methods can improve performance
     
     /// <summary>

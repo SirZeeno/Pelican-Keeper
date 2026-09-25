@@ -97,12 +97,14 @@ public static class JsonHandler
             {
                 var attr = alloc.GetPropertySafe("attributes");
                 if (attr.GetPropertySafe("env_variable").GetString() == variableName)
+                {
                     rconPassword = attr.GetPropertySafe("server_value").GetString() ?? string.Empty;
-                ConsoleExt.WriteLine(
-                    string.IsNullOrEmpty(rconPassword)
-                        ? "[ExtractRconPassword] Rcon Password is Null or Empty"
-                        : $"[ExtractRconPassword] Rcon Password Lenght: {rconPassword.Length}",
-                    ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                    ConsoleExt.WriteLine(
+                        string.IsNullOrEmpty(rconPassword)
+                            ? "[ExtractRconPassword] Rcon Password is Null or Empty"
+                            : $"[ExtractRconPassword] Rcon Password Lenght: {rconPassword.Length}",
+                        ConsoleExt.CurrentStep.JsonProcessing, ConsoleExt.OutputType.Debug);
+                }
             }
         }
 
@@ -217,6 +219,15 @@ public static class JsonHandler
         }
 
         return maxPlayers;
+    }
+
+    internal static string? ExtractFileVariable(string json, string variableName)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        
+        var variableContent = root.GetPropertySafe(variableName).GetString();
+        return string.IsNullOrEmpty(variableContent) ? null : variableContent;
     }
 
     /// <summary>

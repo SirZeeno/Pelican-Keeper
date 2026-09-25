@@ -159,9 +159,11 @@ public static class ServerMarkdown
         return status switch
         {
             TemplateClasses.ServerStatus.Offline => "🔴",
-            TemplateClasses.ServerStatus.Missing => "⚪",
+            TemplateClasses.ServerStatus.Paused => "🟡",
+            TemplateClasses.ServerStatus.Starting => "🟡",
+            TemplateClasses.ServerStatus.Stopping => "🟡",
             TemplateClasses.ServerStatus.Online => "🟢",
-            _ => "🟡"
+            _ => "⚪"
         };
     }
 

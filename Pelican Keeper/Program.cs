@@ -145,6 +145,10 @@ using static DiscordInteractions;
 ///     Fixed an issue where the Java Minecraft query service was using the wrong step and text in the console output.
 ///     Switched server status to use an enum instead of a string to improve readability and maintainability.
 ///     Switched the color of missing servers to white and starting and stopping servers to yellow.
+///     Fixed an issue where [ExtractRconPassword] would spam the console with debug messages.
+///     Fixed an issue where Rcon would throw when the response before authenticating with the server was empty.
+///     Added a config file password retrieval method and tied it into Rcon password retrieval.
+///     Reverted a change made to the GamesToMonitor JSON file that changed the rcon password retrieval method for factorio because it was wrong.
 ///     
 /// </summary>
 

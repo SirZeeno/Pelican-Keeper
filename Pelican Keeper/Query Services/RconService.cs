@@ -6,6 +6,7 @@ using Pelican_Keeper.Interfaces;
 namespace Pelican_Keeper.Query_Services;
 
 //TODO: Monitor for Unhandled exceptions and handle them gracefully without stopping the entire program.
+//TODO: If connect function fails, dont try to send commands
 public class RconService(string ip, int port, string password) : ISendCommand, IDisposable
 {
     private int _requestId;
@@ -33,22 +34,14 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
 
         _stream = _tcpClient.GetStream();
 
-        if (_stream != null && _stream.Length != 0)
-        {
-            var authenticated = await AuthenticateAsync();
-            if (authenticated)
-                ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery,
-                    ConsoleExt.OutputType.Debug);
-            else
-            {
-                ConsoleExt.WriteLine("RCON authentication failed.", ConsoleExt.CurrentStep.RconQuery,
-                    ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
-                Dispose();
-            }
-        }
+        var authenticated = await AuthenticateAsync();
+        if (authenticated)
+            ConsoleExt.WriteLine("RCON connection established successfully.", ConsoleExt.CurrentStep.RconQuery,
+                ConsoleExt.OutputType.Debug);
         else
         {
-            ConsoleExt.WriteLine("RCON connection failed. The return stream is null or empty. Make sure the RCON port is allocated and open.", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error);
+            ConsoleExt.WriteLine("RCON authentication failed.", ConsoleExt.CurrentStep.RconQuery,
+                ConsoleExt.OutputType.Error, new UnauthorizedAccessException());
             Dispose();
         }
     }
@@ -82,17 +75,33 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
     private async Task<bool> AuthenticateAsync()
     {
         _requestId++;
+
         var packet = CreatePacket(_requestId, 3, password);
         await _stream!.WriteAsync(packet);
-        
+
         try
         {
             var response = await ReadResponseAsync();
-            return response.type == 2 && response.id == _requestId;
+            ConsoleExt.WriteLine(
+                $"RCON authentication response: ID={response.id}, Type={response.type}, Body='{response.body}', Expected ID={_requestId}",
+                ConsoleExt.CurrentStep.RconQuery,
+                ConsoleExt.OutputType.Debug);
+
+            if (response.id != -1) return response.type == 2 && response.id == _requestId;
+            ConsoleExt.WriteLine(
+                "RCON server rejected the password.",
+                ConsoleExt.CurrentStep.RconQuery,
+                ConsoleExt.OutputType.Error);
+
+            return false;
         }
         catch (Exception ex)
         {
-            ConsoleExt.WriteLine($"Error during authentication: {ex.Message}", ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Error, ex);
+            ConsoleExt.WriteLine(
+                $"Error during authentication: {ex.Message}",
+                ConsoleExt.CurrentStep.RconQuery,
+                ConsoleExt.OutputType.Error,
+                ex);
             return false;
         }
     }
@@ -134,11 +143,11 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         {
             var read = await _stream!.ReadAsync(buffer, offset, length - offset);
             if (read == 0)
-                ConsoleExt.WriteLine("Connection closed unexpectedly.", ConsoleExt.CurrentStep.RconQuery,
-                    ConsoleExt.OutputType.Error, new IOException("Connection closed by remote host"));
+            {
+                throw new IOException("Connection closed by remote host.");
+            }
             offset += read;
         }
-
         return buffer;
     }
 }
