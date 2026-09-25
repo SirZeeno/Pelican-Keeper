@@ -58,14 +58,14 @@ public class RconService(string ip, int port, string password) : ISendCommand, I
         if (_tcpClient == null || _stream == null)
         {
             ConsoleExt.WriteLine(new InvalidOperationException("Call Connect() before sending commands."),
-                ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+                ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Warning);
             return ExtractorHelpers.ExtractPlayerCount(null, regexPattern).ToString();
         }
 
         if (command == null)
         {
             ConsoleExt.WriteLine(new InvalidOperationException("No command provided for sending RCON command."),
-                ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Debug);
+                ConsoleExt.CurrentStep.RconQuery, ConsoleExt.OutputType.Warning);
             return ExtractorHelpers.ExtractPlayerCount(null, regexPattern).ToString();
         }
         

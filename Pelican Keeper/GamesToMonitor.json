@@ -237,7 +237,7 @@
   },
   {
     "Game": "Purpur-Geyser-Floodgate",
-    "Protocol": "MinecraftBedrock",
+    "Protocol": "MinecraftMixed",
     "QueryPortVariable": "SERVER_PORT"
   },
   {
@@ -282,12 +282,12 @@
   },
   {
     "Game": "GeyserConnect",
-    "Protocol": "MinecraftBedrock",
+    "Protocol": "MinecraftMixed",
     "QueryPortVariable": "SERVER_PORT"
   },
   {
     "Game": "GeyserMC",
-    "Protocol": "MinecraftBedrock",
+    "Protocol": "MinecraftMixed",
     "QueryPortVariable": "SERVER_PORT"
   },
   {
@@ -297,12 +297,12 @@
   },
   {
     "Game": "Paper + Geyser + Floodgate",
-    "Protocol": "MinecraftBedrock",
+    "Protocol": "MinecraftMixed",
     "QueryPortVariable": "SERVER_PORT"
   },
   {
     "Game": "Velocity + Geyser + Floodgate",
-    "Protocol": "MinecraftBedrock",
+    "Protocol": "MinecraftMixed",
     "QueryPortVariable": "SERVER_PORT"
   },
   {

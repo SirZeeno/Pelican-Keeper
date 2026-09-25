@@ -139,6 +139,7 @@ using static DiscordInteractions;
 ///     Merged the GetServerAllocations function into the GetServerResourcesList function since they use the same JSON returned by the Pelican API.
 ///     Fixed an issue where servers were filtered out if they had allocations of external IPs and internal IPs when ignoring internal servers.
 ///     Fixed an issue where max server count also affected the paginated message when the paginated message will never hit character limits and does not need a server limit.
+///     Added mixed query support for Minecraft Geyser servers in case one protocol fails to connect to the default port.
 ///     
 /// </summary>
 

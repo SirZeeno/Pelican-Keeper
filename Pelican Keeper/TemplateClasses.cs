@@ -10,6 +10,7 @@ public abstract class TemplateClasses
     {
         MinecraftJava,
         MinecraftBedrock,
+        MinecraftMixed,
         Rcon,
         A2S,
         Terraria //TODO: Still need to implement this

@@ -37,6 +37,9 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
 
             _tcpClient.Client.ReceiveTimeout = 5000;
             _stream = _tcpClient.GetStream();
+            
+            ConsoleExt.WriteLine($"Connected to Bedrock Minecraft server at {ip}:{port}",
+                ConsoleExt.CurrentStep.MinecraftBedrockQuery);
         }
         catch (SocketException ex)
         {

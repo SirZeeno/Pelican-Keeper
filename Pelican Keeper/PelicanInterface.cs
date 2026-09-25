@@ -352,6 +352,9 @@ public static class PelicanInterface
             case CommandExecutionMethod.MinecraftBedrock:
                 connectionClass = new BedrockMinecraftQueryService(ip, port);
                 break;
+            case CommandExecutionMethod.MinecraftMixed:
+                connectionClass = new BedrockMinecraftQueryService(ip, port);
+                break;
             case CommandExecutionMethod.Terraria:
                 connectionClass = new TShock(ip, port);// Not Implemented
                 break;
@@ -359,6 +362,14 @@ public static class PelicanInterface
 
         await connectionClass.Connect();
         var response = await connectionClass.SendCommandAsync(command, regexPattern);
+        if (string.IsNullOrEmpty(response) && executionMethod == CommandExecutionMethod.MinecraftMixed)
+        {
+            ConsoleExt.WriteLine("Could not connect to server using Bedrock Minecraft Query Service. Trying Java Minecraft Query Service.", ConsoleExt.CurrentStep.GameMonitoring, ConsoleExt.OutputType.Warning);
+            connectionClass.Dispose();
+            connectionClass = new JavaMinecraftQueryService(ip, port);
+            await connectionClass.Connect();
+            response = await connectionClass.SendCommandAsync(command, regexPattern);
+        }
         connectionClass.Dispose();
         return response;
     }
@@ -431,7 +442,7 @@ public static class PelicanInterface
         ConsoleExt.WriteLine(
             $"Sent {serverToMonitor.Protocol} Query to Serer and Port: {Program.Secrets.ExternalServerIp}:{queryPort}",
             ConsoleExt.CurrentStep.ServerQuery, ConsoleExt.OutputType.Debug);
-        ConsoleExt.WriteLine($"Java Minecraft Response: {serverResponse}",
+        ConsoleExt.WriteLine($"Server Response: {serverResponse}",
             ConsoleExt.CurrentStep.ServerQuery, ConsoleExt.OutputType.Debug);
         serverInfo.PlayerCountText = serverToMonitor.Protocol == CommandExecutionMethod.Rcon ? ServerPlayerCountDisplayCleanup(serverResponse, maxPlayers) : serverResponse;
     }
