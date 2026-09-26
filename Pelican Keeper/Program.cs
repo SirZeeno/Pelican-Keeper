@@ -160,6 +160,7 @@ using static DiscordInteractions;
 ///     Version bump
 ///     Fixed an issue with Pelican where the space in the Update Scripts folder would cause issues.
 ///     Fixed an issue with the Pelican API not returning admin servers when the AdminViewServerList config option is enabled.
+///     Change some A2S console outputs to debug output
 ///     
 /// </summary>
 

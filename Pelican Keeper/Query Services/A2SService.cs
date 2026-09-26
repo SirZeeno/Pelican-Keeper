@@ -26,7 +26,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
         _endPoint = new IPEndPoint(IPAddress.Parse(ip), port);
         _udpClient.Client.ReceiveTimeout = 3000;
 
-        ConsoleExt.WriteLine("Connected to A2S server at " + _endPoint, ConsoleExt.CurrentStep.A2SQuery);
+        ConsoleExt.WriteLine("Connected to A2S server at " + _endPoint, ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Debug);
         return Task.CompletedTask;
     }
 
@@ -37,7 +37,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
 
         var request = BuildA2SInfoPacket();
         await _udpClient.SendAsync(request, request.Length, _endPoint);
-        ConsoleExt.WriteLine("Sent A2S_INFO request", ConsoleExt.CurrentStep.A2SQuery);
+        ConsoleExt.WriteLine("Sent A2S_INFO request", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Debug);
 
         var first = await ReceiveWithTimeoutAsync(_udpClient, 15000);
         if (first == null)
@@ -66,7 +66,7 @@ public class A2SService(string ip, int port) : ISendCommand, IDisposable
 
                 var challenged = BuildA2SInfoPacket(challenge);
                 await _udpClient.SendAsync(challenged, challenged.Length, _endPoint);
-                ConsoleExt.WriteLine("Sent A2S_INFO request with challenge", ConsoleExt.CurrentStep.A2SQuery);
+                ConsoleExt.WriteLine("Sent A2S_INFO request with challenge", ConsoleExt.CurrentStep.A2SQuery, ConsoleExt.OutputType.Debug);
 
                 var second = await ReceiveWithTimeoutAsync(_udpClient, 15000);
                 if (second == null)
