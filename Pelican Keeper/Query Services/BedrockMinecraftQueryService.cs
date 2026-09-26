@@ -42,7 +42,7 @@ public class BedrockMinecraftQueryService(string ip, int port) : ISendCommand, I
                 ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Error, ex);
         }
 
-        ConsoleExt.WriteLine($"Connected to Bedrock Minecraft server at {ip}:{port}", ConsoleExt.CurrentStep.MinecraftBedrockQuery);
+        ConsoleExt.WriteLine($"Connected to Bedrock Minecraft server at {ip}:{port}", ConsoleExt.CurrentStep.MinecraftBedrockQuery, ConsoleExt.OutputType.Debug);
         return Task.CompletedTask;
     }
 

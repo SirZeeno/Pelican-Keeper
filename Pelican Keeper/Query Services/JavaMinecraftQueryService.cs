@@ -39,7 +39,7 @@ public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDis
             _stream = _tcpClient.GetStream();
             
             ConsoleExt.WriteLine($"Connected to Java Minecraft server at {ip}:{port}",
-                ConsoleExt.CurrentStep.MinecraftJavaQuery);
+                ConsoleExt.CurrentStep.MinecraftJavaQuery, ConsoleExt.OutputType.Debug);
         }
         catch (SocketException ex)
         {
