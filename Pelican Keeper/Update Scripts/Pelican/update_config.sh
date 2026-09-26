@@ -113,6 +113,7 @@ MESSAGE_SORTING_DIRECTION="${MESSAGE_SORTING_DIRECTION:-Ascending}"
 
 IGNORE_OFFLINE_SERVERS="${IGNORE_OFFLINE_SERVERS:-0}"
 IGNORE_INTERNAL_SERVERS="${IGNORE_INTERNAL_SERVERS:-0}"
+ADMIN_VIEW_SERVER_LIST="${ADMIN_VIEW_SERVER_LIST:-0}"
 IGNORE_SERVERS_WITHOUT_ALLOCATIONS="${IGNORE_SERVERS_WITHOUT_ALLOCATIONS:-1}"
 
 SERVERS_TO_IGNORE_CSV="${SERVERS_TO_IGNORE:-UUIDS HERE}"
@@ -141,9 +142,11 @@ SERVER_UPDATE_INTERVAL="${SERVER_UPDATE_INTERVAL:-10}"
 LIMIT_SERVER_COUNT="${LIMIT_SERVER_COUNT:-0}"
 MAX_SERVER_COUNT="${MAX_SERVER_COUNT:-10}"
 SERVERS_TO_DISPLAY_CSV="${SERVERS_TO_DISPLAY:-UUIDS HERE}"
+CUSTOM_DATE_TIME_FORMAT="${CUSTOM_DATE_TIME_FORMAT:-HH:mm:ss}"
 
 DEBUG="${DEBUG:-0}"
 OUTPUT_MODE="${OUTPUT_MODE:-None}"
+DISABLE_COLOR_OUTPUT="${DISABLE_COLOR_OUTPUT:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 AUTO_UPDATE="${AUTO_UPDATE:-0}"
 
@@ -170,6 +173,7 @@ cat > "$CONFIG" <<EOF
   "MessageSortingDirection": $(str_json "$MESSAGE_SORTING_DIRECTION"),
   "IgnoreOfflineServers": $(bool_to_json "$IGNORE_OFFLINE_SERVERS"),
   "IgnoreInternalServers": $(bool_to_json "$IGNORE_INTERNAL_SERVERS"),
+  "AdminViewServerList": $(bool_to_json "ADMIN_VIEW_SERVER_LIST"),
   "IgnoreServersWithoutAllocations": $(bool_to_json "$IGNORE_SERVERS_WITHOUT_ALLOCATIONS"),
   "ServersToIgnore": $SERVERS_TO_IGNORE_JSON,
 
@@ -195,9 +199,11 @@ cat > "$CONFIG" <<EOF
   "LimitServerCount": $(bool_to_json "$LIMIT_SERVER_COUNT"),
   "MaxServerCount": $(num_or_default "$MAX_SERVER_COUNT" 10),
   "ServersToDisplay": $SERVERS_TO_DISPLAY_JSON,
+  "CustomDateTimeFormat": $(str_json "CUSTOM_DATE_TIME_FORMAT"),
 
   "Debug": $(bool_to_json "$DEBUG"),
   "OutputMode": $(str_json "$OUTPUT_MODE"),
+  "DisableColorOutput": $(bool_to_json "DISABLE_COLOR_OUTPUT"),
   "DryRun": $(bool_to_json "$DRY_RUN"),
   "AutoUpdate": $(bool_to_json "$AUTO_UPDATE")
 }

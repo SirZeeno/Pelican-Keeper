@@ -4,12 +4,12 @@
         "version": "PLCN_v3",
         "update_url": null
     },
-    "exported_at": "2026-02-17T01:36:44+00:00",
+    "exported_at": "2026-09-26T02:00:10+00:00",
     "name": "Pelican Keeper",
     "author": "Leon@logocomp.com",
     "uuid": "b9f6a260-8be9-4de0-90bb-4251ef5f9524",
     "description": "Egg version of the Pelican Keeper Discord Bot.",
-    "image": null,
+    "icon": null,
     "tags": [],
     "features": [],
     "docker_images": {
@@ -36,6 +36,18 @@
     },
     "variables": [
         {
+            "name": "Admin View Server List",
+            "description": "Server list an admin would see (Requires admin permissions!)",
+            "env_variable": "ADMIN_VIEW_SERVER_LIST",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 7
+        },
+        {
             "name": "Allow Server Startup",
             "description": "UUIDs of servers that are allowed to be started up by users in the Discord server. (All if empty) (separated by a comma)",
             "env_variable": "ALLOW_SERVER_STARTUP",
@@ -46,7 +58,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 16
+            "sort": 17
         },
         {
             "name": "Allow Server Stopping",
@@ -58,7 +70,7 @@
             "rules": [
                 "string"
             ],
-            "sort": 19
+            "sort": 20
         },
         {
             "name": "Allow User Server Startup",
@@ -70,7 +82,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 15
+            "sort": 16
         },
         {
             "name": "Allow User Server Stopping",
@@ -82,7 +94,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 18
+            "sort": 19
         },
         {
             "name": "Auto Update",
@@ -94,7 +106,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 31
+            "sort": 34
         },
         {
             "name": "Automatic Shutdown",
@@ -106,7 +118,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 12
+            "sort": 13
         },
         {
             "name": "Continues Games To Monitor Read",
@@ -118,7 +130,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 22
+            "sort": 23
         },
         {
             "name": "Continues Markdown Read",
@@ -130,7 +142,19 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 21
+            "sort": 22
+        },
+        {
+            "name": "Custom Date Time Format",
+            "description": "Custom Date Time Format for the embed footer",
+            "env_variable": "CUSTOM_DATE_TIME_FORMAT",
+            "default_value": "HH:mm:ss",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string"
+            ],
+            "sort": 29
         },
         {
             "name": "Debug",
@@ -142,7 +166,19 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 28
+            "sort": 30
+        },
+        {
+            "name": "Disable Color Output",
+            "description": "Disables console color output to improve performance.",
+            "env_variable": "DISABLE_COLOR_OUTPUT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 32
         },
         {
             "name": "Dry Run",
@@ -154,7 +190,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 30
+            "sort": 33
         },
         {
             "name": "Empty Server Timeout",
@@ -167,7 +203,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 14
+            "sort": 15
         },
         {
             "name": "Ignore Internal Servers",
@@ -203,7 +239,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 7
+            "sort": 8
         },
         {
             "name": "Internal IP Structure",
@@ -227,7 +263,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 9
+            "sort": 10
         },
         {
             "name": "Limit Server Count",
@@ -239,7 +275,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 25
+            "sort": 26
         },
         {
             "name": "Markdown Update Interval",
@@ -252,7 +288,7 @@
                 "min:10",
                 "integer"
             ],
-            "sort": 23
+            "sort": 24
         },
         {
             "name": "Max Server Count",
@@ -264,7 +300,7 @@
             "rules": [
                 "integer"
             ],
-            "sort": 26
+            "sort": 27
         },
         {
             "name": "Message Format",
@@ -318,7 +354,7 @@
                 "string",
                 "in:Info,Warning,Error,Debug,None"
             ],
-            "sort": 29
+            "sort": 31
         },
         {
             "name": "Player Count Display",
@@ -330,7 +366,7 @@
             "rules": [
                 "boolean"
             ],
-            "sort": 10
+            "sort": 11
         },
         {
             "name": "Server Update Interval",
@@ -343,7 +379,7 @@
                 "min:10",
                 "integer"
             ],
-            "sort": 24
+            "sort": 25
         },
         {
             "name": "Servers To Auto Shutdown",
@@ -356,7 +392,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 13
+            "sort": 14
         },
         {
             "name": "Servers To Display",
@@ -369,7 +405,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 27
+            "sort": 28
         },
         {
             "name": "Servers To Ignore",
@@ -382,7 +418,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 8
+            "sort": 9
         },
         {
             "name": "Servers To Monitor",
@@ -395,7 +431,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 11
+            "sort": 12
         },
         {
             "name": "Users Allowed To Start Servers",
@@ -408,7 +444,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 17
+            "sort": 18
         },
         {
             "name": "Users Allowed To Stop Servers",
@@ -421,7 +457,7 @@
                 "string",
                 "nullable"
             ],
-            "sort": 20
+            "sort": 21
         }
     ]
 }

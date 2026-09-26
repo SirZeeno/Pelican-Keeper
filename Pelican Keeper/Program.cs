@@ -152,6 +152,10 @@ using static DiscordInteractions;
 ///     Changed the IgnoreOtherUserServers config option to AdminViewServerList since other users can create API keys as well and AdminViewServerList uses admin rights and is a more accurate name for the option.
 ///     Changed default file links to like to the main branch instead of the testing branch
 ///     Fixed a GitHub Actions issue where the dotnet.yml workflow would fail to create release due to checkout not being included.
+///     V3.0.11
+///     Updated the update_config.sh to include the new variables
+///     Updated Egg to include the new config variables
+///     version bump
 ///     
 /// </summary>
 
