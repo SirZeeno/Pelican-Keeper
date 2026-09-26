@@ -63,8 +63,6 @@ public static class ConsoleExt
     // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
     public static bool SuppressProcessExitForTests { get; set; }
     
-    //TODO: See if I can batch console logging calls to reduce the overall performance in increased output scenarios
-    
     /// <summary>
     ///     Writes a line to the console with a pretext based on the output type.
     /// </summary>

@@ -7,6 +7,7 @@ using Pelican_Keeper.Interfaces;
 namespace Pelican_Keeper.Query_Services;
 
 //TODO: Monitor for Unhandled exceptions and handle them gracefully without stopping the entire program.
+//TODO: If connect function fails, dont try to send commands
 public class JavaMinecraftQueryService(string ip, int port) : ISendCommand, IDisposable
 {
     private NetworkStream? _stream;

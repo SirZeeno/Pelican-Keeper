@@ -67,7 +67,7 @@ public abstract class TemplateClasses
         public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.Ascending;
         public bool IgnoreOfflineServers { get; set; }
         public bool IgnoreInternalServers { get; set; }
-        public bool IgnoreOtherUserServers { get; init; }
+        public bool AdminViewServerList { get; init; }
         public bool IgnoreServersWithoutAllocations { get; init; } = true;
         public string[]? ServersToIgnore { get; set; } = [];
 

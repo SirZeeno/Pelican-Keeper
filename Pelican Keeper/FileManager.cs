@@ -50,7 +50,7 @@ public static class FileManager
     {
         await using var configFile = PreliminaryCustomChecks("Config.json", customDirectoryOrFile);
         var defaultConfig = await HelperClass.GetJsonTextAsync(
-            "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/Config.json");
+            "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/main/Pelican%20Keeper/Config.json");
         await using var writer = new StreamWriter(configFile);
         await writer.WriteAsync(defaultConfig);
     }
@@ -72,7 +72,7 @@ public static class FileManager
     {
         await using var gamesToMonitorFile = PreliminaryCustomChecks("GamesToMonitor.json", customDirectoryOrFile);
         var gamesToMonitor = await HelperClass.GetJsonTextAsync(
-            "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/GamesToMonitor.json");
+            "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/main/Pelican%20Keeper/GamesToMonitor.json");
         await using var writer = new StreamWriter(gamesToMonitorFile);
         await writer.WriteAsync(gamesToMonitor);
     }
@@ -84,7 +84,7 @@ public static class FileManager
     {
         await using var messageMarkdownFile = PreliminaryCustomChecks("MessageMarkdown.txt", customDirectoryOrFile);
         var defaultMarkdown = await HelperClass.GetJsonTextAsync(
-            "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/testing/Pelican%20Keeper/MessageMarkdown.txt");
+            "https://raw.githubusercontent.com/SirZeeno/Pelican-Keeper/refs/heads/main/Pelican%20Keeper/MessageMarkdown.txt");
         await using var writer = new StreamWriter(messageMarkdownFile);
         await writer.WriteAsync(defaultMarkdown);
     }

@@ -104,7 +104,7 @@ using static DiscordInteractions;
 ///     Added IgnoreOtherUserServers to ignore any servers that arent from the User that provided the API key
 ///     Added Support for custom DateTime Format
 ///     Added Defaults to each config setting so if something is missing or wrong, the bot wont freak out over it
-///     Fixed user permissions not being check with the dropdown menus
+///     Fixed user permissions not being checked with the dropdown menus
 ///     Consolidated the response messages sent to discord by start and stop dropdown menus and buttons
 ///     Added customDirectoryOrFile being taken into account when creating Default Files
 ///     Improved Secrets and Config Validation
@@ -149,6 +149,8 @@ using static DiscordInteractions;
 ///     Fixed an issue where Rcon would throw when the response before authenticating with the server was empty.
 ///     Added a config file password retrieval method and tied it into Rcon password retrieval.
 ///     Reverted a change made to the GamesToMonitor JSON file that changed the rcon password retrieval method for factorio because it was wrong.
+///     Changed the IgnoreOtherUserServers config option to AdminViewServerList since other users can create API keys as well and AdminViewServerList uses admin rights and is a more accurate name for the option.
+///     Changed default file links to like to the main branch instead of the testing branch
 ///     
 /// </summary>
 
