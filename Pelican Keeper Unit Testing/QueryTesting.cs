@@ -4,19 +4,22 @@ namespace Pelican_Keeper_Unit_Testing;
 
 public class QueryTesting
 {
-    TemplateClasses.Secrets? _secrets;
-    TemplateClasses.Config? _config;
-    
+    private TemplateClasses.Config? _config;
+    private TemplateClasses.Secrets? _secrets;
+
+    //TODO: run a test for each available game server on panel
+    // If the server is not running, start it, test it and shut it down again
+    // If it is running, test it, and keep it running
     [SetUp]
     public async Task Setup()
     {
         ConsoleExt.SuppressProcessExitForTests = true;
         _secrets = await FileManager.ReadSecretsFile();
         _config = TestConfigCreator.CreateDefaultConfigInstance();
-        
+
         Program.Config = _config;
     }
-    
+
     [Test]
     public async Task SendA2SQuery()
     {
@@ -27,17 +30,19 @@ public class QueryTesting
         }
 
         string? response = null;
-        
+
         if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendA2SRequest(_secrets.ExternalServerIp, 27051);
-        
-        if (ConsoleExt.ExceptionOccurred) //TODO: expand the testing to include output testing, to see if the output is as desired. For example i could get "Timed out waiting for server response." but the test returns a pass
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 27051, TemplateClasses.CommandExecutionMethod.A2S);
+
+        if
+            (ConsoleExt
+             .ExceptionOccurred) //TODO: expand the testing to include output testing, to see if the output is as desired. For example i could get "Timed out waiting for server response." but the test returns a pass
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");
         if (string.IsNullOrEmpty(response) || response == "N/A")
             Assert.Fail("Test failed due to null or empty response from sending A2S command.\n");
         Assert.Pass("A2S request sent successfully.\n");
     }
-    
+
     [Test]
     public async Task SendRconQuery()
     {
@@ -48,9 +53,10 @@ public class QueryTesting
         }
 
         string? response = null;
-        
+
         if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendRconGameServerCommand(_secrets.ExternalServerIp, 37015, "YouSuck", "listplayers"); // should load these from the secrets file and the information provided by the pelican API
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 37015, TemplateClasses.CommandExecutionMethod.Rcon, "YouSuck",
+                "listplayers"); // should load these from the secrets file and the information provided by the pelican API
 
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");
@@ -69,17 +75,17 @@ public class QueryTesting
         }
 
         string? response = null;
-        
+
         if (_secrets.ExternalServerIp != null)
-            response = await PelicanInterface.SendBedrockMinecraftRequest(_secrets.ExternalServerIp, 19132);
-        
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 19132, TemplateClasses.CommandExecutionMethod.MinecraftBedrock);
+
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");
         if (string.IsNullOrEmpty(response) || response == "N/A")
             Assert.Fail("Test failed due to null or empty response from sending Bedrock query command.\n");
         Assert.Pass("Bedrock Query command sent successfully.\n");
     }
-    
+
     [Test]
     public async Task SendJavaQuery()
     {
@@ -90,9 +96,10 @@ public class QueryTesting
         }
 
         string? response = null;
-        
-        if (_secrets.ExternalServerIp != null) response = await PelicanInterface.SendJavaMinecraftRequest(_secrets.ExternalServerIp, 1251);
-        
+
+        if (_secrets.ExternalServerIp != null)
+            response = await PelicanInterface.SendServerRequest(_secrets.ExternalServerIp, 1251, TemplateClasses.CommandExecutionMethod.MinecraftJava);
+
         if (ConsoleExt.ExceptionOccurred)
             Assert.Fail($"Test failed due to exception(s): {ConsoleExt.Exceptions}\n");
         if (string.IsNullOrEmpty(response) || response == "N/A")

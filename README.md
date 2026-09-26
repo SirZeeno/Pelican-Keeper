@@ -1,146 +1,325 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/3eb050aa-40c6-496f-94a3-8404987a6bf6"/><br>
-    <strong>Support me and my projects</strong><br>
+  <img src="https://github.com/user-attachments/assets/3eb050aa-40c6-496f-94a3-8404987a6bf6" alt="Pelican Keeper" />
+</p>
+
+<h1 align="center">Pelican Keeper</h1>
+
+<p align="center">
+  A Discord bot for monitoring and displaying the status of your
+  <a href="https://pelican.dev/">Pelican Game Servers</a>.
+</p>
+
+<p align="center">
+  <strong>Self-hosted • Lightweight • Customizable</strong>
+</p>
+
+<p align="center">
   <a href="https://ko-fi.com/sirzeeno" target="_blank">
     <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi" />
   </a>
 </p>
 
-# Pelican Keeper
-A Discord bot that will display the status of your Pelican Game Servers in a Discord Channel
+---
 
-This Discord bot is a basic compile-and-run or Egg install through Pelican bot built in .NET 8.0
+## ✨ Features
 
-| Feature                 | Description                                                                 | Supported   |
-|-------------------------|-----------------------------------------------------------------------------|-------------|
-| CPU Usage               | Shows live CPU percentage                                                   | ✅           |
-| Memory Usage            | Displays RAM used by the server                                             | ✅           |
-| Disk Space              | Shows total disk usage                                                      | ✅           |
-| Network Stats           | RX/TX bandwidth tracking                                                    | ✅           |
-| Uptime                  | Displays how long the server has been running                               | ✅           |
-| Per Server Messages     | Puts each server in its own message (Subject to rate limitation)            | ✅           |
-| Consolidation           | Consolidates All Servers into one message (limited to 25 in a single embed) | ✅           |
-| Pagination              | Flip through multiple servers in one paginated message                      | ✅           |
-| Custom Templates        | Markdown style message embed system for customizable structure              | ✅           |
-| Auto Updates            | Messages update automatically every X seconds                               | ✅           |
-| Player Count            | Show live player count from server (if supported)                           | ✅ |
-| Server Joinable IP:Port | Show server joinable IP:Port                                                | ✅ |
-| Pelican Egg             | Installable Egg where you can run and configure the bot in the panel        | ❌ (Planned) |
+Pelican Keeper connects to your Pelican panel and displays live server information directly in Discord.
 
+| Feature                     | Supported  |
+|-----------------------------|:----------:|
+| 🖥️ CPU Usage                |     ✅     |
+| 🧠 Memory Usage             |     ✅     |
+| 💾 Disk Usage               |     ✅     |
+| 🌐 Network RX/TX            |     ✅     |
+| ⏱️ Server Uptime             |     ✅     |
+| 👥 Player Count             |     ✅     |
+| 🎮 Server Join IP & Port    |     ✅     |
+| 📊 Consolidated Server View |     ✅     |
+| 📖 Pagination               |     ✅     |
+| ✏️ Custom Message Templates |     ✅     |
+| 🔄 Automatic Updates        |     ✅     |
+| 🥚 Pelican Egg              |     ✅     |
+| 🐳 Docker Container         | 🚧 Planned |
 
-## Setup using Pelican Keeper Egg
+---
 
-### Download Egg
+## 🚀 Installation
 
-Download the egg from this GitHub and import it into your Panel
+There are three ways to run Pelican Keeper.
 
-### Configure Egg
+| Method                 | Recommended | Best For                        |
+|------------------------|:-----------:|---------------------------------|
+| **Pelican Keeper Egg** | ⭐ **Yes**  | Running directly inside Pelican |
+| **Generic C# Egg**     |             | Existing Pelican installations  |
+| **Standalone Release** |             | Running outside Pelican         |
 
-After creating a server using the egg, you now have all the settings from the config at your disposal, which will update the config in real time. 
-You will still need to restart the Bot for the changes to take effect. <br>
-Before you can use the bot, you need to start the bot once to allow it to create any necessary files. One of which you will need to edit manually.
+### 🥚 Pelican Keeper Egg — Recommended
 
-### Edit Secrets file
+The easiest way to run Pelican Keeper is using the provided Pelican Egg.
 
-In the file Tab after starting the bot once, you will find a new Secrets.json file having been created. Edit that file and fill out all the information. <br>
-The wiki for what each field requests can be found [here](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Secrets)
+#### 1. Download the Egg
 
-## Setup in using Generic C# Egg
+Download the latest Egg from the repository and import it into your Pelican panel.
 
-### Setup Egg
+#### 2. Create the Server
 
-Set up the Generic C# egg in your Pelican Panel like normal.
+Create a new server using the Pelican Keeper Egg.
 
-### Configuration
+The Egg exposes the bot's configuration options directly through Pelican.
 
-Set the following variables exactly like this
-```
-- Git Repo Address: https://github.com/SirZeeno/Pelican-Keeper
-- Install Branch: main
-- Project Location: /home/container/Pelican Keeper/
-- Project File: "Pelican Keeper"
-```
-### Secrets
+> **Note:** Configuration changes require a bot restart to take effect.
 
-Run the bot once or create the Secrets.json in the base directory you see when opening the Files tab and fill out all the necessary information.
+#### 3. Start the Bot
 
-## Setup Outside Pelican
-> [!TIP]
-> You will need curl installed.
+Start the server once.
 
-### Get The Latest Release
+Pelican Keeper will automatically create the required configuration files, including:
 
-Download the latest release with this command. This command downloads the latest release for your specific platform, unzips it, and removes the zip file.
-```
-curl -L https://github.com/SirZeeno/Pelican-Keeper/releases/latest/download/[Your_Platform_Version].zip && unzip [Your_Platform_Version].zip && rm [Your_Platform_Version].zip
+```text
+Config.json
+Secrets.json
+MessageHistory.json
 ```
 
-### Run the Bot
-> [!WARNING]
-> At this point you should create the Secrets.json in the directory the bot resides in, otherwise the first run will result in an error.<br>
-> If you don't create the Secrets.json, the bot will create a default one for you that you will need to fill out.<br>
-> After the first run, the bot will have created the Secrets.json. At that point it's your responsibility to fill out with all the necessary information.
+#### 4. Configure `Secrets.json`
 
-while still in the same directory to start the bot, you simply run this command
+Open the **Files** tab and edit `Secrets.json`.
+
+You will need to provide your Pelican API credentials and Discord bot information.
+
+See the [Bot Secrets Wiki](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Secrets) for details.
+
+---
+
+## 🧩 Generic C# Egg
+
+If you prefer to use Pelican's Generic C# Egg, configure it with the following values:
+
+```text
+Git Repo Address: https://github.com/SirZeeno/Pelican-Keeper
+Install Branch: main
+Project Location: /home/container/Pelican Keeper/
+Project File: Pelican Keeper
 ```
+
+After installation, start the bot once to generate `Secrets.json`, or create the file manually in the server's base directory.
+
+Then fill in the required credentials.
+
+---
+
+## 💻 Standalone Installation
+
+Pelican Keeper can also run outside of Pelican on any supported platform.
+
+### Requirements
+
+* `curl`
+* `unzip`
+* .NET 8 runtime
+
+### Download the Latest Release
+
+Replace `[Your_Platform_Version]` with the appropriate release for your platform:
+
+```bash
+curl -L https://github.com/SirZeeno/Pelican-Keeper/releases/latest/download/[Your_Platform_Version].zip \
+  -o Pelican-Keeper.zip
+
+unzip Pelican-Keeper.zip
+rm Pelican-Keeper.zip
+```
+
+### Configure the Bot
+
+Create `Secrets.json` in the bot's installation directory.
+
+If it does not exist, Pelican Keeper will generate a default file on first startup.
+
+See the [Bot Secrets Wiki](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Secrets) for the required values.
+
+### Start the Bot
+
+From the installation directory:
+
+```bash
 dotnet run --project "Pelican Keeper"
 ```
 
-## Secrets
+---
 
-> [!TIP]
-> The Server and Client Tokens are API keys you generate from your Pelican panel.
-> The Admin page is where you can generate the server API token, and the client API token is under the Profile settings.
+# ⚙️ Configuration
 
-> [!WARNING]
-> Make sure you fill out the Secrets.json file found in the bot install directory, otherwise the bot **WILL NOT** work!
+Pelican Keeper uses two primary configuration files:
 
-The Secrets file will be created on first startup if it does not exist. The structure of the file and what each Variable is for can be found in the [Wiki](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Secrets)
+| File                  | Purpose                                                  |
+| --------------------- | -------------------------------------------------------- |
+| `Secrets.json`        | API credentials and Discord connection information       |
+| `Config.json`         | Bot behavior, filtering, formatting, and display options |
+| `MessageMarkdown.txt` | Discord message template                                 |
 
-## Configuration
+> **Important:** Changes to `Config.json` require a bot restart before they take effect.
 
-### Config File
+### 🔐 Secrets
 
-> [!TIP]
-> This file is used to configure how the bot behaves and displays information in Discord.
-> You can edit this file to change the bot's behavior, changing it while the bot is running will not apply the changes until the next restart.
+`Secrets.json` contains the credentials required for Pelican Keeper to communicate with your Pelican panel and Discord.
 
-The config.json file can be found in the installation folder, and the structure and what each setting does is explained
-in the [Wiki](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Config)
+You'll need:
 
-### ConsolidateEmbeds
+* Pelican **Client API Token**
+* Discord **Bot Token**
+* Discord **Channel ID**
+* Other optional connection settings
 
-> Consolidate all the server information into a single embed message if true. And if false, it will create an embed message for each game server you have on pelican.
-> 
-> Note that you will run into discord rate limits if you have this option off, and you have a few game servers on pelican.
+See the complete [Bot Secrets documentation](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Secrets).
 
-![image](https://github.com/user-attachments/assets/9ec54b8d-48fa-424c-acd3-5bb12222f2ef)
+> ⚠️ **Never share your `Secrets.json` or commit it to Git.**
 
-### Paginate
+---
 
-> Paginates the server information into a single embed message with changeable pages.
-> 
-> Note that the page will be the same serverwide, meaning if someone changed the page, it changes it for you as well.
+## 🛠️ Display Modes
 
-![image](https://github.com/user-attachments/assets/7cb58936-71f7-4378-9256-0a79c5056256)
+Pelican Keeper supports three ways of displaying your servers.
 
-### Markdown Formatting
-> [!TIP]
-> The Markdown file can be found in [here](https://github.com/SirZeeno/Pelican-Keeper/blob/main/Pelican%20Keeper/MessageMarkdown.txt).
+### 📦 Consolidated
 
-The Markdown formatting uses [Discord's](https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline) formatting with some slight modifications.<br>
-Anything marked with {{}} will be replaced with the variable name.<br>
-Finally, There is a special Tag called [Title] for the server Name to mark what is supposed to be the server name for special use in the title of the embed.
+All servers are displayed together in a single Discord message.
+Discord embeds support a maximum of **25 fields**, so larger server installations may need to use pagination.
 
-| Variable   | Description                                      |
-|------------|--------------------------------------------------|
-| Uuid       | UUID of the server                               |
-| ServerName | Name of the server                               |
-| StatusIcon | Icon that changes depending on the server status |
-| Status     | Status of the server (Offline/Starting/Running)  |
-| Cpu        | CPU usage of the server                          |
-| Memory     | Memory usage of the server                       |
-| Disk       | Disk space used by the server                    |
-| NetworkRx  | Inbound network traffic                          |
-| NetworkTx  | Outbound network traffic                         |
-| Uptime     | Uptime of the server                             |
+![Consolidated Server View](https://github.com/user-attachments/assets/9ec54b8d-48fa-424c-acd3-5bb12222f2ef)
+
+---
+
+### 📖 Paginated
+
+Display servers one at a time in a single Discord message with navigation controls.
+
+![Paginated Server View](https://github.com/user-attachments/assets/7cb58936-71f7-4378-9256-0a79c5056256)
+
+> **Note:** Pagination is shared across the message. If one user changes the page, the displayed page changes for everyone viewing that message.
+
+---
+
+### 💬 Per-Server Messages
+
+Each server gets its own Discord message.
+
+This can make larger server lists easier to read, but it also generates more Discord API traffic and may run into Discord rate limits.
+
+---
+
+# ✏️ Custom Message Formatting
+
+Pelican Keeper supports customizable Discord message templates through:
+
+```text
+MessageMarkdown.txt
+```
+
+The template uses Discord-style Markdown with a few Pelican Keeper-specific additions.
+
+See the [MessageMarkdown.txt](https://github.com/SirZeeno/Pelican-Keeper/blob/main/Pelican%20Keeper/MessageMarkdown.txt) file for the default template.
+
+### Variables
+
+Variables are written using:
+
+```text
+{{VariableName}}
+```
+
+and are automatically replaced with the corresponding server information.
+
+| Variable          | Description              |
+| ----------------- | ------------------------ |
+| `{{Uuid}}`        | Server UUID              |
+| `{{ServerName}}`  | Server name              |
+| `{{StatusIcon}}`  | Status-dependent icon    |
+| `{{Status}}`      | Current server status    |
+| `{{Cpu}}`         | CPU usage                |
+| `{{Memory}}`      | Memory usage             |
+| `{{Disk}}`        | Disk usage               |
+| `{{NetworkRx}}`   | Incoming network traffic |
+| `{{NetworkTx}}`   | Outgoing network traffic |
+| `{{Uptime}}`      | Server uptime            |
+| `{{PlayerCount}}` | Current player count     |
+
+### Server Title
+
+The special `[Title]` tag identifies the server name used for the Discord embed title.
+
+Example:
+
+```text
+[Title]
+{{StatusIcon}} {{ServerName}}
+[/Title]
+```
+
+---
+
+# 🔧 Configuration Reference
+
+For a complete explanation of every configuration option, see:
+
+**[📖 Bot Configuration Wiki](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Config)**
+
+For API credentials and secrets:
+
+**[🔐 Bot Secrets Wiki](https://github.com/SirZeeno/Pelican-Keeper/wiki/Bot-Secrets)**
+
+---
+
+# 📁 Project Structure
+
+A typical installation looks like:
+
+```text
+Pelican Keeper/
+├── Config.json
+├── Secrets.json
+├── MessageHistory.json
+├── MessageMarkdown.txt
+└── Pelican Keeper
+```
+
+`Secrets.json` contains sensitive information and should **never** be shared publicly.
+
+---
+
+# 🐳 Docker
+
+Docker support is planned but is not currently available.
+
+| Deployment     |    Status   |
+| -------------- | :---------: |
+| Pelican Egg    | ✅ Supported |
+| Generic C# Egg | ✅ Supported |
+| Standalone     | ✅ Supported |
+| Docker         |  🚧 Planned |
+
+---
+
+# 🤝 Contributing
+
+Contributions, bug reports, and feature requests are welcome.
+
+If you find a problem or have an idea for improving Pelican Keeper, open an issue or pull request on GitHub.
+
+---
+
+# 💖 Support
+
+If Pelican Keeper is useful to you and you'd like to support development:
+
+<p align="center">
+  <a href="https://ko-fi.com/sirzeeno" target="_blank">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi" />
+  </a>
+</p>
+
+---
+
+<p align="center">
+  Made for <a href="https://pelican.dev/">Pelican</a> ❤️
+</p>

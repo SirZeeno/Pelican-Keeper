@@ -5,38 +5,19 @@ using System.Text.RegularExpressions;
 namespace Pelican_Keeper;
 
 /// <summary>
-/// TODOs
-///
-/// Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per message
-/// Move the config debug mode check into here so i only have to call the write line function and not also check if debug is on, before the call
-/// Add the OutputMode enum into here to allow for granular control of what type of output is being displayed
-/// Re-Organize the output types of all the console write calls to better reflect the new Debug Output type
+///     TODOs
+///     Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per
+///     message
 /// </summary>
 public static class ConsoleExt
 {
-    public static bool ExceptionOccurred;
-    public static IReadOnlyCollection<Exception> Exceptions => ExceptionsList;
-    private static readonly LinkedList<Exception> ExceptionsList = new();
-    
-    // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
-    public static bool SuppressProcessExitForTests { get; set; }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum OutputType
-    {
-        Info,
-        Warning,
-        Error,
-        Debug,
-        None
-    }
-    
     // This is changeable to be whatever necessary
     public enum CurrentStep
     {
         FileChecks,
         MessageHistory,
         PelicanApi,
+        ServerQuery,
         A2SQuery,
         RconQuery,
         MinecraftJavaQuery,
@@ -55,8 +36,35 @@ public static class ConsoleExt
         None
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum OutputType
+    {
+        Info,
+        Warning,
+        Error,
+        Debug,
+        None
+    }
+    
+    private static readonly Dictionary<CurrentStep, string> StepLabels =
+        Enum.GetValues<CurrentStep>()
+            .ToDictionary(
+                step => step,
+                step => Regex.Replace(
+                    step.ToString(),
+                    @"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])",
+                    " "
+                ));
+
+    public static bool ExceptionOccurred;
+    private static readonly LinkedList<Exception> ExceptionsList = new();
+    public static IReadOnlyCollection<Exception> Exceptions => ExceptionsList;
+
+    // For Unit testing, to stop the program from exiting during errors and causing no readable error or exception message
+    public static bool SuppressProcessExitForTests { get; set; }
+    
     /// <summary>
-    /// Writes a line to the console with a pretext based on the output type.
+    ///     Writes a line to the console with a pretext based on the output type.
     /// </summary>
     /// <param name="output">Output</param>
     /// <param name="currentStep">Current step, default is Ignore</param>
@@ -66,10 +74,13 @@ public static class ConsoleExt
     /// <param name="shouldExit">Should the Program Exit</param>
     /// <typeparam name="T">Any type</typeparam>
     /// <returns>The length of the pretext</returns>
-    public static void WriteLine<T>(T output, CurrentStep currentStep = CurrentStep.None, OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false, bool shouldExit = false)
+    public static void WriteLine<T>(T output, CurrentStep currentStep = CurrentStep.None,
+        OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false,
+        bool shouldExit = false)
     {
         // It shouldn't write it if the output is not info or error and the debug is off and no bypass is set
-        if (outputType != OutputType.Error && outputType != OutputType.Info && !Program.Config.Debug && !shouldBypassDebug) return;
+        if (outputType != OutputType.Error && outputType != OutputType.Info && !Program.Config.Debug &&
+            !shouldBypassDebug) return;
 
         // It needs to write if the bypass is true
         if (shouldBypassDebug)
@@ -77,7 +88,7 @@ public static class ConsoleExt
             WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
             return;
         }
-        
+
         // It needs to write if the output is info or an error
         if (outputType is OutputType.Error or OutputType.Info && Program.Config.OutputMode == OutputType.None)
         {
@@ -94,7 +105,7 @@ public static class ConsoleExt
                 WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
                 return;
             }
-            // Catch All if debug is turned on but none of the conditions before matched
+            // Catch All if debug is turned on, but none of the conditions before matched
             case true:
                 WriteConsoleOutput(output, currentStep, outputType, exception, shouldExit);
                 break;
@@ -102,7 +113,7 @@ public static class ConsoleExt
     }
 
     /// <summary>
-    /// Determines the output type and writes it in the appropriate color.
+    ///     Determines the output type and writes it in the appropriate color.
     /// </summary>
     /// <param name="outputType">Output type</param>
     /// <returns>The length of the pretext</returns>
@@ -115,7 +126,7 @@ public static class ConsoleExt
             OutputType.Debug => (ConsoleColor.DarkMagenta, "Debug"),
             _ => (ConsoleColor.Green, "Info")
         };
-        
+
         Console.ForegroundColor = color;
         Console.Write($"[{label}] ");
         Console.ResetColor();
@@ -123,53 +134,51 @@ public static class ConsoleExt
 
     private static void CurrentTime()
     {
-        var dateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
         Console.ForegroundColor = ConsoleColor.White;
-        Console.Write($"[{dateTime}] ");
+        Console.Write($"[{DateTime.Now:MM/dd/yyyy HH:mm:ss}] ");
         Console.ResetColor();
     }
 
     /// <summary>
-    /// Determines the current step and returns the length of the pretext.
+    ///     Determines the current step and returns the length of the pretext.
     /// </summary>
     /// <param name="step">Current step</param>
     /// <returns>The length of the pretext</returns>
     private static void WriteStep(CurrentStep step)
     {
         if (step == CurrentStep.None) return;
-        
-        var label = Regex.Replace(
-            step.ToString(),
-            @"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])",
-            " "
-        );
 
-        Console.Write($"[{label}] ");
+        Console.Write($"[{StepLabels[step]}] ");
     }
 
-    private static void WriteConsoleOutput<T>(T output, CurrentStep currentStep, OutputType outputType, Exception? exception, bool shouldExit)
+    private static void WriteConsoleOutput<T>(T output, CurrentStep currentStep, OutputType outputType,
+        Exception? exception, bool shouldExit)
     {
-        CurrentTime();
-        WriteStep(currentStep);
-        WriteOutputType(outputType);
-        if (output is IEnumerable enumerable && !(output is string))
+        if (Program.Config.DisableColorOutput)
         {
-            Console.Write(string.Join(", ", enumerable.Cast<object>()));
+            Console.Write($"[{DateTime.Now:MM/dd/yyyy HH:mm:ss}] [{StepLabels[currentStep]}] [{outputType}] ");
         }
         else
         {
-            Console.Write(output);
+            CurrentTime();
+            WriteStep(currentStep);
+            WriteOutputType(outputType);
         }
-        
+        if (output is IEnumerable enumerable && !(output is string))
+            Console.Write(string.Join(", ", enumerable.Cast<object>()));
+        else
+            Console.Write(output);
+
         if (exception == null)
         {
             Console.WriteLine();
             return;
         }
+
         ExceptionOccurred = true;
         ExceptionsList.AddLast(exception);
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
-        
+
         if (!shouldExit || SuppressProcessExitForTests) return;
         Thread.Sleep(TimeSpan.FromSeconds(5));
         Environment.Exit(1);

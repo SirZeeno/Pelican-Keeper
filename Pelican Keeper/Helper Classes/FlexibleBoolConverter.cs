@@ -4,7 +4,8 @@ using System.Text.Json.Serialization;
 namespace Pelican_Keeper.Helper_Classes;
 
 /// <summary>
-/// This Class is a conversion class to allow the use of other formats of booleans in the config to account for issues with Pelican Panel and allow more flexibility
+///     This Class is a conversion class to allow the use of other formats of booleans in the config to account for issues
+///     with Pelican Panel and allow more flexibility
 /// </summary>
 public class FlexibleBoolConverter : JsonConverter<bool>
 {
@@ -19,7 +20,7 @@ public class FlexibleBoolConverter : JsonConverter<bool>
                 return false;
 
             case JsonTokenType.Number:
-                if (reader.TryGetInt32(out int intValue))
+                if (reader.TryGetInt32(out var intValue))
                     return intValue != 0;
                 break;
 

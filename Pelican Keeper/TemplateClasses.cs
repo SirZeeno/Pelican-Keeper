@@ -1,136 +1,124 @@
 ﻿using System.Text.Json.Serialization;
-using Pelican_Keeper.Helper_Classes;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Pelican_Keeper;
 
 public abstract class TemplateClasses
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum MessageFormat
-    {
-        PerServer,
-        Consolidated,
-        Paginated,
-        None
-    }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum MessageSorting
-    {
-        Name,
-        Status,
-        Uptime,
-        None
-    }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum MessageSortingDirection
-    {
-        Ascending,
-        Descending,
-        None
-    }
-    
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CommandExecutionMethod
     {
         MinecraftJava,
         MinecraftBedrock,
+        MinecraftMixed,
         Rcon,
         A2S,
         Terraria //TODO: Still need to implement this
     }
 
-    //TODO: for Server status in the template class, so i dont have to compare the literal string but instead use a enum which is more predicatable
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum MessageFormat
+    {
+        PerServer,
+        Consolidated,
+        Paginated
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum MessageSorting
+    {
+        Name,
+        Status,
+        Uptime
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum MessageSortingDirection
+    {
+        Ascending,
+        Descending
+    }
+    
     public enum ServerStatus
     {
         Online,
         Offline,
         Paused,
         Starting,
-        Stopping
+        Stopping,
+        Missing
     }
-    
-    public record Secrets
-    (
+
+    public record Secrets(
         string? ClientToken,
-        string? ServerToken,
         string? ServerUrl,
         string? BotToken,
         ulong[]? ChannelIds,
         string? ExternalServerIp
     );
-    
+
     public class Config
     {
-        public string? InternalIpStructure { get; init; }
-        public MessageFormat MessageFormat { get; set; } = MessageFormat.None;
-        public MessageSorting MessageSorting { get; init; } = MessageSorting.None;
-        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.None;
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool IgnoreOfflineServers { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
+        private readonly int _markdownUpdateInterval = 30;
+        private readonly int _serverUpdateInterval = 10;
+        public string? InternalIpStructure { get; init; } = "192.168.*.*";
+        public MessageFormat MessageFormat { get; set; } = MessageFormat.Consolidated;
+        public MessageSorting MessageSorting { get; init; } = MessageSorting.Name;
+        public MessageSortingDirection MessageSortingDirection { get; init; } = MessageSortingDirection.Ascending;
+        public bool IgnoreOfflineServers { get; set; }
         public bool IgnoreInternalServers { get; set; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool IgnoreServersWithoutAllocations { get; init; }
-        public string[]? ServersToIgnore { get; set; }
-        
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool JoinableIpDisplay { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool PlayerCountDisplay { get; init; }
-        public string[]? ServersToMonitor { get; init; }
-        
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool AutomaticShutdown { get; init; }
-        public string[]? ServersToAutoShutdown { get; init; }
-        public string? EmptyServerTimeout { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool AllowUserServerStartup { get; init; }
-        public string[]? AllowServerStartup { get; init; }
-        public string[]? UsersAllowedToStartServers { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
-        public bool AllowUserServerStopping { get; init; }
-        public string[]? AllowServerStopping { get; init; }
-        public string[]? UsersAllowedToStopServers { get; init; }
+        public bool AdminViewServerList { get; init; }
+        public bool IgnoreServersWithoutAllocations { get; init; } = true;
+        public string[]? ServersToIgnore { get; set; } = [];
 
-        [JsonConverter(typeof(FlexibleBoolConverter))]
+        public bool JoinableIpDisplay { get; init; }
+        public bool PlayerCountDisplay { get; init; }
+        public string[]? ServersToMonitor { get; init; } = [];
+
+        public bool AutomaticShutdown { get; init; }
+        public string[]? ServersToAutoShutdown { get; init; } = [];
+        public string? EmptyServerTimeout { get; init; } = "00:01:00";
+        public bool AllowUserServerStartup { get; init; } = true;
+        public string[]? AllowServerStartup { get; init; } = [];
+        public string[]? UsersAllowedToStartServers { get; init; } = [];
+        public bool AllowUserServerStopping { get; init; } = true;
+        public string[]? AllowServerStopping { get; init; } = [];
+        public string[]? UsersAllowedToStopServers { get; init; } = [];
+
         public bool ContinuesMarkdownRead { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool ContinuesGamesToMonitorRead { get; init; }
-        private readonly int _markdownUpdateInterval;
-        public int MarkdownUpdateInterval 
+
+        public int MarkdownUpdateInterval
         {
             get => _markdownUpdateInterval;
             init => _markdownUpdateInterval = Math.Max(value, 10);
         }
-        private readonly int _serverUpdateInterval;
+
         public int ServerUpdateInterval
         {
             get => _serverUpdateInterval;
             init => _serverUpdateInterval = Math.Max(value, 10);
         }
-        
-        [JsonConverter(typeof(FlexibleBoolConverter))]
+
         public bool LimitServerCount { get; set; }
-        public int MaxServerCount { get; set; }
-        public string[]? ServersToDisplay { get; init; }
-        
-        [JsonConverter(typeof(FlexibleBoolConverter))]
+        public int MaxServerCount { get; set; } = 10;
+        public string[]? ServersToDisplay { get; init; } = [];
+
+        public string? CustomDateTimeFormat { get; init; } = "HH:mm:ss";
+
         public bool Debug { get; set; }
         public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;
-        [JsonConverter(typeof(FlexibleBoolConverter))]
+        public bool DisableColorOutput { get; init; }
         public bool DryRun { get; init; }
-        [JsonConverter(typeof(FlexibleBoolConverter))]
         public bool AutoUpdate { get; init; }
     }
-    
+
     public class ServerInfo
     {
         public int Id { get; init; }
         public string Uuid { get; init; } = null!;
         public string Name { get; init; } = null!;
-        public EggInfo Egg { get; init; } = null!;
+        public string EggName { get; init; } = null!;
         public ServerResources? Resources { get; set; }
         public List<ServerAllocation>? Allocations { get; set; }
         public string? PlayerCountText { get; set; }
@@ -138,9 +126,9 @@ public abstract class TemplateClasses
 
     public record ServerResources
     {
-        public string CurrentState { get; init; } = null!;
+        public ServerStatus CurrentState { get; init; } = ServerStatus.Offline;
         public long MemoryBytes { get; init; }
-        public long MemoryMaximum { get;  init; }
+        public long MemoryMaximum { get; init; }
         public double CpuAbsolute { get; init; }
         public double CpuMaximum { get; init; }
         public long DiskBytes { get; init; }
@@ -149,28 +137,27 @@ public abstract class TemplateClasses
         public long NetworkTxBytes { get; init; }
         public long Uptime { get; init; }
     }
-    
+
     public class ServerAllocation
     {
-        public string Uuid { get; init; } = null!;
         public string Ip { get; init; } = null!;
         public int Port { get; init; }
         public bool IsDefault { get; init; }
     }
-    
+
     public class LiveMessageJsonStorage
     {
         public HashSet<ulong>? LiveStore { get; set; } = new();
         public Dictionary<ulong, int>? PaginatedLiveStore { get; set; } = new();
     }
-    
+
     public class ServerViewModel
     {
         public string PlayerCount { get; set; } = null!;
         public string IpAndPort { get; set; } = null!;
         public string? Uuid { get; set; }
         public string ServerName { get; init; } = null!;
-        public string Status { get; set; } = null!;
+        public ServerStatus Status { get; set; } = ServerStatus.Offline;
         public string StatusIcon { get; set; } = null!;
         public string Cpu { get; set; } = null!;
         public string MaxCpu { get; set; } = null!;
@@ -182,11 +169,12 @@ public abstract class TemplateClasses
         public string NetworkTx { get; set; } = null!;
         public string Uptime { get; set; } = null!;
     }
-    
+
     public class GamesToMonitor
     {
         public string Game { get; init; } = null!;
         public CommandExecutionMethod Protocol { get; init; }
+        public string? ConfigLocation { get; init; }
         public string? RconPortVariable { get; set; }
         public string? RconPasswordVariable { get; set; }
         public string? RconPassword { get; set; }
@@ -196,7 +184,7 @@ public abstract class TemplateClasses
         public string? MaxPlayer { get; set; }
         public string? PlayerCountExtractRegex { get; set; }
     }
-    
+
     public class EggInfo
     {
         public int Id { get; init; }

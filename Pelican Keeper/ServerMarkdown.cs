@@ -1,22 +1,32 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using DSharpPlus.Entities;
 using Pelican_Keeper.Helper_Classes;
 
 namespace Pelican_Keeper;
+using Validators;
 
 using static ConversionHelpers;
 
-
 public static class ServerMarkdown
 {
-    private record PreprocessedTemplate(string Body, Dictionary<string, string> Tags);
-    private static readonly string MessageMarkdownPath = FileManager.GetFilePath("MessageMarkdown.txt"); //TODO: Add error handling for missing file and Validation for correct format
-    private static string _templateText = File.ReadAllText(MessageMarkdownPath);
+    private static readonly string
+        MessageMarkdownPath =
+            FileManager.GetFilePath(
+                "MessageMarkdown.txt");
+
+    private static string _templateText = null!;
+
+    public static async Task ReadMarkdownFile()
+    {
+        _templateText = await File.ReadAllTextAsync(MessageMarkdownPath);
+        if (MessageMarkdownPath != string.Empty) return;
+        Console.WriteLine("MessageMarkdown.txt not found. Pulling Default from Github!");
+        await FileManager.CreateMessageMarkdownFile();
+    }
 
     /// <summary>
-    /// Processes [Tag]...[/Tag] blocks, replaces placeholders inside them,
-    /// and removes them from the final template body.
+    ///     Processes [Tag]...[/Tag] blocks, replaces placeholders inside them,
+    ///     and removes them from the final template body.
     /// </summary>
     /// <param name="model">The template model to use</param>
     /// <returns>A preprocessed template</returns>
@@ -25,13 +35,13 @@ public static class ServerMarkdown
         var tagDict = new Dictionary<string, string>();
 
         var tagRegex = new Regex(@"\[(\w+)](.*?)\[/\1]", RegexOptions.Singleline);
-    
-        string strippedTemplate = tagRegex.Replace(_templateText, match =>
-        {
-            string tag = match.Groups[1].Value;
-            string content = match.Groups[2].Value;
 
-            string rendered = ReplacePlaceholders(content, model);
+        var strippedTemplate = tagRegex.Replace(_templateText, match =>
+        {
+            var tag = match.Groups[1].Value;
+            var content = match.Groups[2].Value;
+
+            var rendered = ReplacePlaceholders(content, model);
 
             tagDict[tag] = rendered.Trim();
             return ""; // removes the tagged content from the final template body
@@ -41,7 +51,7 @@ public static class ServerMarkdown
     }
 
     /// <summary>
-    /// Replaces {{VariableName}} placeholders in text using reflection on the model.
+    ///     Replaces {{VariableName}} placeholders in text using reflection on the model.
     /// </summary>
     /// <param name="text">Input text</param>
     /// <param name="model">The template model to use</param>
@@ -59,14 +69,16 @@ public static class ServerMarkdown
     }
 
     /// <summary>
-    /// Parses the message template and returns the final message and server title.
+    ///     Parses the message template and returns the final message and server title.
     /// </summary>
     /// <param name="serverResponse">The server response</param>
     /// <returns>A tuple containing the final message and server title</returns>
     public static (string message, string serverName) ParseTemplate(TemplateClasses.ServerInfo serverResponse)
     {
         if (serverResponse.Resources == null) throw new ArgumentException("Server Resource response cannot be null.");
-        
+        MarkdownValidator.ValidateMarkdown(_templateText);
+        TextInfo textInfo = CultureInfo.CurrentCulture.TextInfo;
+
         var viewModel = new TemplateClasses.ServerViewModel
         {
             Uuid = serverResponse.Uuid,
@@ -76,40 +88,50 @@ public static class ServerMarkdown
             Cpu = $"{serverResponse.Resources.CpuAbsolute:0.00}%",
             MaxCpu = DynamicallyAddPercentSign(IfZeroThenInfinite($"{serverResponse.Resources.CpuMaximum:0.00}")),
             Memory = FormatBytes(serverResponse.Resources.MemoryBytes),
-            MaxMemory = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.MemoryMaximum).ToString(CultureInfo.InvariantCulture)),
+            MaxMemory = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.MemoryMaximum * 1048576)
+                .ToString(CultureInfo.InvariantCulture)),
             Disk = FormatBytes(serverResponse.Resources.DiskBytes),
-            MaxDisk = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.DiskMaximum).ToString(CultureInfo.InvariantCulture)),
+            MaxDisk = IfZeroThenInfinite(FormatBytes(serverResponse.Resources.DiskMaximum * 1048576)
+                .ToString(CultureInfo.InvariantCulture)),
             NetworkRx = FormatBytes(serverResponse.Resources.NetworkRxBytes),
             NetworkTx = FormatBytes(serverResponse.Resources.NetworkTxBytes),
             Uptime = FormatUptime(serverResponse.Resources.Uptime)
         };
 
-        if (Program.Config.JoinableIpDisplay) viewModel.IpAndPort = ExtractorHelpers.GetReadableConnectableAddress(serverResponse);
-        
-        if (Program.Config.PlayerCountDisplay) viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText) ? "N/A" : serverResponse.PlayerCountText;
+        if (Program.Config.JoinableIpDisplay)
+            viewModel.IpAndPort = ExtractorHelpers.GetReadableConnectableAddress(serverResponse);
+
+        if (Program.Config.PlayerCountDisplay)
+            viewModel.PlayerCount = string.IsNullOrEmpty(serverResponse.PlayerCountText)
+                ? "N/A"
+                : serverResponse.PlayerCountText;
 
         var result = PreprocessTemplateTags(viewModel);
         var serverName = result.Tags.GetValueOrDefault("Title", "Default Title");
         var message = ReplacePlaceholders(result.Body, viewModel);
 
-        ConsoleExt.WriteLine($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}", ConsoleExt.CurrentStep.Markdown, ConsoleExt.OutputType.Debug);
+        ConsoleExt.WriteLine($"Server: {viewModel.ServerName}, Message Character Count: {message.Length}",
+            ConsoleExt.CurrentStep.Markdown, ConsoleExt.OutputType.Debug);
 
         return (message, serverName);
     }
-    
-    public static void GetMarkdownFileContentAsync()
+
+    public static void GetMarkdownFileContentRoutine()
     {
         Task.Run(async () =>
         {
             while (Program.Config.ContinuesMarkdownRead)
             {
-                _templateText = await File.ReadAllTextAsync(MessageMarkdownPath);
+                if (_templateText == string.Empty)
+                {
+                    _templateText = await File.ReadAllTextAsync(MessageMarkdownPath);
+                }
                 await Task.Delay(TimeSpan.FromSeconds(Program.Config.MarkdownUpdateInterval));
             }
         });
     }
-    
-    internal static string FormatBytes(long bytes)
+
+    private static string FormatBytes(long bytes)
     {
         const long kb = 1024;
         const long mb = kb * 1024;
@@ -125,21 +147,25 @@ public static class ServerMarkdown
             _ => $"{bytes} B"
         };
     }
-    
-    internal static string FormatUptime(long uptimeMs)
+
+    private static string FormatUptime(long uptimeMs)
     {
         var uptime = TimeSpan.FromMilliseconds(uptimeMs);
         return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m";
     }
 
-    public static string GetStatusIcon(string status)
+    private static string GetStatusIcon(TemplateClasses.ServerStatus status)
     {
-        return status.ToLower() switch
+        return status switch
         {
-            "offline" => "🔴",
-            "missing" => "🟡",
-            "running" => "🟢",
+            TemplateClasses.ServerStatus.Offline => "🔴",
+            TemplateClasses.ServerStatus.Paused => "🟡",
+            TemplateClasses.ServerStatus.Starting => "🟡",
+            TemplateClasses.ServerStatus.Stopping => "🟡",
+            TemplateClasses.ServerStatus.Online => "🟢",
             _ => "⚪"
         };
     }
+
+    private record PreprocessedTemplate(string Body, Dictionary<string, string> Tags);
 }
