@@ -173,7 +173,7 @@ cat > "$CONFIG" <<EOF
   "MessageSortingDirection": $(str_json "$MESSAGE_SORTING_DIRECTION"),
   "IgnoreOfflineServers": $(bool_to_json "$IGNORE_OFFLINE_SERVERS"),
   "IgnoreInternalServers": $(bool_to_json "$IGNORE_INTERNAL_SERVERS"),
-  "AdminViewServerList": $(bool_to_json "ADMIN_VIEW_SERVER_LIST"),
+  "AdminViewServerList": $(bool_to_json "$ADMIN_VIEW_SERVER_LIST"),
   "IgnoreServersWithoutAllocations": $(bool_to_json "$IGNORE_SERVERS_WITHOUT_ALLOCATIONS"),
   "ServersToIgnore": $SERVERS_TO_IGNORE_JSON,
 
@@ -199,11 +199,11 @@ cat > "$CONFIG" <<EOF
   "LimitServerCount": $(bool_to_json "$LIMIT_SERVER_COUNT"),
   "MaxServerCount": $(num_or_default "$MAX_SERVER_COUNT" 10),
   "ServersToDisplay": $SERVERS_TO_DISPLAY_JSON,
-  "CustomDateTimeFormat": $(str_json "CUSTOM_DATE_TIME_FORMAT"),
+  "CustomDateTimeFormat": $(str_json "$CUSTOM_DATE_TIME_FORMAT"),
 
   "Debug": $(bool_to_json "$DEBUG"),
   "OutputMode": $(str_json "$OUTPUT_MODE"),
-  "DisableColorOutput": $(bool_to_json "DISABLE_COLOR_OUTPUT"),
+  "DisableColorOutput": $(bool_to_json "$DISABLE_COLOR_OUTPUT"),
   "DryRun": $(bool_to_json "$DRY_RUN"),
   "AutoUpdate": $(bool_to_json "$AUTO_UPDATE")
 }
