@@ -97,7 +97,7 @@ public static class PelicanInterface
     
     private static RestResponse GetServerList()
     {
-        var apiExtension = Program.Config.AdminViewServerList ? "/api/client/?type=admin-all&include=egg" : "/api/client/?include=egg";
+        var apiExtension = Program.Config.AdminViewServerList ? "/api/client/?include=egg&type=admin-all" : "/api/client/?include=egg";
         var client = new RestClient(Program.Secrets.ServerUrl + apiExtension);
         var response = CreateRequest(client, Program.Secrets.ClientToken);
 

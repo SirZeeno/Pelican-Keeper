@@ -159,6 +159,7 @@ using static DiscordInteractions;
 ///     V3.0.12
 ///     Version bump
 ///     Fixed an issue with Pelican where the space in the Update Scripts folder would cause issues.
+///     Fixed an issue with the Pelican API not returning admin servers when the AdminViewServerList config option is enabled.
 ///     
 /// </summary>
 
@@ -189,7 +190,7 @@ public static class Program
         Config.MaxServerCount = 20;
         Config.IgnoreInternalServers = true;
         Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1","c76c19e3-85f4-41b1-9cd4-0699dfcc78e9"];
-        Config.IgnoreOfflineServers = false;
+        Config.IgnoreOfflineServers = true;
 #endif
 
         WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
