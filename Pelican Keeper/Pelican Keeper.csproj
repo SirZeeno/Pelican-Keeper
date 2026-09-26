@@ -40,27 +40,27 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Update Scripts\Bare Metal\Install.sh">
+        <None Update="Update_Scripts\Bare_Metal\Install.sh">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Update Scripts\Bare Metal\startup.sh">
+        <None Update="Update_Scripts\Bare_Metal\startup.sh">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Update Scripts\Pelican\update.sh">
+        <None Update="Update_Scripts\Pelican\update.sh">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Update Scripts\Pelican\startup.sh">
+        <None Update="Update_Scripts\Pelican\startup.sh">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Update Scripts\Pelican\update_config.sh">
+        <None Update="Update_Scripts\Pelican\update_config.sh">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
-        <None Update="Game Icons\Index.json">
+        <None Update="Game_Icons\Index.json">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
