@@ -151,6 +151,7 @@ using static DiscordInteractions;
 ///     Reverted a change made to the GamesToMonitor JSON file that changed the rcon password retrieval method for factorio because it was wrong.
 ///     Changed the IgnoreOtherUserServers config option to AdminViewServerList since other users can create API keys as well and AdminViewServerList uses admin rights and is a more accurate name for the option.
 ///     Changed default file links to like to the main branch instead of the testing branch
+///     Fixed a GitHub Actions issue where the dotnet.yml workflow would fail to create release due to checkout not being included.
 ///     
 /// </summary>
 
