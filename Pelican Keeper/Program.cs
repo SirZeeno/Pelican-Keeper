@@ -156,6 +156,9 @@ using static DiscordInteractions;
 ///     Updated the update_config.sh to include the new variables
 ///     Updated Egg to include the new config variables
 ///     version bump
+///     V3.0.12
+///     Version bump
+///     Fixed an issue with Pelican where the space in the Update Scripts folder would cause issues.
 ///     
 /// </summary>
 
