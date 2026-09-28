@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Pelican_Keeper.Helper_Classes;
 using Pelican_Keeper.Interfaces;
+using Pelican_Keeper.Logging;
 using Pelican_Keeper.Query_Services;
 using RestSharp;
 

@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using Pelican_Keeper.Logging;
 using RestSharp;
 
 namespace Pelican_Keeper.Helper_Classes;

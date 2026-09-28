@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
+using Pelican_Keeper.Logging;
 using static Pelican_Keeper.TemplateClasses;
 
 namespace Pelican_Keeper;

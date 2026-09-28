@@ -1,14 +1,12 @@
 ﻿using System.Collections;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Pelican_Keeper.Helper_Classes;
+using Serilog;
 
-namespace Pelican_Keeper;
+namespace Pelican_Keeper.Logging;
 
-/// <summary>
-///     TODOs
-///     Work on optimizing the console output to be less laggy on slower systems due to the constant write outputs even per
-///     message
-/// </summary>
+//TODO: Add a running log file so if any issues happen while not being watched, logs persist to see what happened.
 public static class ConsoleExt
 {
     // This is changeable to be whatever necessary
@@ -64,7 +62,7 @@ public static class ConsoleExt
     public static bool SuppressProcessExitForTests { get; set; }
     
     /// <summary>
-    ///     Writes a line to the console with a pretext based on the output type.
+    ///     Writes a line to the console and log file with a pretext based on the output type.
     /// </summary>
     /// <param name="output">Output</param>
     /// <param name="currentStep">Current step, default is Ignore</param>
@@ -78,6 +76,9 @@ public static class ConsoleExt
         OutputType outputType = OutputType.Info, Exception? exception = null, bool shouldBypassDebug = false,
         bool shouldExit = false)
     {
+        // Always write to the log file, regardless of console filtering.
+        WriteLogOutput(output, currentStep, outputType, exception);
+
         // It shouldn't write it if the output is not info or error and the debug is off and no bypass is set
         if (outputType != OutputType.Error && outputType != OutputType.Info && !Program.Config.Debug &&
             !shouldBypassDebug) return;
@@ -113,10 +114,66 @@ public static class ConsoleExt
     }
 
     /// <summary>
+    ///     Writes the complete output to Serilog regardless of console filtering.
+    /// </summary>
+    /// <param name="output">Output</param>
+    /// <param name="currentStep">Current step, default is Ignore</param>
+    /// <param name="outputType">Output type, default is info</param>
+    /// <param name="exception">Exception, default is null</param>
+    /// <typeparam name="T">Any type</typeparam>
+    private static void WriteLogOutput<T>(T output, CurrentStep currentStep, OutputType outputType,
+        Exception? exception)
+    {
+        var message = output is IEnumerable enumerable && output is not string
+            ? string.Join(", ", enumerable.Cast<object>())
+            : output?.ToString() ?? string.Empty;
+
+        var stepLabel = currentStep == CurrentStep.None
+            ? "None"
+            : StepLabels[currentStep];
+
+        switch (outputType)
+        {
+            case OutputType.Error:
+                Log.Error(
+                    exception,
+                    "[{Step}] {Message}",
+                    stepLabel,
+                    message);
+                break;
+
+            case OutputType.Warning:
+                Log.Warning(
+                    exception,
+                    "[{Step}] {Message}",
+                    stepLabel,
+                    message);
+                break;
+
+            case OutputType.Debug:
+                Log.Debug(
+                    exception,
+                    "[{Step}] {Message}",
+                    stepLabel,
+                    message);
+                break;
+
+            case OutputType.Info:
+            case OutputType.None:
+            default:
+                Log.Information(
+                    exception,
+                    "[{Step}] {Message}",
+                    stepLabel,
+                    message);
+                break;
+        }
+    }
+
+    /// <summary>
     ///     Determines the output type and writes it in the appropriate color.
     /// </summary>
     /// <param name="outputType">Output type</param>
-    /// <returns>The length of the pretext</returns>
     private static void WriteOutputType(OutputType outputType)
     {
         var (color, label) = outputType switch
@@ -135,7 +192,8 @@ public static class ConsoleExt
     private static void CurrentTime()
     {
         Console.ForegroundColor = ConsoleColor.White;
-        Console.Write($"[{DateTime.Now:MM/dd/yyyy HH:mm:ss}] ");
+        DateTime time = Program.Config.CustomTimeZone != null ? TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneHelper.TryFindSystemTimeZoneByAbbreviation(Program.Config.CustomTimeZone)) : DateTime.Now;
+        Console.Write($"[{time:MM/dd/yyyy HH:mm:ss}] ");
         Console.ResetColor();
     }
 
@@ -143,7 +201,6 @@ public static class ConsoleExt
     ///     Determines the current step and returns the length of the pretext.
     /// </summary>
     /// <param name="step">Current step</param>
-    /// <returns>The length of the pretext</returns>
     private static void WriteStep(CurrentStep step)
     {
         if (step == CurrentStep.None) return;
@@ -156,7 +213,8 @@ public static class ConsoleExt
     {
         if (Program.Config.DisableColorOutput)
         {
-            Console.Write($"[{DateTime.Now:MM/dd/yyyy HH:mm:ss}] [{StepLabels[currentStep]}] [{outputType}] ");
+            DateTime time = Program.Config.CustomTimeZone != null ? TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneHelper.TryFindSystemTimeZoneByAbbreviation(Program.Config.CustomTimeZone)) : DateTime.Now;
+            Console.Write($"[{time:MM/dd/yyyy HH:mm:ss}] [{StepLabels[currentStep]}] [{outputType}] ");
         }
         else
         {
@@ -164,6 +222,7 @@ public static class ConsoleExt
             WriteStep(currentStep);
             WriteOutputType(outputType);
         }
+
         if (output is IEnumerable enumerable && !(output is string))
             Console.Write(string.Join(", ", enumerable.Cast<object>()));
         else
@@ -180,6 +239,7 @@ public static class ConsoleExt
         Console.WriteLine($"\nException: {exception.Message}\nStack Trace: {exception.StackTrace}");
 
         if (!shouldExit || SuppressProcessExitForTests) return;
+
         Thread.Sleep(TimeSpan.FromSeconds(5));
         Environment.Exit(1);
     }

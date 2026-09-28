@@ -143,6 +143,7 @@ LIMIT_SERVER_COUNT="${LIMIT_SERVER_COUNT:-0}"
 MAX_SERVER_COUNT="${MAX_SERVER_COUNT:-10}"
 SERVERS_TO_DISPLAY_CSV="${SERVERS_TO_DISPLAY:-UUIDS HERE}"
 CUSTOM_DATE_TIME_FORMAT="${CUSTOM_DATE_TIME_FORMAT:-HH:mm:ss}"
+CUSTOM_TIME_ZONE="${CUSTOM_TIME_ZONE:-EST}"
 
 DEBUG="${DEBUG:-0}"
 OUTPUT_MODE="${OUTPUT_MODE:-None}"
@@ -199,7 +200,9 @@ cat > "$CONFIG" <<EOF
   "LimitServerCount": $(bool_to_json "$LIMIT_SERVER_COUNT"),
   "MaxServerCount": $(num_or_default "$MAX_SERVER_COUNT" 10),
   "ServersToDisplay": $SERVERS_TO_DISPLAY_JSON,
+  
   "CustomDateTimeFormat": $(str_json "$CUSTOM_DATE_TIME_FORMAT"),
+  "CustomTimeZone": $(str_json "CUSTOM_TIME_ZONE"),
 
   "Debug": $(bool_to_json "$DEBUG"),
   "OutputMode": $(str_json "$OUTPUT_MODE"),

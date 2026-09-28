@@ -1,4 +1,5 @@
 ﻿using Pelican_Keeper.Interfaces;
+using Pelican_Keeper.Logging;
 
 namespace Pelican_Keeper.Query_Services;
 

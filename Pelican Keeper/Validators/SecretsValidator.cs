@@ -1,3 +1,5 @@
+using Pelican_Keeper.Logging;
+
 namespace Pelican_Keeper.Validators;
 
 public static class SecretsValidator

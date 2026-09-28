@@ -1,5 +1,6 @@
 ﻿using Pelican_Keeper;
 using Pelican_Keeper.Helper_Classes;
+using Pelican_Keeper.Logging;
 using RestSharp;
 
 namespace Pelican_Keeper_Unit_Testing;

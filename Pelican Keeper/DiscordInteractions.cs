@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
+using Pelican_Keeper.Logging;
 using Pelican_Keeper.Update_Loop_Structures;
 using static Pelican_Keeper.TemplateClasses;
 

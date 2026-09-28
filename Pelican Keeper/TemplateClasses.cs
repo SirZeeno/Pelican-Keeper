@@ -1,4 +1,6 @@
 ﻿using System.Text.Json.Serialization;
+using Pelican_Keeper.Logging;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Pelican_Keeper;
@@ -105,6 +107,7 @@ public abstract class TemplateClasses
         public string[]? ServersToDisplay { get; init; } = [];
 
         public string? CustomDateTimeFormat { get; init; } = "HH:mm:ss";
+        public string? CustomTimeZone { get; init; } = "EST";
 
         public bool Debug { get; set; }
         public ConsoleExt.OutputType OutputMode { get; init; } = ConsoleExt.OutputType.None;

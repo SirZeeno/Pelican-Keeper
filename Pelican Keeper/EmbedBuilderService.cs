@@ -1,4 +1,6 @@
 ﻿using DSharpPlus.Entities;
+using Pelican_Keeper.Helper_Classes;
+using Pelican_Keeper.Logging;
 
 namespace Pelican_Keeper;
 
@@ -21,14 +23,16 @@ public class
             ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
 
+        DateTime time = Program.Config.CustomTimeZone != null ? TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneHelper.TryFindSystemTimeZoneByAbbreviation(Program.Config.CustomTimeZone)) : DateTime.Now;
+        
         if (!string.IsNullOrWhiteSpace(Program.Config.CustomDateTimeFormat) &&
             !string.IsNullOrEmpty(Program.Config.CustomDateTimeFormat))
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter
-                { Text = $"Last Updated: {DateTime.Now.ToString(Program.Config.CustomDateTimeFormat)}" };
+                { Text = $"Last Updated: {time.ToString(Program.Config.CustomDateTimeFormat)}" };
         else
-            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {time:HH:mm:ss}" };
 
-        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding,
+        ConsoleExt.WriteLine("Last Updated: " + time.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding,
             ConsoleExt.OutputType.Debug);
         ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}",
             ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
@@ -51,10 +55,17 @@ public class
             ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
             ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
         }
+        
+        DateTime time = Program.Config.CustomTimeZone != null ? TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneHelper.TryFindSystemTimeZoneByAbbreviation(Program.Config.CustomTimeZone)) : DateTime.Now;
 
-        embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
+        if (!string.IsNullOrWhiteSpace(Program.Config.CustomDateTimeFormat) &&
+            !string.IsNullOrEmpty(Program.Config.CustomDateTimeFormat))
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter
+                { Text = $"Last Updated: {time.ToString(Program.Config.CustomDateTimeFormat)}" };
+        else
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {time:HH:mm:ss}" };
 
-        ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding,
+        ConsoleExt.WriteLine("Last Updated: " + time.ToString("HH:mm:ss"), ConsoleExt.CurrentStep.EmbedBuilding,
             ConsoleExt.OutputType.Debug);
         ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}",
             ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
@@ -78,10 +89,17 @@ public class
                 ConsoleExt.WriteLine(serverInfo.serverName, ConsoleExt.CurrentStep.EmbedBuilding);
                 ConsoleExt.WriteLine(serverInfo.message, ConsoleExt.CurrentStep.EmbedBuilding);
             }
+            
+            DateTime time = Program.Config.CustomTimeZone != null ? TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneHelper.TryFindSystemTimeZoneByAbbreviation(Program.Config.CustomTimeZone)) : DateTime.Now;
 
-            embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {DateTime.Now:HH:mm:ss}" };
+            if (!string.IsNullOrWhiteSpace(Program.Config.CustomDateTimeFormat) &&
+                !string.IsNullOrEmpty(Program.Config.CustomDateTimeFormat))
+                embed.Footer = new DiscordEmbedBuilder.EmbedFooter
+                    { Text = $"Last Updated: {time.ToString(Program.Config.CustomDateTimeFormat)}" };
+            else
+                embed.Footer = new DiscordEmbedBuilder.EmbedFooter { Text = $"Last Updated: {time:HH:mm:ss}" };
 
-            ConsoleExt.WriteLine("Last Updated: " + DateTime.Now.ToString("HH:mm:ss"),
+            ConsoleExt.WriteLine("Last Updated: " + time.ToString("HH:mm:ss"),
                 ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);
             ConsoleExt.WriteLine($"Embed character count: {EmbedBuilderHelper.GetEmbedCharacterCount(embed)}",
                 ConsoleExt.CurrentStep.EmbedBuilding, ConsoleExt.OutputType.Debug);

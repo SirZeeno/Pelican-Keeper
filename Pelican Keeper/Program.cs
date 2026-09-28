@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
+using Pelican_Keeper.Logging;
 using Pelican_Keeper.Update_Loop_Structures;
 
 namespace Pelican_Keeper;
@@ -161,6 +162,11 @@ using static DiscordInteractions;
 ///     Fixed an issue with Pelican where the space in the Update Scripts folder would cause issues.
 ///     Fixed an issue with the Pelican API not returning admin servers when the AdminViewServerList config option is enabled.
 ///     Change some A2S console outputs to debug output
+///     V3.0.13
+///     Fixed Custom Time Format not being applied in Per-Server, and Paginated Message formats
+///     Added Custom TimeZone option to config for the console output and embed footer (abbreviations with multiple meanings are currently not supported (eg. CST))
+///     Added Serlilog file sinks to allow for Rolling file logs for cases where the bot crashes without being noticed.
+///     Updated Packages
 ///     
 /// </summary>
 
@@ -177,45 +183,61 @@ public static class Program
     private static async Task Main()
     {
         _targetChannel = [];
+        LogConfiguration.Initialize();
 
-        await FileManager.ReadConfigFile();
-        await FileManager.ReadSecretsFile();
-        await ServerMarkdown.ReadMarkdownFile();
-        ServerMarkdown.GetMarkdownFileContentRoutine();
-        GetGamesToMonitorFileAsync();
+        try
+        {
+            await FileManager.ReadConfigFile();
+            await FileManager.ReadSecretsFile();
+            await ServerMarkdown.ReadMarkdownFile();
+            ServerMarkdown.GetMarkdownFileContentRoutine();
+            GetGamesToMonitorFileAsync();
 
 #if DEBUG
-        Config.MessageFormat = MessageFormat.Consolidated;
-        Config.Debug = true;
-        Config.LimitServerCount = true;
-        Config.MaxServerCount = 20;
-        Config.IgnoreInternalServers = true;
-        Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1","c76c19e3-85f4-41b1-9cd4-0699dfcc78e9"];
-        Config.IgnoreOfflineServers = true;
-        Config.AdminViewServerList = true;
+            Config.MessageFormat = MessageFormat.Consolidated;
+            Config.Debug = true;
+            Config.LimitServerCount = true;
+            Config.MaxServerCount = 20;
+            Config.IgnoreInternalServers = true;
+            Config.ServersToIgnore = ["40715309-bc34-4697-9625-3b0576e600b1", "c76c19e3-85f4-41b1-9cd4-0699dfcc78e9"];
+            Config.IgnoreOfflineServers = true;
+            Config.AdminViewServerList = true;
 #endif
 
-        WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
+            WriteLine($"The Bot is currently on version {VersionUpdater.CurrentVersion}");
 
-        if (Config.AutoUpdate) await VersionUpdater.UpdateProgram();
+            if (Config.AutoUpdate) await VersionUpdater.UpdateProgram();
 
-        var discord = new DiscordClient(new DiscordConfiguration
+            var discord = new DiscordClient(new DiscordConfiguration
+            {
+                Token = Secrets.BotToken,
+                TokenType = TokenType.Bot,
+                Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents
+            });
+
+            discord.Ready += OnClientReady;
+            discord.MessageDeleted += OnMessageDeleted;
+            discord.ComponentInteractionCreated += OnPageFlipInteraction;
+            discord.ComponentInteractionCreated += OnServerStartInteraction;
+            discord.ComponentInteractionCreated += OnServerStopInteraction;
+            discord.ComponentInteractionCreated += OnDropDownInteraction;
+
+            await discord.ConnectAsync();
+            BotId = discord.CurrentUser.Id;
+            await Task.Delay(-1);
+        }
+        catch (Exception e)
         {
-            Token = Secrets.BotToken,
-            TokenType = TokenType.Bot,
-            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents
-        });
-
-        discord.Ready += OnClientReady;
-        discord.MessageDeleted += OnMessageDeleted;
-        discord.ComponentInteractionCreated += OnPageFlipInteraction;
-        discord.ComponentInteractionCreated += OnServerStartInteraction;
-        discord.ComponentInteractionCreated += OnServerStopInteraction;
-        discord.ComponentInteractionCreated += OnDropDownInteraction;
-
-        await discord.ConnectAsync();
-        BotId = discord.CurrentUser.Id;
-        await Task.Delay(-1);
+            WriteLine(
+                "Unhandled application exception",
+                CurrentStep.Initialization,
+                OutputType.Error,
+                e);
+        }
+        finally
+        {
+            LogConfiguration.Close();
+        }
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Pelican_Keeper;
+using Pelican_Keeper.Logging;
 
 namespace Pelican_Keeper_Unit_Testing;
 
@@ -72,7 +73,7 @@ public class FileReadingTesting
                 JsonConvert.SerializeObject(
                     config); //Stop testing the serialized when the things i want to test is being able to run the bot even if you misspelled something or put a wrong ID or value on the config
         await File.WriteAllTextAsync("./TestConfig.json", configJson);
-        Assert.DoesNotThrowAsync(() =>
+        await Assert.DoesNotThrowAsync(() =>
             FileManager.ReadConfigFile(
                 "./TestConfig.json")); //TODO: change this to actually run the bot and checks for exceptions or throws
     }
