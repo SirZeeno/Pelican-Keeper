@@ -221,7 +221,7 @@ public static class PelicanInterface
     ///     Processed the Server list with the settings defined in the config
     /// </summary>
     /// <param name="servers">Server Info list</param>
-    private static List<ServerInfo> ProcessServerList(List<ServerInfo> servers)
+    private static List<ServerInfo> ProcessServerList(List<ServerInfo> servers) //TODO: for the button list, the servers get filtered here, either this needs to be changed, or another method needs to be created to still retain the full list for the button list
     {
         var serversToIgnore = Program.Config.ServersToIgnore;
         if (serversToIgnore is { Length: > 0 } && serversToIgnore[0] != "UUIDS HERE")

@@ -7,6 +7,7 @@ using Pelican_Keeper.Logging;
 
 namespace Pelican_Keeper;
 
+//TODO: Rework this to not have to run on first run when you are already up to date
 public static class VersionUpdater
 {
     public static string CurrentVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "2.0.4";

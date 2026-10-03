@@ -10,6 +10,8 @@ using static ConsoleExt;
 using static HelperClass;
 using static DebugHelpers;
 
+//TODO: Add support to start offline servers when only online servers are visible.
+//TODO: Filter out offline servers from the stop list, and online servers from the start list.
 public static class ButtonCreation
 {
     private static readonly Config Config = Program.Config;

@@ -164,9 +164,10 @@ using static DiscordInteractions;
 ///     Change some A2S console outputs to debug output
 ///     V3.0.13
 ///     Fixed Custom Time Format not being applied in Per-Server, and Paginated Message formats
-///     Added Custom TimeZone option to config for the console output and embed footer (abbreviations with multiple meanings are currently not supported (eg. CST))
+///     Added a Custom TimeZone option to config for the console output and embed footer (abbreviations with multiple meanings are currently not supported (eg. CST))
 ///     Added Serlilog file sinks to allow for Rolling file logs for cases where the bot crashes without being noticed.
 ///     Updated Packages
+///     Removed the PK_DISABLE_SELF_UPDATE toggle on the pelican keeper startup script
 ///     
 /// </summary>
 

@@ -7,6 +7,5 @@ fi
 
 bash "./Update_Scripts/Pelican/update_config.sh"
 
-export PK_DISABLE_SELF_UPDATE=1
 chmod +x ./"Pelican Keeper" || true
 exec ./"Pelican Keeper"

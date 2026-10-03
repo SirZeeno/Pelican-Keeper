@@ -11,6 +11,7 @@ public static class HelperClass
     private static readonly Dictionary<string, string> LastEmbedHashes = new();
     
     //TODO: See if turning API call functions into async methods can improve performance
+    //TODO: Figure out what to do when 403 (Forbidden) occurs
     
     /// <summary>
     ///     Creates a rest request to the Pelican API and automatically retries connection failures.
