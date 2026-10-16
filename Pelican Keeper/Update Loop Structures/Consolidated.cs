@@ -22,14 +22,16 @@ public static class Consolidated
             async () =>
             {
                 var serversList = GetServersList();
-                Program.GlobalServerInfo = serversList;
-                if (serversList.Count == 0)
-                    WriteLine("No servers found on Pelican.", CurrentStep.None, OutputType.Error);
-                var uuids = serversList.Select(s => s.Uuid).ToList();
-                var embed = await Program.EmbedService.BuildMultiServerEmbed(serversList);
-                return (uuids, embed)!;
+                Program.GlobalFilteredServerInfo = serversList.Item2;
+                Program.GlobalFullServerInfo = serversList.Item1;
+                if (serversList.Item2.Count == 0)
+                    WriteLine("No servers found on Pelican that conform to your filters set in your configuration.", CurrentStep.None, OutputType.Error);
+                var filteredUuids = serversList.Item2.Select(s => s.Uuid).ToList();
+                var unfilteredUuids = serversList.Item1.Select(s => s.Uuid).ToList();
+                var embed = await Program.EmbedService.BuildMultiServerEmbed(serversList.Item2);
+                return (filteredUuids, serversList.Item1, embed)!;
             },
-            async (embedObj, uuids) =>
+            async (embedObj, uuids, fullServerList) =>
             {
                 var embed = (DiscordEmbed)embedObj;
                 if (EmbedHasChanged(uuids, embed))
@@ -42,7 +44,7 @@ public static class Consolidated
                             WriteLine($"Couldn't find existing message in {channel.Name}", CurrentStep.DiscordMessage,
                                 OutputType.Debug);
 
-                        var buttons = ButtonCreation.ConsolidatedButtonCreation(uuids);
+                        var buttons = ButtonCreation.ConsolidatedButtonCreation(fullServerList);
 
                         if (lastMessage != null && lastMessage != 0 && !config.DryRun)
                         {

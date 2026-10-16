@@ -7,7 +7,7 @@ namespace Pelican_Keeper_Unit_Testing;
 
 public class PelicanApiRequestTesting
 {
-    private List<TemplateClasses.ServerInfo>? _serverInfos;
+    private Tuple<List<TemplateClasses.ServerInfo>, List<TemplateClasses.ServerInfo>> _serverInfos = null!;
 
     [SetUp]
     public async Task Setup()
@@ -20,7 +20,6 @@ public class PelicanApiRequestTesting
 
 
     [Test]
-    [Order(1)]
     public void CanReachServer()
     {
         var client = new RestClient(Program.Secrets.ServerUrl + "/api/application/nodes/1");
@@ -31,33 +30,33 @@ public class PelicanApiRequestTesting
     }
 
     [Test]
-    [Order(2)]
+    [DependsOnTest("CanReachServer")]
     public void GetServerList()
     {
         _serverInfos = PelicanInterface.GetServersList();
-        if (_serverInfos.Count > 0) Assert.Pass();
+        if (_serverInfos.Item1.Count > 0) Assert.Pass();
         else Assert.Fail("Failed to get Game servers");
     }
 
     [Test]
-    [Order(3)]
+    [DependsOnTest("GetServerList")]
     public void GetServerResources()
     {
         if (_serverInfos == null) Assert.Fail("Server info list is null");
 
-        PelicanInterface.GetServerResources(_serverInfos![0]);
-        if (_serverInfos[0].Resources != null) Assert.Pass();
+        PelicanInterface.GetServerResources(_serverInfos!.Item1[0]);
+        if (_serverInfos.Item1[0].Resources != null) Assert.Pass();
         else Assert.Fail("Server resources are null");
     }
 
     [Test]
-    [Order(4)]
+    [DependsOnTest("GetServerResources")]
     public async Task GetServerResourcesList()
     {
         if (_serverInfos == null) Assert.Fail("Server info list is null");
 
-        await PelicanInterface.GetServerResourcesList(_serverInfos!);
-        if (_serverInfos![1].Resources != null) Assert.Pass();
+        await PelicanInterface.GetServerResourcesList(_serverInfos!.Item1);
+        if (_serverInfos.Item1[1].Resources != null) Assert.Pass();
         else Assert.Fail("Server resources are null");
     }
 }

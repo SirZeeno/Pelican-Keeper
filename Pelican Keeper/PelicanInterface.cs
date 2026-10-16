@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.Json;
-using System.Text.RegularExpressions;
+using Newtonsoft.Json.Serialization;
 using Pelican_Keeper.Helper_Classes;
 using Pelican_Keeper.Interfaces;
 using Pelican_Keeper.Logging;
@@ -22,7 +22,6 @@ public static class PelicanInterface
     private static readonly Dictionary<string, DateTime> ShutdownTracker = new();
 
     private static readonly RestResponse LocalServerListResponse = GetServerList();
-    private static readonly List<ServerInfo> ServerListResponse = GetPelicanServerList();
 
     private static RestResponse GetConfigFile(ServerInfo serverInfo, string pathToFile)
     {
@@ -223,34 +222,15 @@ public static class PelicanInterface
     /// <param name="servers">Server Info list</param>
     private static List<ServerInfo> ProcessServerList(List<ServerInfo> servers) //TODO: for the button list, the servers get filtered here, either this needs to be changed, or another method needs to be created to still retain the full list for the button list
     {
-        var serversToIgnore = Program.Config.ServersToIgnore;
-        if (serversToIgnore is { Length: > 0 } && serversToIgnore[0] != "UUIDS HERE")
-            servers = servers.Where(s => !serversToIgnore.Contains(s.Uuid)).ToList();
-
-        _ = GetServerResourcesList(servers);
+        servers = ServerListHelpers.FilterServerList(servers);
+        
         if (Program.Config.IgnoreOfflineServers)
             servers = servers.Where(s =>
                     s.Resources?.CurrentState != ServerStatus.Offline &&
                     s.Resources?.CurrentState != ServerStatus.Missing)
                 .ToList();
 
-        servers = SortServers(servers, Program.Config.MessageSorting, Program.Config.MessageSortingDirection);
-        
-        if (Program.Config.IgnoreInternalServers && Program.Config.InternalIpStructure != null)
-        {
-            var internalIpPattern = "^" + Regex.Escape(Program.Config.InternalIpStructure).Replace("\\*", "\\d+") + "$";
-            servers = servers.Where(s => !(s.Allocations?.All(a => Regex.IsMatch(a.Ip, internalIpPattern)) ?? false))
-                .ToList();
-        }
-
-        if (!Program.Config.LimitServerCount || Program.Config.MaxServerCount <= 0 ||
-            Program.Config.MessageFormat == MessageFormat.Paginated) return servers;
-        
-        if (Program.Config.ServersToDisplay != null && Program.Config.ServersToDisplay.Length > 0 &&
-            Program.Config.ServersToDisplay[0] != "UUIDS HERE")
-            servers = servers.Where(s => Program.Config.ServersToDisplay.Contains(s.Uuid)).ToList();
-        else
-            servers = servers.Take(Program.Config.MaxServerCount).ToList();
+        servers = ServerListHelpers.LimitServerList(servers);
 
         return servers;
     }
@@ -258,14 +238,14 @@ public static class PelicanInterface
     /// <summary>
     ///     Returns a ServerInfo List which has been processed and been filled with all its information
     /// </summary>
-    /// <returns>Server list response</returns>
-    public static List<ServerInfo> GetServersList()
+    /// <returns>A Tuple of Server list response and filted Server list response</returns>
+    public static Tuple<List<ServerInfo>,List<ServerInfo>> GetServersList()
     {
         var serverInfos = GetPelicanServerList();
-        serverInfos = ProcessServerList(serverInfos);
-        _ = GetServerResourcesList(ServerListResponse);
-        MonitorServers(serverInfos);
-        return serverInfos;
+        _ = GetServerResourcesList(serverInfos);
+        var filteredServerInfos = ProcessServerList(serverInfos);
+        MonitorServers(filteredServerInfos);
+        return new Tuple<List<ServerInfo>, List<ServerInfo>>(serverInfos, filteredServerInfos);
     }
 
     /// <summary>

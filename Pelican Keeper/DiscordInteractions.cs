@@ -116,7 +116,7 @@ public static class DiscordInteractions
 
         try
         {
-            var uuids = GlobalServerInfo.Select(x => x.Uuid).ToList();
+            var uuids = GlobalFilteredServerInfo.Select(x => x.Uuid).ToList();
 
             var components = ButtonCreation.PaginatedButtonCreation(uuids!, index);
             await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
@@ -265,7 +265,7 @@ public static class DiscordInteractions
             return;
         }
 
-        var serverInfo = GlobalServerInfo.FirstOrDefault(x => x.Uuid == id);
+        var serverInfo = GlobalFilteredServerInfo.FirstOrDefault(x => x.Uuid == id);
         if (serverInfo == null)
         {
             WriteLine($"No server found with UUID {id}", CurrentStep.DiscordInteraction, OutputType.Warning);
@@ -314,7 +314,7 @@ public static class DiscordInteractions
             return;
         }
 
-        var serverInfo = GlobalServerInfo.FirstOrDefault(x => x.Uuid == id);
+        var serverInfo = GlobalFilteredServerInfo.FirstOrDefault(x => x.Uuid == id);
         if (serverInfo == null)
         {
             WriteLine($"No server found with UUID {id}", CurrentStep.DiscordInteraction, OutputType.Warning);

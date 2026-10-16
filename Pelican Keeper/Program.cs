@@ -168,6 +168,10 @@ using static DiscordInteractions;
 ///     Added Serlilog file sinks to allow for Rolling file logs for cases where the bot crashes without being noticed.
 ///     Updated Packages
 ///     Removed the PK_DISABLE_SELF_UPDATE toggle on the pelican keeper startup script
+///     Changed the Gitea Actions file to match the GitHub Version.
+///     Removed unused duplicate API Server Resource and Server List calls
+///     Changed the PelicanApiRequest tests to use Depends on test since order is getting depricated.
+///     Filtered out offline servers from the stop list, and online servers from the start list in Consolidated mode.
 ///     
 /// </summary>
 
@@ -178,7 +182,8 @@ public static class Program
     public static Config Config = null!;
     internal static readonly EmbedBuilderService EmbedService = new();
     internal static List<DiscordEmbed> EmbedPages = null!;
-    internal static List<ServerInfo> GlobalServerInfo = null!;
+    internal static List<ServerInfo> GlobalFilteredServerInfo = null!;
+    internal static List<ServerInfo> GlobalFullServerInfo = null!;
     internal static ulong BotId;
 
     private static async Task Main()
@@ -301,8 +306,8 @@ public static class Program
     /// <param name="applyEmbedUpdateAsync">A function that applies the embed update</param>
     /// <param name="delaySeconds">Delay in seconds between updates</param>
     public static void StartEmbedUpdaterLoop(MessageFormat mode,
-        Func<Task<(List<string?> uuids, object embedOrEmbeds)>> generateEmbedsAsync,
-        Func<object, List<string?>, Task> applyEmbedUpdateAsync, int delaySeconds = 10)
+        Func<Task<(List<string?> filteredUuids, List<ServerInfo?> fullServerList, object embedOrEmbeds)>> generateEmbedsAsync,
+        Func<object, List<string?>, List<ServerInfo>, Task> applyEmbedUpdateAsync, int delaySeconds = 10)
     {
         Task.Run(async () =>
         {
@@ -310,8 +315,8 @@ public static class Program
             {
                 try
                 {
-                    var (uuids, embedData) = await generateEmbedsAsync();
-                    await applyEmbedUpdateAsync(embedData, uuids);
+                    var (filteredUuids, fullServerList, embedData) = await generateEmbedsAsync();
+                    await applyEmbedUpdateAsync(embedData, filteredUuids, fullServerList);
                     WriteLine($"Updated Embed Data at {DateTime.Now}");
                 }
                 catch (BadRequestException ex)

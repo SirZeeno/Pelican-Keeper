@@ -10,35 +10,36 @@ using static ConsoleExt;
 using static HelperClass;
 using static DebugHelpers;
 
-//TODO: Add support to start offline servers when only online servers are visible.
-//TODO: Filter out offline servers from the stop list, and online servers from the start list.
 public static class ButtonCreation
 {
     private static readonly Config Config = Program.Config;
 
-    public static List<DiscordComponent> ConsolidatedButtonCreation(List<string?> uuids)
+    public static List<DiscordComponent> ConsolidatedButtonCreation(List<ServerInfo> fullServerList)
     {
-        var selectedServerUuids = uuids;
-
-        if (Config.AllowServerStartup is { Length: > 0 } &&
-            !string.Equals(Config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal))
-        {
-            selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStartup.Contains(uuid)).ToList();
-            WriteLine($"Selected Servers: {selectedServerUuids.Count}", CurrentStep.None, OutputType.Warning);
-        }
-
-        if (Config.AllowServerStopping is { Length: > 0 } &&
-            !string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal))
-            selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStopping.Contains(uuid)).ToList();
+        var filteredServerList = ServerListHelpers.FilterServerList(fullServerList);
 
         List<DiscordComponent> buttons = [];
-
+        
         // Build START menus
-        if (Config is { AllowUserServerStartup: true, IgnoreOfflineServers: false })
+        if (Config is { AllowUserServerStartup: true })
         {
+            filteredServerList = filteredServerList.Where(s =>
+                    s.Resources?.CurrentState != ServerStatus.Starting &&
+                    s.Resources?.CurrentState != ServerStatus.Online &&
+                    s.Resources?.CurrentState != ServerStatus.Missing)
+                .ToList();
+            var selectedServerUuids = filteredServerList.Select(x => x.Uuid).ToList();
+            
+            if (Config.AllowServerStartup is { Length: > 0 } &&
+                !string.Equals(Config.AllowServerStartup[0], "UUIDS HERE", StringComparison.Ordinal))
+            {
+                selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStartup.Contains(uuid)).ToList();
+                WriteLine($"Selected {selectedServerUuids.Count} Servers allowed to be started by users", CurrentStep.None, OutputType.Warning);
+            }
+            
             var startOptions = selectedServerUuids.Select((uuid, i) =>
                 new DiscordSelectComponentOption(
-                    Program.GlobalServerInfo[i].Name, // shown to user
+                    Program.GlobalFilteredServerInfo[i].Name, // shown to user
                     uuid // data you read on interaction
                 )
             );
@@ -60,9 +61,23 @@ public static class ButtonCreation
         // Build STOP menus
         if (Config.AllowUserServerStopping)
         {
+            filteredServerList = filteredServerList.Where(s =>
+                    s.Resources?.CurrentState != ServerStatus.Offline &&
+                    s.Resources?.CurrentState != ServerStatus.Stopping &&
+                    s.Resources?.CurrentState != ServerStatus.Missing)
+                .ToList();
+            var selectedServerUuids = filteredServerList.Select(x => x.Uuid).ToList();
+            
+            if (Config.AllowServerStopping is { Length: > 0 } &&
+                !string.Equals(Config.AllowServerStopping[0], "UUIDS HERE", StringComparison.Ordinal))
+            {
+                selectedServerUuids = selectedServerUuids.Where(uuid => Config.AllowServerStopping.Contains(uuid)).ToList();
+                WriteLine($"Selected {selectedServerUuids.Count} Servers allowed to be stopped by users", CurrentStep.None, OutputType.Warning);
+            }
+            
             var stopOptions = selectedServerUuids.Select((uuid, i) =>
                 new DiscordSelectComponentOption(
-                    Program.GlobalServerInfo[i].Name,
+                    Program.GlobalFilteredServerInfo[i].Name,
                     uuid
                 )
             );
@@ -86,6 +101,7 @@ public static class ButtonCreation
         return buttons;
     }
 
+    //TODO: Filter out offline servers from the stop list, and online servers from the start list.
     public static List<DiscordComponent> PaginatedButtonCreation(List<string?> uuids, int index)
     {
         if (index < 0 || index >= uuids.Count)
@@ -129,6 +145,7 @@ public static class ButtonCreation
         return buttons;
     }
 
+    //TODO: Filter out offline servers from the stop list, and online servers from the start list.
     public static List<DiscordComponent> PerServerButtonCreation(string? uuid)
     {
         // treat "UUIDS HERE" placeholder or empty/null list as "allow all"

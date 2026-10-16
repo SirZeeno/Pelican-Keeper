@@ -22,14 +22,15 @@ public static class Paginated
             async () =>
             {
                 var serversList = GetServersList();
-                Program.GlobalServerInfo = serversList;
-                if (serversList.Count == 0)
+                Program.GlobalFilteredServerInfo = serversList.Item2;
+                Program.GlobalFullServerInfo = serversList.Item1;
+                if (serversList.Item2.Count == 0)
                     WriteLine("No servers found on Pelican.", CurrentStep.None, OutputType.Error);
-                var uuids = serversList.Select(s => s.Uuid).ToList();
-                var embeds = await Program.EmbedService.BuildPaginatedServerEmbeds(serversList);
-                return (uuids, embeds)!;
+                var filteredUuids = serversList.Item2.Select(s => s.Uuid).ToList();
+                var embeds = await Program.EmbedService.BuildPaginatedServerEmbeds(serversList.Item2);
+                return (filteredUuids, serversList.Item1, embeds)!;
             },
-            async (embedObj, uuids) =>
+            async (embedObj, uuids, fullServerList) =>
             {
                 var embeds = (List<DiscordEmbed>)embedObj;
 

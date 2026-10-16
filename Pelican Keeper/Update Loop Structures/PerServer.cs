@@ -18,14 +18,15 @@ public static class PerServer
         var config = Program.Config;
 
         var serversList = GetServersList();
-        Program.GlobalServerInfo = serversList;
-        if (serversList.Count == 0)
+        Program.GlobalFilteredServerInfo = serversList.Item2;
+        Program.GlobalFullServerInfo = serversList.Item1;
+        if (serversList.Item2.Count == 0)
         {
             WriteLine("No servers found on Pelican.", CurrentStep.None, OutputType.Error);
             return;
         }
 
-        foreach (var server in serversList)
+        foreach (var server in serversList.Item2)
             Program.StartEmbedUpdaterLoop(
                 MessageFormat.PerServer,
                 async () =>
@@ -33,9 +34,9 @@ public static class PerServer
                     var uuid = server.Uuid;
 
                     var embed = await Program.EmbedService.BuildSingleServerEmbed(server);
-                    return ([uuid], embed);
+                    return ([uuid], serversList.Item1, embed)!;
                 },
-                async (embedObj, uuid) =>
+                async (embedObj, uuid, uuids) =>
                 {
                     if (embedObj is not DiscordEmbed embed) return;
                     if (EmbedHasChanged(uuid, embed))
