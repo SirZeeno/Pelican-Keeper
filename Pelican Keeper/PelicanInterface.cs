@@ -105,7 +105,7 @@ public static class PelicanInterface
             ConsoleExt.WriteLine("Error: " + $"Status:{response.StatusCode}, Error: {response.ErrorMessage}, Exception: {response.ErrorException}, Response: {response.Content}", ConsoleExt.CurrentStep.PelicanApi,
                 ConsoleExt.OutputType.Error, response.ErrorException, true, true);
 
-        if (!string.IsNullOrEmpty(response.Content)) return response;
+        if (!string.IsNullOrEmpty(response.Content) && !string.IsNullOrWhiteSpace(response.Content)) return response;
         ConsoleExt.WriteLine($"Server List Response is null or empty. Response Content: {response.Content}",
             ConsoleExt.CurrentStep.PelicanApi, ConsoleExt.OutputType.Error, response.ErrorException, true, true);
         throw new Exception("Server List Response is null or empty.");

@@ -101,7 +101,7 @@ public static class ButtonCreation
         return buttons;
     }
 
-    //TODO: Filter out offline servers from the stop list, and online servers from the start list.
+    //TODO: Filter out offline servers from the stop list, and online servers from the start list. I have to think about adding a new generalized button for the servers
     public static List<DiscordComponent> PaginatedButtonCreation(List<string?> uuids, int index)
     {
         if (index < 0 || index >= uuids.Count)
@@ -145,7 +145,7 @@ public static class ButtonCreation
         return buttons;
     }
 
-    //TODO: Filter out offline servers from the stop list, and online servers from the start list.
+    //TODO: Filter out offline servers from the stop list, and online servers from the start list. I have to think about adding a new generalized button for the servers
     public static List<DiscordComponent> PerServerButtonCreation(string? uuid)
     {
         // treat "UUIDS HERE" placeholder or empty/null list as "allow all"
